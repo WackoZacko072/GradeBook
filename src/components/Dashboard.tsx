@@ -11,15 +11,18 @@ import {
   X,
   ShieldCheck,
   HeartHandshake,
+  GraduationCap,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import { calculateClassAverage, calculateOverallAverage } from '../utils/gradeCalculations';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
   classes: ClassItem[];
   onSelectClass: (classId: string) => void;
   onOpenAddClass: () => void;
   onLoadDemoData: () => void;
+  onOpenFirebaseConfig?: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -27,7 +30,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onSelectClass,
   onOpenAddClass,
   onLoadDemoData,
+  onOpenFirebaseConfig,
 }) => {
+  const { user, isConfigured, signInWithGoogle } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCalculationInfo, setShowCalculationInfo] = useState(false);
 
@@ -52,19 +57,71 @@ export const Dashboard: React.FC<DashboardProps> = ({
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const firstName = user?.displayName
+    ? user.displayName.split(' ')[0]
+    : user?.email
+    ? user.email.split('@')[0]
+    : null;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
+      {/* 0. Guest Banner (if not logged in) */}
+      {!user && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-white shadow-2xs border border-blue-200/60 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.02 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                Want your own private gradebook synced to the cloud?
+              </h3>
+              <p className="text-xs text-slate-600 mt-0.5">
+                Sign in with Google to create your personal account, save courses securely, and access them from any device.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={isConfigured ? signInWithGoogle : onOpenFirebaseConfig}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0 self-stretch sm:self-auto justify-center"
+          >
+            <span>Sign in with Google</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* 1. Header Title & Top Add Class Button */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 select-none">
-            Your Personal Gradebook
+            {firstName ? `${firstName}'s Gradebook` : 'Your Personal Gradebook'}
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-            A clearer view of your grades.
+            {firstName ? `Welcome back, ${firstName}.` : 'A clearer view of your grades.'}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            All your classes. One place to keep track.
+            {classes.length === 0
+              ? 'Your gradebook is ready. Add your first class below to begin.'
+              : 'All your classes. One place to keep track.'}
           </p>
         </div>
 
@@ -93,17 +150,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
               <div className="mt-2 flex items-baseline">
                 <span className="text-5xl sm:text-6xl font-extrabold tracking-tight">
-                  {classes.length > 0 ? overallCalc.overallAverage.toFixed(1) : '100.0'}
+                  {classes.length > 0 ? overallCalc.overallAverage.toFixed(1) : '--'}
                 </span>
-                <span className="text-3xl sm:text-4xl font-bold text-blue-200 ml-0.5">%</span>
+                {classes.length > 0 && (
+                  <span className="text-3xl sm:text-4xl font-bold text-blue-200 ml-0.5">%</span>
+                )}
               </div>
 
               <p className="text-xs text-blue-100/90 font-medium mt-1.5">
-                Across {classes.length} {classes.length === 1 ? 'class' : 'classes'}, equally weighted
+                {classes.length > 0
+                  ? `Across ${classes.length} ${classes.length === 1 ? 'class' : 'classes'}, equally weighted`
+                  : 'Add your classes to begin calculating your overall weighted GPA'}
               </p>
             </div>
 
-            {/* Circular icon graphic matching screenshot */}
+            {/* Circular icon graphic */}
             <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white/20 flex items-center justify-center bg-white/10 flex-shrink-0 shadow-inner">
               <BookOpen className="w-10 h-10 text-white stroke-[2]" />
             </div>
@@ -113,7 +174,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="relative z-10 mt-5">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-xs text-white text-xs font-medium border border-white/10 select-none">
               <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-              <span>The big picture, made simple</span>
+              <span>{classes.length === 0 ? 'Your slate is completely clean' : 'The big picture, made simple'}</span>
             </div>
           </div>
         </div>
@@ -130,7 +191,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div className="text-2xl font-extrabold text-slate-900 tracking-tight leading-none">
                   {classes.length}
                 </div>
-                <div className="text-xs text-slate-500 font-medium mt-1">Classes</div>
+                <div className="text-xs text-slate-500 font-medium mt-1">Enrolled Classes</div>
               </div>
             </div>
             <span className="text-[11px] text-slate-400 font-medium">On your radar</span>
@@ -156,80 +217,115 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 3. Your Classes Section */}
       <div className="space-y-4">
-        {/* Section Header with Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">Your classes</h2>
-            <span className="px-2 py-0.5 text-xs font-bold bg-slate-100 text-slate-500 rounded-lg">
-              {classes.length}
-            </span>
-          </div>
-
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Find a class..."
-              className="w-full pl-9 pr-8 py-1.5 text-xs bg-white border border-slate-200 rounded-xl placeholder-slate-400 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all min-h-[36px]"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Classes Grid */}
-        {filteredClasses.length === 0 ? (
-          <div className="bg-white rounded-2xl p-10 text-center border border-slate-200/80 shadow-2xs">
-            <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-              <BookOpen className="w-6 h-6" />
+        {/* Section Header with Search (shown only if classes exist) */}
+        {classes.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-900 tracking-tight">Your classes</h2>
+              <span className="px-2 py-0.5 text-xs font-bold bg-slate-100 text-slate-500 rounded-lg">
+                {classes.length}
+              </span>
             </div>
-            {searchQuery ? (
-              <>
-                <h3 className="text-base font-bold text-slate-900">No classes match "{searchQuery}"</h3>
-                <p className="text-xs text-slate-500 mt-1">Try another search term or clear the filter.</p>
+
+            <div className="relative w-full sm:w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Find a class..."
+                className="w-full pl-9 pr-8 py-1.5 text-xs bg-white border border-slate-200 rounded-xl placeholder-slate-400 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all min-h-[36px]"
+              />
+              {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                 >
-                  Clear filter
+                  <X className="w-3.5 h-3.5" />
                 </button>
-              </>
-            ) : (
-              <>
-                <h3 className="text-base font-bold text-slate-900">No Classes Added Yet</h3>
-                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                  Create your first class to track weighted categories, or load demo classes to test calculations.
-                </p>
-                <div className="mt-4 flex items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={onOpenAddClass}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl cursor-pointer"
-                  >
-                    Add First Class
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onLoadDemoData}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer"
-                  >
-                    Load Sample Data
-                  </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Classes Display */}
+        {classes.length === 0 ? (
+          /* Brand New User / Zero Classes Onboarding State */
+          <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-slate-200/90 shadow-2xs">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 border border-blue-100/80 shadow-xs">
+              <GraduationCap className="w-8 h-8 stroke-[2.2]" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              {firstName ? `${firstName}'s Gradebook is Ready` : 'Your Gradebook is Clean & Ready'}
+            </h3>
+            <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto leading-relaxed">
+              You start with zero classes. Add your current courses to set up custom category weights, track assignments, and calculate exactly what you need on finals.
+            </p>
+
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={onOpenAddClass}
+                className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Add Your First Class</span>
+              </button>
+              <button
+                type="button"
+                onClick={onLoadDemoData}
+                className="w-full sm:w-auto px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer"
+              >
+                Load Sample Data Preview
+              </button>
+            </div>
+
+            {/* Quick 3-Step Guide */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 pt-8 border-t border-slate-100 text-left">
+              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
+                <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center mb-2">
+                  1
                 </div>
-              </>
-            )}
+                <h4 className="text-xs font-bold text-slate-900">Add Courses</h4>
+                <p className="text-[11px] text-slate-500 mt-1">Name your classes and choose custom theme colors.</p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
+                <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center mb-2">
+                  2
+                </div>
+                <h4 className="text-xs font-bold text-slate-900">Set Category Weights</h4>
+                <p className="text-[11px] text-slate-500 mt-1">Configure Homework, Exams, Quizzes to total 100%.</p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
+                <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center mb-2">
+                  3
+                </div>
+                <h4 className="text-xs font-bold text-slate-900">Track & Predict</h4>
+                <p className="text-[11px] text-slate-500 mt-1">Log points or percentages and calculate your target score.</p>
+              </div>
+            </div>
+          </div>
+        ) : filteredClasses.length === 0 ? (
+          /* Search Filter Empty State */
+          <div className="bg-white rounded-2xl p-10 text-center border border-slate-200/80 shadow-2xs">
+            <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+              <Search className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900">No classes match "{searchQuery}"</h3>
+            <p className="text-xs text-slate-500 mt-1">Try another search term or clear the filter.</p>
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer"
+            >
+              Clear filter
+            </button>
           </div>
         ) : (
+          /* Class Cards Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredClasses.map((item) => {
               const classCalc = calculateClassAverage(item);
@@ -239,7 +335,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 0
               );
 
-              // Distinct category palette matching the screenshot (blue, teal, indigo)
               const accentColor = item.color || '#2563EB';
 
               return (
@@ -369,7 +464,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
       </div>
 
-      {/* 5. Minimal Footer matching screenshot */}
+      {/* 5. Minimal Footer */}
       <footer className="pt-8 pb-4 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
