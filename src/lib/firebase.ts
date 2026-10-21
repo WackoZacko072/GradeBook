@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { initializeFirestore, getFirestore, type Firestore } from 'firebase/firestore';
 
 export interface FirebaseConfig {
   apiKey: string;
@@ -77,7 +77,13 @@ googleProvider.setCustomParameters({
 try {
   app = getApps().length === 0 ? initializeApp(activeConfig) : getApp();
   auth = getAuth(app);
-  db = getFirestore(app);
+  try {
+    db = initializeFirestore(app, {
+      ignoreUndefinedProperties: true,
+    });
+  } catch {
+    db = getFirestore(app);
+  }
 } catch (err) {
   console.error('Failed to initialize Firebase:', err);
 }

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { ClassItem } from './types/grade';
 import {
+  getInitialClasses,
   loadUserClasses,
   saveUserClasses,
   loadGuestClasses,
@@ -19,9 +20,11 @@ import { FirebaseConfigModal } from './components/FirebaseConfigModal';
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
 
-  const [classes, setClasses] = useState<ClassItem[]>([]);
+  // Initialize classes immediately on mount so page refresh NEVER loses data
+  const [classes, setClasses] = useState<ClassItem[]>(() => getInitialClasses());
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const initialLoadDoneRef = useRef(false);
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -33,13 +36,13 @@ export const App: React.FC = () => {
     let isCancelled = false;
 
     async function loadData() {
-      setIsDataLoaded(false);
       if (user) {
-        // Authenticated user: load from cloud/cache (starts with 0 classes for new users)
+        // Authenticated user: load from cloud/cache
         const userClasses = await loadUserClasses(user.uid, user.email, user.displayName);
         if (!isCancelled) {
           setClasses(userClasses);
           setIsDataLoaded(true);
+          initialLoadDoneRef.current = true;
         }
       } else {
         // Unauthenticated guest: load local guest classes
@@ -47,6 +50,7 @@ export const App: React.FC = () => {
         if (!isCancelled) {
           setClasses(guestClasses);
           setIsDataLoaded(true);
+          initialLoadDoneRef.current = true;
         }
       }
     }
@@ -60,9 +64,9 @@ export const App: React.FC = () => {
     };
   }, [user, authLoading]);
 
-  // Save classes whenever they are modified (only after initial data load)
+  // Save classes whenever they are modified (only after initial data load has finished)
   useEffect(() => {
-    if (!isDataLoaded) return;
+    if (!initialLoadDoneRef.current && !isDataLoaded) return;
 
     if (user) {
       saveUserClasses(user.uid, classes);
@@ -76,20 +80,30 @@ export const App: React.FC = () => {
 
   // Add class handler
   const handleAddClass = (newClass: ClassItem) => {
-    setClasses((prev) => [newClass, ...prev]);
+    setClasses((prev) => {
+      const next = [newClass, ...prev];
+      if (user) saveUserClasses(user.uid, next);
+      else saveGuestClasses(next);
+      return next;
+    });
     setSelectedClassId(newClass.id); // Open newly created class directly
   };
 
   // Update full class (categories, assessments, weights)
   const handleUpdateClass = (updated: ClassItem) => {
-    setClasses((prev) =>
-      prev.map((c) => (c.id === updated.id ? updated : c))
-    );
+    setClasses((prev) => {
+      const next = prev.map((c) => (c.id === updated.id ? updated : c));
+      if (user) saveUserClasses(user.uid, next);
+      else saveGuestClasses(next);
+      return next;
+    });
   };
 
   // Restore backup
   const handleRestoreClasses = (restored: ClassItem[]) => {
     setClasses(restored);
+    if (user) saveUserClasses(user.uid, restored);
+    else saveGuestClasses(restored);
     if (selectedClassId && !restored.some((c) => c.id === selectedClassId)) {
       setSelectedClassId(null);
     }
@@ -98,6 +112,11 @@ export const App: React.FC = () => {
   // Load demo data
   const handleLoadDemoData = () => {
     setClasses(INITIAL_DEMO_CLASSES);
+    if (user) {
+      saveUserClasses(user.uid, INITIAL_DEMO_CLASSES);
+    } else {
+      saveGuestClasses(INITIAL_DEMO_CLASSES);
+    }
   };
 
   return (
@@ -128,7 +147,12 @@ export const App: React.FC = () => {
                 onBack={() => setSelectedClassId(null)}
                 onUpdateClass={handleUpdateClass}
                 onDeleteClass={(id) => {
-                  setClasses((prev) => prev.filter((c) => c.id !== id));
+                  setClasses((prev) => {
+                    const next = prev.filter((c) => c.id !== id);
+                    if (user) saveUserClasses(user.uid, next);
+                    else saveGuestClasses(next);
+                    return next;
+                  });
                   setSelectedClassId(null);
                 }}
               />
