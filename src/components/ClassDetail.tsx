@@ -924,7 +924,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
       </div>
 
       {/* Grade input area */}
-      <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap sm:flex-nowrap justify-between sm:justify-end">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap justify-between sm:justify-end pt-1 sm:pt-0">
         {/* Points vs Percentage toggle */}
         <button
           type="button"
@@ -935,7 +935,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
             })
           }
           title="Toggle between Percentage and Points earned"
-          className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-slate-200 text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer select-none"
+          className="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer select-none min-h-[38px] min-w-[38px] flex items-center justify-center"
         >
           {isPointsMode ? 'Pts' : '%'}
         </button>
@@ -951,7 +951,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Pts"
               value={assessment.earnedScore !== undefined ? assessment.earnedScore : ''}
               onChange={(e) => handlePointsEarnedChange(e.target.value)}
-              className="w-16 px-2 py-1 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[36px]"
+              className="w-16 px-2 py-1.5 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[38px]"
             />
             <span className="text-xs font-bold text-slate-400">/</span>
             <input
@@ -962,7 +962,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Total"
               value={assessment.maxScore !== undefined ? assessment.maxScore : 100}
               onChange={(e) => handlePointsMaxChange(e.target.value)}
-              className="w-16 px-2 py-1 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[36px]"
+              className="w-16 px-2 py-1.5 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[38px]"
             />
           </div>
         ) : (
@@ -976,7 +976,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Grade"
               value={assessment.score !== null && assessment.score !== undefined ? assessment.score : ''}
               onChange={(e) => handlePercentageChange(e.target.value)}
-              className="w-24 pl-2.5 pr-6 py-1 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[36px]"
+              className="w-24 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[38px]"
             />
             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
               %
@@ -1003,7 +1003,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
             type="button"
             onClick={onReset}
             title="Reset grade to blank/ungraded"
-            className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+            className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
@@ -1014,7 +1014,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
           type="button"
           onClick={onDelete}
           title="Delete assessment"
-          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

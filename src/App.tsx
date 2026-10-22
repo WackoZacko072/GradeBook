@@ -16,6 +16,7 @@ import { ClassDetail } from './components/ClassDetail';
 import { AddClassModal } from './components/AddClassModal';
 import { BackupModal } from './components/BackupModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
 
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -26,10 +27,14 @@ export const App: React.FC = () => {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const initialLoadDoneRef = useRef(false);
 
-  // Modals
+  // Modals & Navigation state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isFirebaseConfigOpen, setIsFirebaseConfigOpen] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // Scroll ref for main content
+  const mainContentRef = useRef<HTMLElement>(null);
 
   // Load classes whenever user changes (or auth initializes)
   useEffect(() => {
@@ -75,6 +80,13 @@ export const App: React.FC = () => {
     }
   }, [classes, user, isDataLoaded]);
 
+  // Scroll to top when active class changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [selectedClassId]);
+
   // Active selected class
   const activeClass = classes.find((c) => c.id === selectedClassId) || null;
 
@@ -87,6 +99,7 @@ export const App: React.FC = () => {
       return next;
     });
     setSelectedClassId(newClass.id); // Open newly created class directly
+    setIsMobileDrawerOpen(false);
   };
 
   // Update full class (categories, assessments, weights)
@@ -125,22 +138,28 @@ export const App: React.FC = () => {
       <Header
         onOpenBackup={() => setIsBackupModalOpen(true)}
         onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
+        onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
       />
 
       {/* App Body: Full width flex layout */}
       <div className="flex-1 w-full bg-[#FAFBFD] flex overflow-hidden">
-        {/* Left Sidebar (Taskbar) */}
+        {/* Left Sidebar (Desktop + Mobile Drawer) */}
         <Sidebar
           classes={classes}
           selectedClassId={selectedClassId}
           onSelectOverview={() => setSelectedClassId(null)}
           onSelectClass={(id) => setSelectedClassId(id)}
           onOpenAddClass={() => setIsAddModalOpen(true)}
+          isMobileOpen={isMobileDrawerOpen}
+          onMobileClose={() => setIsMobileDrawerOpen(false)}
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD]">
-          <div className="w-full max-w-[1080px] mx-auto px-6 sm:px-8 lg:px-12 py-8">
+        <main
+          ref={mainContentRef}
+          className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] pb-24 md:pb-8"
+        >
+          <div className="w-full max-w-[1080px] mx-auto px-4 sm:px-8 lg:px-12 py-5 sm:py-8">
             {activeClass ? (
               <ClassDetail
                 classItem={activeClass}
@@ -168,6 +187,16 @@ export const App: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar (Docked on phones) */}
+      <MobileBottomNav
+        selectedClassId={selectedClassId}
+        classCount={classes.length}
+        onSelectOverview={() => setSelectedClassId(null)}
+        onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
+        onOpenAddClass={() => setIsAddModalOpen(true)}
+        onOpenBackup={() => setIsBackupModalOpen(true)}
+      />
 
       {/* Modals */}
       <AddClassModal

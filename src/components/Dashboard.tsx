@@ -115,10 +115,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 select-none">
             {firstName ? `${firstName}'s Gradebook` : 'Your Personal Gradebook'}
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
             {firstName ? `Welcome back, ${firstName}.` : 'A clearer view of your grades.'}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             {classes.length === 0
               ? 'Your gradebook is ready. Add your first class below to begin.'
               : 'All your classes. One place to keep track.'}
@@ -128,7 +128,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <button
           type="button"
           onClick={onOpenAddClass}
-          className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px]"
+          className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px]"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Add class</span>
@@ -136,24 +136,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* 2. Hero Banner & Stat Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         {/* Large Blue Hero Card (2 cols) */}
-        <div className="lg:col-span-2 bg-gradient-to-r from-[#2052DE] via-[#2563EB] to-[#1D4ED8] text-white rounded-3xl p-7 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-xs min-h-[220px]">
+        <div className="lg:col-span-2 bg-gradient-to-r from-[#2052DE] via-[#2563EB] to-[#1D4ED8] text-white rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-xs min-h-[200px] sm:min-h-[220px]">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
-          <div className="flex items-start justify-between gap-6 relative z-10">
+          <div className="flex items-start justify-between gap-4 sm:gap-6 relative z-10">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-200">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-blue-200">
                 Overall Average
               </span>
 
               <div className="mt-2 flex items-baseline">
-                <span className="text-5xl sm:text-6xl font-extrabold tracking-tight">
+                <span className="text-4xl sm:text-6xl font-extrabold tracking-tight">
                   {classes.length > 0 ? overallCalc.overallAverage.toFixed(1) : '--'}
                 </span>
                 {classes.length > 0 && (
-                  <span className="text-3xl sm:text-4xl font-bold text-blue-200 ml-0.5">%</span>
+                  <span className="text-2xl sm:text-4xl font-bold text-blue-200 ml-0.5">%</span>
                 )}
               </div>
 
@@ -165,8 +165,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Circular icon graphic */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white/20 flex items-center justify-center bg-white/10 flex-shrink-0 shadow-inner">
-              <BookOpen className="w-10 h-10 text-white stroke-[2]" />
+            <div className="w-16 h-16 sm:w-28 sm:h-28 rounded-full border-2 sm:border-4 border-white/20 flex items-center justify-center bg-white/10 flex-shrink-0 shadow-inner">
+              <BookOpen className="w-7 h-7 sm:w-10 sm:h-10 text-white stroke-[2]" />
             </div>
           </div>
 

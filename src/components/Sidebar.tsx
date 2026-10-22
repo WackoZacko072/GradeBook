@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, Plus, Calculator } from 'lucide-react';
+import { Layers, Plus, Calculator, X, BookOpen } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import { calculateClassAverage } from '../utils/gradeCalculations';
 
@@ -9,6 +9,8 @@ interface SidebarProps {
   onSelectOverview: () => void;
   onSelectClass: (id: string) => void;
   onOpenAddClass: () => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -17,9 +19,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectOverview,
   onSelectClass,
   onOpenAddClass,
+  isMobileOpen = false,
+  onMobileClose,
 }) => {
-  return (
-    <aside className="w-64 bg-[#F8FAFC] border-r border-slate-200/80 flex flex-col justify-between p-4 flex-shrink-0 min-h-[calc(100vh-65px)]">
+  const content = (
+    <div className="flex flex-col justify-between h-full">
       <div className="space-y-6">
         {/* Workspace section */}
         <div>
@@ -28,8 +32,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </span>
           <button
             type="button"
-            onClick={onSelectOverview}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+            onClick={() => {
+              onSelectOverview();
+              onMobileClose?.();
+            }}
+            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
               selectedClassId === null
                 ? 'bg-[#EBF2FE] text-[#2563EB] shadow-2xs'
                 : 'text-slate-700 hover:bg-slate-200/60'
@@ -59,19 +66,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </span>
             <button
               type="button"
-              onClick={onOpenAddClass}
+              onClick={() => {
+                onOpenAddClass();
+                onMobileClose?.();
+              }}
               title="Add New Class"
-              className="p-1 text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
             >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              <Plus className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1 max-h-[50vh] overflow-y-auto pr-1">
             {classes.length === 0 ? (
-              <p className="text-xs text-slate-400 px-3 py-2 italic">
-                No classes added yet
-              </p>
+              <div className="px-3 py-3 text-center bg-slate-100/60 rounded-xl border border-dashed border-slate-200">
+                <p className="text-xs text-slate-500 font-medium">No classes yet</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenAddClass();
+                    onMobileClose?.();
+                  }}
+                  className="mt-2 text-xs font-bold text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Class
+                </button>
+              </div>
             ) : (
               classes.map((c) => {
                 const isSelected = selectedClassId === c.id;
@@ -82,8 +102,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <button
                     key={c.id}
                     type="button"
-                    onClick={() => onSelectClass(c.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all cursor-pointer ${
+                    onClick={() => {
+                      onSelectClass(c.id);
+                      onMobileClose?.();
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] ${
                       isSelected
                         ? 'bg-white text-blue-700 font-semibold shadow-2xs border border-slate-200/80'
                         : 'text-slate-700 hover:bg-slate-200/60 font-medium'
@@ -91,14 +114,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   >
                     <div className="flex items-center gap-2.5 truncate">
                       <span
-                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                         style={{ backgroundColor: dotColor }}
                       />
                       <span className="truncate">{c.name}</span>
                     </div>
 
-                    <span className="text-xs font-bold text-slate-400 tabular-nums ml-2 flex-shrink-0">
-                      {calc.average.toFixed(1)}
+                    <span className="text-xs font-bold text-slate-500 tabular-nums ml-2 flex-shrink-0">
+                      {calc.average.toFixed(1)}%
                     </span>
                   </button>
                 );
@@ -118,6 +141,62 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="text-[11px] text-slate-400">A lot less mental math.</div>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* 1. Desktop Persistent Sidebar */}
+      <aside className="hidden md:flex w-64 bg-[#F8FAFC] border-r border-slate-200/80 flex-col justify-between p-4 flex-shrink-0 min-h-[calc(100vh-65px)]">
+        {content}
+      </aside>
+
+      {/* 2. Mobile Slide-Over Drawer with Backdrop */}
+      <div
+        className={`fixed inset-0 z-50 md:hidden transition-all duration-300 ${
+          isMobileOpen
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Dark Backdrop */}
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
+          onClick={onMobileClose}
+        />
+
+        {/* Drawer Panel */}
+        <div
+          className={`fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-[#FAFBFD] shadow-2xl flex flex-col justify-between p-5 transform transition-transform duration-300 ease-out z-10 ${
+            isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          {/* Drawer Header */}
+          <div className="flex items-center justify-between pb-4 mb-2 border-b border-slate-200/80">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs">
+                <BookOpen className="w-4 h-4 stroke-[2.2]" />
+              </div>
+              <span className="font-extrabold text-lg text-slate-900 tracking-tight">
+                gradebook<span className="text-blue-600">.</span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={onMobileClose}
+              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
+              aria-label="Close navigation drawer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Drawer Body */}
+          <div className="flex-1 overflow-y-auto">
+            {content}
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
