@@ -18,10 +18,18 @@ export interface ChatMessage {
   timestamp: number;
 }
 
+// Built-in default key from your Firebase/Google Cloud project so it works for all users
+const DEFAULT_PROJECT_KEY = 'AIzaSyBLXZNaIecqkf_rRBZcwRc8IQHDdwi2HI0';
+
 /**
- * Retrieves the stored Gemini API key (localStorage or .env)
+ * Retrieves the Gemini API key (env variable, localStorage, or built-in default project key)
  */
 export function getGeminiApiKey(): string {
+  const fromEnv = import.meta.env.VITE_GEMINI_API_KEY;
+  if (fromEnv && fromEnv !== 'your_gemini_api_key_here' && fromEnv.trim().length > 0) {
+    return fromEnv.trim();
+  }
+
   try {
     const fromLocal = localStorage.getItem(GEMINI_STORAGE_KEY);
     if (fromLocal && fromLocal.trim().length > 0) {
@@ -31,12 +39,7 @@ export function getGeminiApiKey(): string {
     // ignore
   }
 
-  const fromEnv = import.meta.env.VITE_GEMINI_API_KEY;
-  if (fromEnv && fromEnv !== 'your_gemini_api_key_here' && fromEnv.trim().length > 0) {
-    return fromEnv.trim();
-  }
-
-  return '';
+  return DEFAULT_PROJECT_KEY;
 }
 
 export function saveGeminiApiKey(key: string): void {

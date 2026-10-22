@@ -153,15 +153,15 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* AI Advisor Button */}
+          {/* Small circular AI Advisor icon button */}
           <button
             type="button"
             onClick={onOpenAiAdvisor}
-            title="AI Academic Advisor & What-If Analyst"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-bold text-xs rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer min-h-[36px]"
+            title="AI Academic Advisor"
+            aria-label="AI Academic Advisor"
+            className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 active:scale-95 text-white shadow-xs flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-            <span className="hidden sm:inline">AI Advisor</span>
+            <Sparkles className="w-4 h-4 text-amber-300" />
           </button>
 
           {/* Desktop Backup Button */}

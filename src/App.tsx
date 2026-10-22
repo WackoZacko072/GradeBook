@@ -18,6 +18,7 @@ import { BackupModal } from './components/BackupModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { AiAdvisorDrawer } from './components/AiAdvisorDrawer';
+import { Sparkles } from 'lucide-react';
 
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -225,6 +226,17 @@ export const App: React.FC = () => {
         isOpen={isFirebaseConfigOpen}
         onClose={() => setIsFirebaseConfigOpen(false)}
       />
+
+      {/* Small circular floating AI symbol in corner */}
+      <button
+        type="button"
+        onClick={() => handleOpenAiAdvisor()}
+        title="AI Academic Advisor"
+        aria-label="Open AI Academic Advisor"
+        className="fixed bottom-20 md:bottom-6 right-5 md:right-7 z-40 w-12 h-12 md:w-13 md:h-13 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 active:scale-95 text-white shadow-lg hover:shadow-xl shadow-indigo-500/30 flex items-center justify-center transition-all cursor-pointer group border-2 border-white/90"
+      >
+        <Sparkles className="w-5 h-5 md:w-5.5 md:h-5.5 text-amber-300 group-hover:rotate-12 transition-transform duration-200" />
+      </button>
 
       {/* AI Academic Advisor Drawer */}
       <AiAdvisorDrawer
