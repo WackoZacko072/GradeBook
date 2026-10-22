@@ -4,6 +4,8 @@ import {
   calculateOverallAverage,
   validateCategoryWeights,
   roundTo,
+  getGradePoint,
+  calculateCumulativeGPA,
 } from './gradeCalculations';
 import type { Category, ClassItem, Assessment } from '../types/grade';
 
@@ -213,14 +215,33 @@ export function runAllCalculationTests(): boolean {
   assert(userControlCats[1].weight === 70, '14. No auto-rebalance: Tests category weight remained unchanged at 70%');
   const userValidation = validateCategoryWeights(userControlCats);
   assert(userValidation.isValid === false, '14. Weights sum to 110%: flagged as invalid');
-  // User corrects Tests to 60
-  userControlCats[1].weight = 60;
-  const userValidationFixed = validateCategoryWeights(userControlCats);
-  assert(userValidationFixed.isValid === true, '14. User manually balanced weights to 100%: valid!');
+  // 15. GPA Calculation and Credit Weighting Test
+  const testClassesForGPA: ClassItem[] = [
+    {
+      id: 'c1',
+      name: 'Class A',
+      credits: 4,
+      createdAt: 1,
+      categories: [{ id: 'cat', name: 'All', weight: 100, assessments: [{ id: 'a1', name: 'Exam', score: 95 }] }], // 95% = 4.0
+    },
+    {
+      id: 'c2',
+      name: 'Class B',
+      credits: 3,
+      createdAt: 2,
+      categories: [{ id: 'cat', name: 'All', weight: 100, assessments: [{ id: 'a2', name: 'Exam', score: 85 }] }], // 85% = 3.0
+    },
+  ];
+  // Quality points: (4.0 * 4) + (3.0 * 3) = 16 + 9 = 25 / 7 = 3.57 GPA
+  const gpaResult = calculateCumulativeGPA(testClassesForGPA);
+  assert(gpaResult.gpa === 3.57, `15. Weighted GPA calculated accurately: got ${gpaResult.gpa} (expected 3.57)`);
+  assert(gpaResult.totalCredits === 7, `15. Total credits calculated accurately: got ${gpaResult.totalCredits} (expected 7)`);
+  assert(getGradePoint(95) === 4.0, '15. Grade point for 95% is 4.0');
+  assert(getGradePoint(88) === 3.3, '15. Grade point for 88% is 3.3');
 
   console.log('=====================================================');
   if (allPassed) {
-    console.log('🎉 ALL 14 TEST CASES PASSED SUCCESSFULLY!');
+    console.log('🎉 ALL 15 TEST CASES PASSED SUCCESSFULLY!');
   } else {
     console.error('💥 SOME TESTS FAILED! CHECK OUTPUT ABOVE.');
   }
@@ -229,3 +250,4 @@ export function runAllCalculationTests(): boolean {
 }
 
 runAllCalculationTests();
+

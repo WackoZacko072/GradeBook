@@ -17,6 +17,7 @@ import { AddClassModal } from './components/AddClassModal';
 import { BackupModal } from './components/BackupModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { AiAdvisorDrawer } from './components/AiAdvisorDrawer';
 
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -31,6 +32,10 @@ export const App: React.FC = () => {
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isFirebaseConfigOpen, setIsFirebaseConfigOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+
+  // AI Advisor Drawer state
+  const [isAiAdvisorOpen, setIsAiAdvisorOpen] = useState(false);
+  const [prefilledAdvisorPrompt, setPrefilledAdvisorPrompt] = useState<string | undefined>(undefined);
 
   // Scroll ref for main content
   const mainContentRef = useRef<HTMLElement>(null);
@@ -132,6 +137,13 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleOpenAiAdvisor = (prompt?: string) => {
+    if (prompt) {
+      setPrefilledAdvisorPrompt(prompt);
+    }
+    setIsAiAdvisorOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFBFD] text-[#0F172A] flex flex-col font-sans">
       {/* Top Header */}
@@ -140,6 +152,7 @@ export const App: React.FC = () => {
         onOpenBackup={() => setIsBackupModalOpen(true)}
         onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
+        onOpenAiAdvisor={() => handleOpenAiAdvisor()}
       />
 
       {/* App Body: Full width flex layout */}
@@ -167,6 +180,7 @@ export const App: React.FC = () => {
                 onBack={() => setSelectedClassId(null)}
                 onUpdateClass={handleUpdateClass}
                 onDeleteClass={handleDeleteClass}
+                onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
               />
             ) : (
               <Dashboard
@@ -175,6 +189,7 @@ export const App: React.FC = () => {
                 onOpenAddClass={() => setIsAddModalOpen(true)}
                 onLoadDemoData={handleLoadDemoData}
                 onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
+                onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
               />
             )}
           </div>
@@ -189,6 +204,7 @@ export const App: React.FC = () => {
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
         onOpenAddClass={() => setIsAddModalOpen(true)}
         onOpenBackup={() => setIsBackupModalOpen(true)}
+        onOpenAiAdvisor={() => handleOpenAiAdvisor()}
       />
 
       {/* Modals */}
@@ -208,6 +224,15 @@ export const App: React.FC = () => {
       <FirebaseConfigModal
         isOpen={isFirebaseConfigOpen}
         onClose={() => setIsFirebaseConfigOpen(false)}
+      />
+
+      {/* AI Academic Advisor Drawer */}
+      <AiAdvisorDrawer
+        isOpen={isAiAdvisorOpen}
+        onClose={() => setIsAiAdvisorOpen(false)}
+        classes={classes}
+        prefilledPrompt={prefilledAdvisorPrompt}
+        onClearPrefilledPrompt={() => setPrefilledAdvisorPrompt(undefined)}
       />
     </div>
   );

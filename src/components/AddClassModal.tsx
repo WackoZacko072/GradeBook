@@ -33,6 +33,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
   onAddClass,
 }) => {
   const [className, setClassName] = useState('');
+  const [credits, setCredits] = useState<number>(3);
   const [template, setTemplate] = useState<'standard' | 'simple' | 'custom' | 'empty'>('standard');
   const [customCategories, setCustomCategories] = useState<DraftCategory[]>([
     { id: '1', name: 'Tests', weight: 40 },
@@ -135,6 +136,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
       id: 'class_' + Math.random().toString(36).substring(2, 9),
       name: trimmed,
       color: '#2563EB',
+      credits: Number(credits) || 3,
       createdAt: Date.now(),
       categories: initialCategories,
     };
@@ -180,20 +182,37 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-5">
-          <div>
-            <label htmlFor="class-name-input" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-              Class Name
-            </label>
-            <input
-              id="class-name-input"
-              type="text"
-              autoFocus
-              required
-              value={className}
-              onChange={(e) => setClassName(e.target.value)}
-              placeholder="e.g. Pre-Calculus 12"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-base min-h-[44px]"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="sm:col-span-3">
+              <label htmlFor="class-name-input" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                Class Name
+              </label>
+              <input
+                id="class-name-input"
+                type="text"
+                autoFocus
+                required
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
+                placeholder="e.g. Pre-Calculus 12"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
+              />
+            </div>
+            <div>
+              <label htmlFor="class-credits-input" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2" title="Credit hours for GPA calculation">
+                Credits
+              </label>
+              <input
+                id="class-credits-input"
+                type="number"
+                min="0.5"
+                max="10"
+                step="0.5"
+                value={credits}
+                onChange={(e) => setCredits(parseFloat(e.target.value) || 3)}
+                className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
+              />
+            </div>
           </div>
 
           <div>

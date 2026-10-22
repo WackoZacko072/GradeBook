@@ -31,6 +31,7 @@ interface ClassDetailProps {
   onBack: () => void;
   onUpdateClass: (updated: ClassItem) => void;
   onDeleteClass?: (id: string) => void;
+  onOpenAiAdvisor?: (prompt?: string) => void;
 }
 
 export const ClassDetail: React.FC<ClassDetailProps> = ({
@@ -38,6 +39,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
   onBack,
   onUpdateClass,
   onDeleteClass,
+  onOpenAiAdvisor,
 }) => {
   // Inline editing for Class Name
   const [isEditingClassName, setIsEditingClassName] = useState(false);
@@ -289,7 +291,22 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Ask AI Advisor Button */}
+            <button
+              type="button"
+              onClick={() =>
+                onOpenAiAdvisor?.(
+                  `Give me an academic strategy for ${classItem.name}. My current grade is ${classCalc.average.toFixed(1)}% (${letterGradeInfo.letter}). Calculate what score I need on my upcoming assessments to hit my target of ${classItem.targetGrade || 90}%, and tell me which assignments have the highest leverage.`
+                )
+              }
+              title="Ask AI Advisor about this course"
+              className="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer min-h-[44px]"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+              <span>Ask AI Advisor</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setIsManageWeightsOpen(true)}

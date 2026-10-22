@@ -211,3 +211,53 @@ export function equalizeCategoryWeights(categories: Category[]): Category[] {
   }
   return result;
 }
+
+/**
+ * Standard North American 4.0 GPA scale conversion
+ */
+export function getGradePoint(percentage: number): number {
+  if (percentage >= 93) return 4.0;
+  if (percentage >= 90) return 3.7;
+  if (percentage >= 87) return 3.3;
+  if (percentage >= 83) return 3.0;
+  if (percentage >= 80) return 2.7;
+  if (percentage >= 77) return 2.3;
+  if (percentage >= 73) return 2.0;
+  if (percentage >= 70) return 1.7;
+  if (percentage >= 67) return 1.3;
+  if (percentage >= 65) return 1.0;
+  return 0.0;
+}
+
+/**
+ * Computes credit-weighted Cumulative GPA on a 4.0 scale
+ */
+export function calculateCumulativeGPA(classes: ClassItem[]): {
+  gpa: number;
+  totalCredits: number;
+  unweightedGpa: number;
+} {
+  if (!classes || classes.length === 0) {
+    return { gpa: 4.0, totalCredits: 0, unweightedGpa: 4.0 };
+  }
+
+  let totalQualityPoints = 0;
+  let totalCredits = 0;
+  let unweightedPointsSum = 0;
+
+  for (const c of classes) {
+    const avg = calculateClassAverage(c).average;
+    const gradePoint = getGradePoint(avg);
+    const credits = typeof c.credits === 'number' && c.credits > 0 ? c.credits : 3.0;
+
+    totalQualityPoints += gradePoint * credits;
+    totalCredits += credits;
+    unweightedPointsSum += gradePoint;
+  }
+
+  const gpa = totalCredits > 0 ? roundTo(totalQualityPoints / totalCredits, 2) : 4.0;
+  const unweightedGpa = roundTo(unweightedPointsSum / classes.length, 2);
+
+  return { gpa, totalCredits, unweightedGpa };
+}
+

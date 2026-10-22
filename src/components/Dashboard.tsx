@@ -14,7 +14,11 @@ import {
   GraduationCap,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
-import { calculateClassAverage, calculateOverallAverage } from '../utils/gradeCalculations';
+import {
+  calculateClassAverage,
+  calculateOverallAverage,
+  calculateCumulativeGPA,
+} from '../utils/gradeCalculations';
 import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
@@ -23,6 +27,7 @@ interface DashboardProps {
   onOpenAddClass: () => void;
   onLoadDemoData: () => void;
   onOpenFirebaseConfig?: () => void;
+  onOpenAiAdvisor?: (prompt?: string) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -31,6 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenAddClass,
   onLoadDemoData,
   onOpenFirebaseConfig,
+  onOpenAiAdvisor,
 }) => {
   const { user, isConfigured, signInWithGoogle } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,6 +44,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Overall calculations across all classes
   const overallCalc = calculateOverallAverage(classes);
+  const gpaInfo = calculateCumulativeGPA(classes);
 
   // Total graded items across all classes
   const totalGradedItems = classes.reduce((sum, c) => {
@@ -172,9 +179,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           {/* Bottom pill */}
           <div className="relative z-10 mt-5">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-xs text-white text-xs font-medium border border-white/10 select-none">
-              <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-              <span>{classes.length === 0 ? 'Your slate is completely clean' : 'The big picture, made simple'}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-xs text-white text-xs font-bold border border-white/25 select-none shadow-2xs">
+                <GraduationCap className="w-3.5 h-3.5 text-amber-300" />
+                <span>GPA: {classes.length > 0 ? `${gpaInfo.gpa.toFixed(2)} / 4.0` : '--'}</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-xs text-white text-xs font-medium border border-white/10 select-none">
+                <span>Letter: {classes.length > 0 ? overallCalc.letterGrade : '--'}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -212,6 +224,41 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <span className="text-[11px] text-slate-400 font-medium">Every score counts</span>
           </div>
+        </div>
+      </div>
+
+      {/* AI Academic Advisor Quick Banner */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white rounded-3xl p-5 sm:p-6 shadow-md relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4 border border-indigo-900/50">
+        <div className="absolute top-0 right-0 -mr-10 -mt-10 w-48 h-48 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex items-start sm:items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+            <Sparkles className="w-6 h-6 text-amber-300 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-extrabold text-white tracking-tight">
+                AI Academic Advisor & Grade Analyst
+              </h3>
+              <span className="px-2 py-0.5 bg-blue-500/30 border border-blue-400/40 text-blue-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                Live Data
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+              Ask "What-if" grade questions, calculate exact exam targets, and analyze competitive admissions odds for UBC, U of T, and top universities.
+            </p>
+          </div>
+        </div>
+
+        <div className="relative z-10 flex items-center gap-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => onOpenAiAdvisor?.()}
+            className="w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-purple-600" />
+            <span>Ask AI Advisor</span>
+          </button>
         </div>
       </div>
 

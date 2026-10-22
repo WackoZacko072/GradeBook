@@ -12,6 +12,7 @@ import {
   AlertCircle,
   CloudUpload,
   AlertTriangle,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -27,6 +28,7 @@ interface HeaderProps {
   onOpenBackup: () => void;
   onOpenFirebaseConfig: () => void;
   onOpenMobileDrawer?: () => void;
+  onOpenAiAdvisor: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -34,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenBackup,
   onOpenFirebaseConfig,
   onOpenMobileDrawer,
+  onOpenAiAdvisor,
 }) => {
   const { user, isConfigured, signInWithGoogle, logout, authError } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -149,6 +152,17 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Private & Secure</span>
             </div>
           )}
+
+          {/* AI Advisor Button */}
+          <button
+            type="button"
+            onClick={onOpenAiAdvisor}
+            title="AI Academic Advisor & What-If Analyst"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-bold text-xs rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer min-h-[36px]"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+            <span className="hidden sm:inline">AI Advisor</span>
+          </button>
 
           {/* Desktop Backup Button */}
           <button

@@ -20,6 +20,7 @@ export interface ClassItem {
   name: string;
   code?: string;
   color?: string; // Optional accent color
+  credits?: number; // Credit hours/units (defaults to 3.0)
   categories: Category[];
   targetGrade?: number;
   createdAt: number;
