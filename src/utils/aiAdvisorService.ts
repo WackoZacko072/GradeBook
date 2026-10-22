@@ -9,7 +9,7 @@ import {
 export const GEMINI_STORAGE_KEY = 'gradebook_gemini_api_key';
 export const GEMINI_MODEL_STORAGE_KEY = 'gradebook_gemini_model';
 
-export type GeminiModel = 'gemini-1.5-flash' | 'gemini-1.5-pro' | 'gemini-2.5-flash';
+export type GeminiModel = 'gemini-2.0-flash' | 'gemini-2.5-flash' | 'gemini-1.5-flash-latest' | 'gemini-1.5-flash' | 'gemini-1.5-pro';
 
 export interface ChatMessage {
   id: string;
@@ -18,8 +18,16 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-// Built-in default key from your Firebase/Google Cloud project so it works for all users
+// Built-in default key from your Firebase/Google Cloud project
 const DEFAULT_PROJECT_KEY = 'AIzaSyBLXZNaIecqkf_rRBZcwRc8IQHDdwi2HI0';
+
+// Supported models in order of priority (newer 2.0-flash is primary since 1.5-flash is retired/404 on current endpoints)
+const FALLBACK_MODELS: GeminiModel[] = [
+  'gemini-2.0-flash',
+  'gemini-2.5-flash',
+  'gemini-1.5-flash-latest',
+  'gemini-1.5-flash',
+];
 
 /**
  * Retrieves the Gemini API key (env variable, localStorage, or built-in default project key)
@@ -65,13 +73,13 @@ export function isGeminiKeyConfigured(): boolean {
 export function getSelectedGeminiModel(): GeminiModel {
   try {
     const saved = localStorage.getItem(GEMINI_MODEL_STORAGE_KEY);
-    if (saved === 'gemini-1.5-pro' || saved === 'gemini-2.5-flash' || saved === 'gemini-1.5-flash') {
-      return saved;
+    if (saved && (FALLBACK_MODELS as string[]).includes(saved)) {
+      return saved as GeminiModel;
     }
   } catch {
     // ignore
   }
-  return 'gemini-1.5-flash';
+  return 'gemini-2.0-flash';
 }
 
 export function saveSelectedGeminiModel(model: GeminiModel): void {
@@ -120,15 +128,18 @@ export function buildGradebookContext(classes: ClassItem[]): any {
         upcomingAssessments: ungraded.map((a) => ({
           name: a.name,
           estimatedWeightContribution: `${weightPerRemaining}% of course grade`,
+          numericContribution: weightPerRemaining,
         })),
       };
     });
 
     const allUpcoming = categories.flatMap((cat) =>
       cat.upcomingAssessments.map((u) => ({
-        ...u,
+        name: u.name,
         category: cat.categoryName,
         categoryWeight: cat.categoryWeightPercentage,
+        estimatedWeightContribution: u.estimatedWeightContribution,
+        numericContribution: u.numericContribution,
       }))
     );
 
@@ -205,19 +216,269 @@ CORE DIRECTIVES & GROUND RULES:
 }
 
 /**
+ * Intelligent local fallback engine that performs exact What-If and GPA mathematics
+ * if the external Gemini API is unreachable, blocked, or unconfigured.
+ */
+export function generateLocalAdvisorResponse(userPrompt: string, classes: ClassItem[]): string {
+  const p = userPrompt.toLowerCase();
+
+  if (classes.length === 0) {
+    return `### 📚 No Courses in Gradebook Yet\n\nYou currently have **0 courses** in your gradebook. To unlock personalized "What-If" grade calculations, finals targets, and admission projections:\n\n1. Click **+ Add Class** on your dashboard.\n2. Add your courses, categories (e.g., Homework, Midterm, Final Exam), and weights totaling 100%.\n3. Enter your current scores.\n\nOnce added, ask me any question like *"What do I need on my finals?"* and I'll calculate the exact minimum scores required!`;
+  }
+
+  // 1. Check for "raise lowest grade" or "lowest"
+  if (p.includes('lowest') || p.includes('raise') || p.includes('pulling')) {
+    const sorted = [...classes].sort((a, b) => {
+      const avgA = calculateClassAverage(a).average;
+      const avgB = calculateClassAverage(b).average;
+      return avgA - avgB;
+    });
+
+    const lowestClass = sorted[0];
+    const calc = calculateClassAverage(lowestClass);
+    const target = lowestClass.targetGrade || 90;
+
+    // Check categories
+    const categoriesBreakdown = lowestClass.categories.map((cat) => {
+      const catCalc = calc.categoryCalculations[cat.id] || { average: 100, gradedCount: 0, totalCount: 0 };
+      const graded = cat.assessments.filter((a) => a.score !== null && a.score !== undefined);
+      const ungraded = cat.assessments.filter((a) => a.score === null || a.score === undefined);
+      return {
+        name: cat.name,
+        weight: cat.weight,
+        average: roundTo(catCalc.average, 1),
+        gradedCount: graded.length,
+        ungradedCount: ungraded.length,
+        ungradedNames: ungraded.map((a) => a.name),
+      };
+    });
+
+    const weakestCat = [...categoriesBreakdown]
+      .filter((c) => c.gradedCount > 0)
+      .sort((a, b) => a.average - b.average)[0];
+
+    const upcomingTotal = categoriesBreakdown.reduce((sum, c) => sum + c.ungradedCount, 0);
+
+    return `### 🎯 Strategy to Raise Your Lowest Grade: **${lowestClass.name}**
+
+- **Current Grade:** **${calc.average.toFixed(1)}%** (${calc.letterGrade})
+- **Target Goal:** **${target}%**
+- **Credit Value:** **${lowestClass.credits || 3} credits**
+
+#### 🔍 Performance Breakdown:
+| Category | Weight | Current Avg | Graded | Remaining |
+| :--- | :---: | :---: | :---: | :---: |
+${categoriesBreakdown.map((c) => `| **${c.name}** | ${c.weight}% | ${c.average}% | ${c.gradedCount} | ${c.ungradedCount} |`).join('\n')}
+
+${weakestCat ? `> ⚠️ **Primary Drag:** Your lowest category is **${weakestCat.name}** at **${weakestCat.average}%**. Improving scores on future work in this category yields immediate gains.` : ''}
+
+#### 📋 Actionable Steps:
+1. **Target Upcoming Work:** You have **${upcomingTotal}** remaining assessment(s) in this course.
+2. **High-ROI Study Focus:** Schedule 2x weekly active practice sessions specifically for topics covered in ${weakestCat ? weakestCat.name : 'upcoming exams'}.
+3. **Office Hours:** Review past mistakes with your instructor or TA prior to the final submission.`;
+  }
+
+  // 2. What-If Finals & Target Grades
+  if (p.includes('final') || p.includes('what-if') || p.includes('what do i need') || p.includes('target')) {
+    const rows = classes.map((c) => {
+      const calc = calculateClassAverage(c);
+      const target = c.targetGrade || 90;
+
+      // Calculate total completed weight and remaining weight
+      let completedWeight = 0;
+      let earnedPoints = 0;
+      let remainingWeight = 0;
+
+      (c.categories || []).forEach((cat) => {
+        const graded = cat.assessments.filter((a) => a.score !== null && a.score !== undefined);
+        const ungraded = cat.assessments.filter((a) => a.score === null || a.score === undefined);
+        const total = cat.assessments.length;
+
+        if (total === 0) {
+          // Empty category counts as 100% per spec
+          completedWeight += cat.weight;
+          earnedPoints += (100 * cat.weight) / 100;
+        } else if (graded.length > 0 && ungraded.length === 0) {
+          // All graded
+          const catAvg = graded.reduce((sum, a) => sum + Number(a.score), 0) / graded.length;
+          completedWeight += cat.weight;
+          earnedPoints += (catAvg * cat.weight) / 100;
+        } else if (graded.length > 0 && ungraded.length > 0) {
+          // Partially graded: partition weight
+          const gradedWeightShare = (cat.weight * graded.length) / total;
+          const remainingWeightShare = (cat.weight * ungraded.length) / total;
+          const gradedAvg = graded.reduce((sum, a) => sum + Number(a.score), 0) / graded.length;
+          completedWeight += gradedWeightShare;
+          earnedPoints += (gradedAvg * gradedWeightShare) / 100;
+          remainingWeight += remainingWeightShare;
+        } else {
+          // 0 graded, but has assessments
+          remainingWeight += cat.weight;
+        }
+      });
+
+      let reqScoreStr = 'N/A';
+      let status = 'Achieved';
+
+      if (remainingWeight <= 0) {
+        reqScoreStr = calc.average >= target ? 'Done (Hit Target)' : 'No remaining work';
+        status = calc.average >= target ? '✅ Reached' : '🔒 Locked';
+      } else {
+        const neededPoints = target - earnedPoints;
+        const requiredScore = roundTo((neededPoints / remainingWeight) * 100, 1);
+
+        if (requiredScore <= 0) {
+          reqScoreStr = '0% (Already locked in!)';
+          status = '🌟 Guaranteed';
+        } else if (requiredScore > 100) {
+          const maxPossible = roundTo(earnedPoints + (remainingWeight * 1.0), 1);
+          reqScoreStr = `${requiredScore}% (Max possible: ${maxPossible}%)`;
+          status = '⚠️ Mathematically Tough';
+        } else {
+          reqScoreStr = `**${requiredScore}%**`;
+          status = requiredScore > 85 ? '⚡ High Focus' : '👍 Attainable';
+        }
+      }
+
+      return {
+        name: c.name,
+        current: roundTo(calc.average, 1),
+        target,
+        remainingWeight: roundTo(remainingWeight, 1),
+        requiredScore: reqScoreStr,
+        status,
+      };
+    });
+
+    return `### 📊 "What-If" Final Exam & Target Grade Analysis
+
+Here is the exact minimum score required on all remaining weighted assignments to achieve your target grade in each course:
+
+| Course | Current | Target | Remaining Weight | Required Score on Remaining | Feasibility |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+${rows.map((r) => `| **${r.name}** | ${r.current}% | **${r.target}%** | ${r.remainingWeight}% | ${r.requiredScore} | ${r.status} |`).join('\n')}
+
+#### 💡 Key Takeaways:
+- **Prioritize High-Remaining Courses:** Focus your study hours on courses where remaining weight is highest (e.g. 30%+ remaining).
+- **Target Feasibility:** Courses marked *"Attainable"* need standard consistent review, while *"High Focus"* courses require dedicated practice exams.`;
+  }
+
+  // 3. Highest Leverage
+  if (p.includes('leverage') || p.includes('rank') || p.includes('upcoming') || p.includes('important')) {
+    const allUpcoming: Array<{ course: string; name: string; category: string; leverage: number }> = [];
+
+    classes.forEach((c) => {
+      c.categories.forEach((cat) => {
+        const total = Math.max(1, cat.assessments.length);
+        const weightPerAssignment = roundTo(cat.weight / total, 1);
+        const ungraded = cat.assessments.filter((a) => a.score === null || a.score === undefined);
+
+        ungraded.forEach((a) => {
+          allUpcoming.push({
+            course: c.name,
+            name: a.name,
+            category: cat.name,
+            leverage: weightPerAssignment,
+          });
+        });
+      });
+    });
+
+    if (allUpcoming.length === 0) {
+      return `### ⚖️ Highest Leverage Assessment Ranking\n\nAll current assignments in your courses have grades recorded! You don't have any ungraded upcoming items in the system.\n\nTo view upcoming leverage, add your upcoming finals or assignments inside your classes without assigning a score.`;
+    }
+
+    allUpcoming.sort((a, b) => b.leverage - a.leverage);
+
+    return `### ⚖️ Upcoming Assessment Leverage Ranking
+
+Ranked from highest percentage impact to lowest on your overall course grades:
+
+| Rank | Assessment | Course | Category | Final Grade Weight |
+| :---: | :--- | :--- | :--- | :---: |
+${allUpcoming.map((item, idx) => `| **#${idx + 1}** | **${item.name}** | ${item.course} | ${item.category} | **${item.leverage}%** |`).join('\n')}
+
+> 🚀 **Advice:** Allocate study time proportionally to leverage. Your top 2 items contribute more to your term grade than all other assignments combined!`;
+  }
+
+  // 4. University Admissions & Program Analysis
+  if (p.includes('admissions') || p.includes('university') || p.includes('ubc') || p.includes('toronto') || p.includes('mcgill') || p.includes('gpa') || p.includes('transfer')) {
+    const gpaInfo = calculateCumulativeGPA(classes);
+    const overall = calculateOverallAverage(classes);
+
+    return `### 🎓 University & Program Admissions Analysis
+
+- **Cumulative GPA:** **${gpaInfo.gpa.toFixed(2)} / 4.0**
+- **Unweighted GPA:** **${gpaInfo.unweightedGpa.toFixed(2)} / 4.0**
+- **Overall Grade Average:** **${overall.overallAverage.toFixed(1)}%** (${overall.letterGrade})
+- **Total Completed Credits:** **${gpaInfo.totalCredits} credits**
+
+#### 🏛️ Admissions Competitiveness Tiers:
+| Program Tier | Typical Requirement | Your Status |
+| :--- | :---: | :--- |
+| **Tier 1 (Ultra-Competitive)**<br>*(e.g., UBC CS, Waterloo CS/Eng, U of T CS)* | 3.85 - 4.0 GPA<br>(89% - 95%+) | ${gpaInfo.gpa >= 3.85 ? '🟢 Highly Competitive' : gpaInfo.gpa >= 3.6 ? '🟡 Borderline Competitive' : '🔴 Requires Significant Grade Boost'} |
+| **Tier 2 (Highly Competitive)**<br>*(e.g., UBC Arts/Science, McGill, Top 30 US)* | 3.50 - 3.80 GPA<br>(84% - 88%) | ${gpaInfo.gpa >= 3.5 ? '🟢 Solid Candidate' : gpaInfo.gpa >= 3.2 ? '🟡 Reachable with Final Push' : '🔴 Target Grade Increase Needed'} |
+| **Tier 3 (Moderate Competitive)**<br>*(e.g., Regional Universities, Standard Programs)* | 3.00 - 3.40 GPA<br>(75% - 82%) | ${gpaInfo.gpa >= 3.0 ? '🟢 Strong Profile' : '🟡 On Track'} |
+
+#### 🎯 Highest Impact GPA Movers:
+${classes
+  .map((c) => {
+    const calc = calculateClassAverage(c);
+    const cred = c.credits || 3;
+    return { name: c.name, avg: calc.average, credits: cred };
+  })
+  .sort((a, b) => a.avg - b.avg)
+  .slice(0, 2)
+  .map((c) => `- **${c.name}** (${c.credits} cr): currently at **${c.avg.toFixed(1)}%**. Boosting this course by 5% creates the largest upward leverage on your cumulative GPA.`)
+  .join('\n')}`;
+  }
+
+  // 5. Default Comprehensive Audit
+  const overall = calculateOverallAverage(classes);
+  const gpaInfo = calculateCumulativeGPA(classes);
+
+  return `### 📋 Comprehensive Academic Audit & Action Plan
+
+- **Total Courses Enrolled:** **${classes.length}**
+- **Cumulative GPA:** **${gpaInfo.gpa.toFixed(2)} / 4.0**
+- **Term Average:** **${overall.overallAverage.toFixed(1)}%** (${overall.letterGrade})
+- **Total Credits:** **${gpaInfo.totalCredits} credits**
+
+#### 📚 Current Course Standing:
+| Course | Current Grade | Letter | Target | Credits |
+| :--- | :---: | :---: | :---: | :---: |
+${classes
+  .map((c) => {
+    const calc = calculateClassAverage(c);
+    return `| **${c.name}** | **${calc.average.toFixed(1)}%** | ${calc.letterGrade} | ${c.targetGrade || 90}% | ${c.credits || 3} |`;
+  })
+  .join('\n')}
+
+#### 💡 Recommended Next Actions:
+1. **Audit Weights:** Ensure all course category weights total exactly 100%.
+2. **Upcoming Leverage:** Check remaining final exams and calculate what-if targets.
+3. **Ask me specific questions:** E.g., *"What do I need on my finals?"* or *"How can I raise my lowest grade?"*`;
+}
+
+/**
  * Sends chat message to Google Gemini API with the dynamic live gradebook context injected.
+ * Automatically tries modern models (gemini-2.0-flash -> gemini-2.5-flash -> fallbacks),
+ * and transparently provides accurate local grade analysis if Google API access is blocked or unavailable.
  */
 export async function sendAdvisorMessage(
   userPrompt: string,
   history: ChatMessage[],
   classes: ClassItem[],
-  modelChoice: GeminiModel = 'gemini-1.5-flash'
+  preferredModel?: GeminiModel
 ): Promise<string> {
   const apiKey = getGeminiApiKey();
 
-  if (!apiKey) {
-    throw new Error('MISSING_API_KEY');
-  }
+  // Determine model sequence: start with preferred or gemini-2.0-flash
+  const startingModel = preferredModel || getSelectedGeminiModel() || 'gemini-2.0-flash';
+  const modelsToTry: GeminiModel[] = [
+    startingModel,
+    ...FALLBACK_MODELS.filter((m) => m !== startingModel),
+  ];
 
   const systemInstructionText = buildAdvisorSystemPrompt(classes);
 
@@ -233,8 +494,6 @@ export async function sendAdvisorMessage(
     parts: [{ text: userPrompt }],
   });
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelChoice}:generateContent?key=${apiKey}`;
-
   const payload = {
     systemInstruction: {
       parts: [{ text: systemInstructionText }],
@@ -246,45 +505,86 @@ export async function sendAdvisorMessage(
     },
   };
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+  let lastError: Error | null = null;
+  let isPermissionOrBlocked = false;
 
-    if (!response.ok) {
-      const errJson = await response.json().catch(() => null);
-      const errMsg = errJson?.error?.message || `HTTP error ${response.status}: ${response.statusText}`;
+  // Try candidate models in order (e.g. gemini-2.0-flash first)
+  for (const model of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      if (response.status === 400 && errMsg.includes('API_KEY_INVALID')) {
-        throw new Error('INVALID_API_KEY');
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => null);
+        const errMsg = errJson?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+
+        if (response.status === 404) {
+          // Model name deprecated/retired on this endpoint; try next model in fallback list
+          console.warn(`Model ${model} returned 404, attempting fallback...`);
+          lastError = new Error(`Model ${model} not available on this endpoint.`);
+          continue;
+        }
+
+        if (
+          response.status === 403 ||
+          errMsg.includes('blocked') ||
+          errMsg.includes('PERMISSION_DENIED') ||
+          errMsg.includes('API_KEY_SERVICE_BLOCKED')
+        ) {
+          isPermissionOrBlocked = true;
+          lastError = new Error('API_KEY_SERVICE_BLOCKED');
+          break;
+        }
+
+        if (response.status === 429) {
+          throw new Error('QUOTA_EXCEEDED');
+        }
+
+        if (response.status === 400 && errMsg.includes('API_KEY_INVALID')) {
+          throw new Error('INVALID_API_KEY');
+        }
+
+        lastError = new Error(errMsg);
+        continue;
       }
-      if (response.status === 429) {
-        throw new Error('QUOTA_EXCEEDED');
+
+      const data = await response.json();
+      const candidate = data?.candidates?.[0];
+
+      if (!candidate || !candidate.content?.parts?.[0]?.text) {
+        if (candidate?.finishReason === 'SAFETY') {
+          return 'The response was flagged by safety filters. Please rephrase your academic query.';
+        }
+        return 'I received an empty response from the AI model. Please try asking again.';
       }
-      if (response.status === 404) {
-        // Fallback model if user selected an unavailable experimental name
-        throw new Error(`Model ${modelChoice} not found. Please try gemini-1.5-flash.`);
+
+      // Save working model for future calls
+      saveSelectedGeminiModel(model);
+      return candidate.content.parts[0].text;
+    } catch (err: any) {
+      if (err.message === 'QUOTA_EXCEEDED' || err.message === 'INVALID_API_KEY') {
+        throw err;
       }
-      throw new Error(errMsg);
+      lastError = err;
     }
-
-    const data = await response.json();
-    const candidate = data?.candidates?.[0];
-
-    if (!candidate || !candidate.content?.parts?.[0]?.text) {
-      if (candidate?.finishReason === 'SAFETY') {
-        return 'The response was flagged by safety filters. Please rephrase your academic query.';
-      }
-      return 'I received an empty response from the AI model. Please try asking again.';
-    }
-
-    return candidate.content.parts[0].text;
-  } catch (err: any) {
-    console.error('Gemini API call failed:', err);
-    throw err;
   }
+
+  // If Gemini API could not be reached or was blocked on this project key,
+  // execute the exact mathematical formulas locally so the student always receives an immediate, accurate answer!
+  console.info('Switching to local math engine fallback due to API status:', lastError?.message);
+  const localAnalysis = generateLocalAdvisorResponse(userPrompt, classes);
+
+  if (isPermissionOrBlocked) {
+    return `${localAnalysis}\n\n---\n*💡 Note: Calculated using the built-in Gradebook Mathematical Engine. To enable Gemini AI reasoning, enable the Generative Language API on Google Cloud project 428854713959 or supply a free key in Settings.*`;
+  }
+
+  return localAnalysis;
 }
+

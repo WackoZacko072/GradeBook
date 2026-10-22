@@ -75,10 +75,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       <button
         type="button"
         onClick={onOpenAiAdvisor}
-        className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 cursor-pointer transition-colors text-purple-600 hover:text-purple-700 font-semibold"
+        className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 cursor-pointer transition-colors text-blue-600 hover:text-blue-700 font-semibold"
       >
-        <div className="p-1 rounded-xl bg-purple-50 text-purple-600">
-          <Sparkles className="w-4 h-4 text-purple-600" />
+        <div className="p-1 rounded-xl bg-blue-50 text-blue-600">
+          <Sparkles className="w-4 h-4 text-blue-600 stroke-[2.2]" />
         </div>
         <span className="text-[10px] tracking-tight">AI Advisor</span>
       </button>

@@ -4,14 +4,18 @@ import {
   Sparkles,
   Send,
   Trash2,
-  Bot,
   User,
   AlertCircle,
   GraduationCap,
+  Key,
+  Check,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import {
   sendAdvisorMessage,
+  saveGeminiApiKey,
+  clearGeminiApiKey,
+  GEMINI_STORAGE_KEY,
   type ChatMessage,
 } from '../utils/aiAdvisorService';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -64,6 +68,15 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   const [inputPrompt, setInputPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [isKeyConfigOpen, setIsKeyConfigOpen] = useState(false);
+  const [customKeyInput, setCustomKeyInput] = useState(() => {
+    try {
+      return localStorage.getItem(GEMINI_STORAGE_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
+  const [keySavedFeedback, setKeySavedFeedback] = useState(false);
 
   // Load chat history from localStorage
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -113,6 +126,20 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     }
   };
 
+  const handleSaveCustomKey = () => {
+    if (customKeyInput.trim()) {
+      saveGeminiApiKey(customKeyInput.trim());
+      setKeySavedFeedback(true);
+      setTimeout(() => {
+        setKeySavedFeedback(false);
+        setIsKeyConfigOpen(false);
+      }, 1500);
+    } else {
+      clearGeminiApiKey();
+      setIsKeyConfigOpen(false);
+    }
+  };
+
   const handleSend = async (textToSend?: string) => {
     const prompt = (textToSend || inputPrompt).trim();
     if (!prompt || isLoading) return;
@@ -141,10 +168,10 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     } catch (err: any) {
       console.error('AI Advisor error:', err);
       let msg = err.message || 'Failed to generate response. Please try again.';
-      if (msg.includes('Gemini API has not been used') || msg.includes('PERMISSION_DENIED')) {
-        msg = 'Gemini API needs to be enabled once in your Google Cloud Console for project 428854713959.';
-      } else if (msg === 'QUOTA_EXCEEDED') {
+      if (msg === 'QUOTA_EXCEEDED') {
         msg = 'Gemini API rate limit reached. Please wait a few seconds and try again.';
+      } else if (msg === 'INVALID_API_KEY') {
+        msg = 'The provided Gemini API key is invalid. Please check your key in Settings.';
       }
       setErrorBanner(msg);
     } finally {
@@ -169,11 +196,11 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
 
       {/* Slide-over panel */}
       <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-250 border-l border-slate-200">
-        {/* Header */}
+        {/* Header - matching blue & white logo identity */}
         <div className="p-4 border-b border-slate-200/80 bg-slate-50/70 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-xs">
-              <Sparkles className="w-4 h-4 text-amber-300" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
+              <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -187,6 +214,18 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5">
+            {/* Optional API Key Settings */}
+            <button
+              type="button"
+              onClick={() => setIsKeyConfigOpen(!isKeyConfigOpen)}
+              title="API Key Configuration"
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                isKeyConfigOpen ? 'bg-blue-100 text-blue-700' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <Key className="w-4 h-4" />
+            </button>
+
             {/* Clear chat history */}
             {messages.length > 0 && (
               <button
@@ -210,17 +249,57 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           </div>
         </div>
 
+        {/* Expandable Optional API Key Settings Box */}
+        {isKeyConfigOpen && (
+          <div className="p-3.5 bg-blue-50/70 border-b border-blue-200/80 animate-in slide-in-from-top-2 duration-150">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-blue-600" />
+                Gemini API Key (Optional)
+              </span>
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[11px] text-blue-600 hover:underline font-semibold"
+              >
+                Get Free Gemini Key ↗
+              </a>
+            </div>
+            <p className="text-[11px] text-slate-600 mb-2 leading-relaxed">
+              By default, the advisor runs using the built-in project key or local math engine. If you have your own Gemini Pro / AI Studio key, enter it below:
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="password"
+                value={customKeyInput}
+                onChange={(e) => setCustomKeyInput(e.target.value)}
+                placeholder="AIzaSy..."
+                className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-mono"
+              />
+              <button
+                type="button"
+                onClick={handleSaveCustomKey}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                {keySavedFeedback ? <Check className="w-3.5 h-3.5" /> : null}
+                <span>{keySavedFeedback ? 'Saved!' : 'Save'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Error notification banner if any */}
         {errorBanner && (
-          <div className="p-3 bg-amber-50 border-b border-amber-200 text-amber-900 text-xs flex items-center justify-between">
+          <div className="p-3 bg-rose-50 border-b border-rose-200 text-rose-900 text-xs flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
               <span className="leading-relaxed">{errorBanner}</span>
             </div>
             <button
               type="button"
               onClick={() => setErrorBanner(null)}
-              className="text-amber-800 font-bold hover:text-amber-950 text-xs ml-2 cursor-pointer flex-shrink-0"
+              className="text-rose-800 font-bold hover:text-rose-950 text-xs ml-2 cursor-pointer flex-shrink-0"
             >
               Dismiss
             </button>
@@ -269,8 +348,8 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {msg.role === 'model' && (
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs">
-                      <Bot className="w-4 h-4" />
+                    <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs">
+                      <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
                     </div>
                   )}
 
@@ -298,8 +377,8 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
 
               {isLoading && (
                 <div className="flex gap-2.5 justify-start">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 animate-pulse">
-                    <Sparkles className="w-4 h-4 text-amber-300" />
+                  <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs animate-pulse">
+                    <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
                   </div>
                   <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-xs p-3.5 shadow-2xs">
                     <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
