@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { ClassItem } from './types/grade';
 import {
   getInitialClasses,
-  loadUserClasses,
+  subscribeToUserClasses,
   saveUserClasses,
   loadGuestClasses,
   saveGuestClasses,
@@ -24,8 +24,7 @@ export const App: React.FC = () => {
   // Initialize classes immediately on mount so page refresh NEVER loses data
   const [classes, setClasses] = useState<ClassItem[]>(() => getInitialClasses());
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const initialLoadDoneRef = useRef(false);
+  const [_isDataLoaded, setIsDataLoaded] = useState(false);
 
   // Modals & Navigation state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -36,49 +35,37 @@ export const App: React.FC = () => {
   // Scroll ref for main content
   const mainContentRef = useRef<HTMLElement>(null);
 
-  // Load classes whenever user changes (or auth initializes)
+  // Real-time synchronization: subscribe to user classes in Firestore
+  // Automatically syncs computer and phone seamlessly without data loss!
   useEffect(() => {
-    let isCancelled = false;
+    let unsubscribeUser: (() => void) | null = null;
 
-    async function loadData() {
-      if (user) {
-        // Authenticated user: load from cloud/cache
-        const userClasses = await loadUserClasses(user.uid, user.email, user.displayName);
-        if (!isCancelled) {
-          setClasses(userClasses);
-          setIsDataLoaded(true);
-          initialLoadDoneRef.current = true;
-        }
-      } else {
-        // Unauthenticated guest: load local guest classes
-        const guestClasses = loadGuestClasses();
-        if (!isCancelled) {
-          setClasses(guestClasses);
-          setIsDataLoaded(true);
-          initialLoadDoneRef.current = true;
-        }
-      }
-    }
+    if (authLoading) return;
 
-    if (!authLoading) {
-      loadData();
+    if (user) {
+      // Authenticated user: real-time live sync across devices
+      unsubscribeUser = subscribeToUserClasses(
+        user.uid,
+        (cloudClasses) => {
+          setClasses(cloudClasses);
+          setIsDataLoaded(true);
+        },
+        user.email,
+        user.displayName
+      );
+    } else {
+      // Unauthenticated guest: load local guest classes
+      const guestClasses = loadGuestClasses();
+      setClasses(guestClasses);
+      setIsDataLoaded(true);
     }
 
     return () => {
-      isCancelled = true;
+      if (unsubscribeUser) {
+        unsubscribeUser();
+      }
     };
   }, [user, authLoading]);
-
-  // Save classes whenever they are modified (only after initial data load has finished)
-  useEffect(() => {
-    if (!initialLoadDoneRef.current && !isDataLoaded) return;
-
-    if (user) {
-      saveUserClasses(user.uid, classes);
-    } else {
-      saveGuestClasses(classes);
-    }
-  }, [classes, user, isDataLoaded]);
 
   // Scroll to top when active class changes
   useEffect(() => {
@@ -112,6 +99,19 @@ export const App: React.FC = () => {
     });
   };
 
+  // Delete class
+  const handleDeleteClass = (id: string) => {
+    setClasses((prev) => {
+      const next = prev.filter((c) => c.id !== id);
+      if (user) saveUserClasses(user.uid, next);
+      else saveGuestClasses(next);
+      return next;
+    });
+    if (selectedClassId === id) {
+      setSelectedClassId(null);
+    }
+  };
+
   // Restore backup
   const handleRestoreClasses = (restored: ClassItem[]) => {
     setClasses(restored);
@@ -136,6 +136,7 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-[#FAFBFD] text-[#0F172A] flex flex-col font-sans">
       {/* Top Header */}
       <Header
+        classes={classes}
         onOpenBackup={() => setIsBackupModalOpen(true)}
         onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
@@ -165,15 +166,7 @@ export const App: React.FC = () => {
                 classItem={activeClass}
                 onBack={() => setSelectedClassId(null)}
                 onUpdateClass={handleUpdateClass}
-                onDeleteClass={(id) => {
-                  setClasses((prev) => {
-                    const next = prev.filter((c) => c.id !== id);
-                    if (user) saveUserClasses(user.uid, next);
-                    else saveGuestClasses(next);
-                    return next;
-                  });
-                  setSelectedClassId(null);
-                }}
+                onDeleteClass={handleDeleteClass}
               />
             ) : (
               <Dashboard

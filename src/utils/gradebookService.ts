@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot, type Unsubscribe } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { ClassItem } from '../types/grade';
 
@@ -11,6 +11,43 @@ const LEGACY_STORAGE_KEYS = [
   'gradebook_data_v1',
 ];
 
+export type SyncState = 'synced' | 'syncing' | 'error' | 'offline';
+
+export interface SyncStatusInfo {
+  state: SyncState;
+  lastSyncedAt: number | null;
+  errorMessage: string | null;
+}
+
+let currentSyncStatus: SyncStatusInfo = {
+  state: db ? 'synced' : 'offline',
+  lastSyncedAt: null,
+  errorMessage: null,
+};
+
+const syncListeners = new Set<(status: SyncStatusInfo) => void>();
+
+function setSyncStatus(state: SyncState, errorMessage: string | null = null) {
+  currentSyncStatus = {
+    state,
+    lastSyncedAt: state === 'synced' ? Date.now() : currentSyncStatus.lastSyncedAt,
+    errorMessage,
+  };
+  syncListeners.forEach((fn) => fn(currentSyncStatus));
+}
+
+export function subscribeToSyncStatus(listener: (status: SyncStatusInfo) => void): () => void {
+  listener(currentSyncStatus);
+  syncListeners.add(listener);
+  return () => {
+    syncListeners.delete(listener);
+  };
+}
+
+export function getSyncStatus(): SyncStatusInfo {
+  return currentSyncStatus;
+}
+
 /**
  * Strips all undefined properties from objects so Firestore never rejects the payload
  */
@@ -19,17 +56,30 @@ function sanitizeForFirestore<T>(data: T): T {
 }
 
 /**
- * Get cached classes immediately and synchronously for instant rendering on page refresh
+ * Get cached classes strictly for a specific user ID
+ */
+export function getUserCacheClasses(userId: string): ClassItem[] {
+  try {
+    const raw = localStorage.getItem(USER_CACHE_PREFIX + userId);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (err) {
+    console.error('Error reading user cache:', err);
+  }
+  return [];
+}
+
+/**
+ * Get cached classes immediately and synchronously for instant rendering on page load
  */
 export function getInitialClasses(userId?: string | null): ClassItem[] {
   try {
-    // 1. If user ID is passed, check their specific cache first
+    // 1. If user ID is known, check their specific cache first
     if (userId) {
-      const userRaw = localStorage.getItem(USER_CACHE_PREFIX + userId);
-      if (userRaw) {
-        const parsed = JSON.parse(userRaw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
+      const userClasses = getUserCacheClasses(userId);
+      if (userClasses.length > 0) return userClasses;
     }
 
     // 2. Check the last active saved classes key
@@ -62,119 +112,134 @@ export function getInitialClasses(userId?: string | null): ClassItem[] {
 }
 
 /**
- * Load classes for a specific authenticated user.
- * Prioritizes user's saved data, syncs with Firestore, and ensures local data is NEVER wiped out by refresh.
+ * Real-time subscription to user classes in Firestore.
+ * Automatically synchronizes between computer and phone instantly!
  */
-export async function loadUserClasses(
+export function subscribeToUserClasses(
   userId: string,
+  onClassesReceived: (classes: ClassItem[]) => void,
   userEmail?: string | null,
   userName?: string | null
-): Promise<ClassItem[]> {
+): Unsubscribe {
   const cacheKey = USER_CACHE_PREFIX + userId;
 
-  // 1. Check local cache for this user first
-  let cachedClasses: ClassItem[] = [];
-  try {
-    const raw = localStorage.getItem(cacheKey);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        cachedClasses = parsed;
-      }
-    }
-  } catch {
-    // ignore
-  }
-
-  // If local cache is empty, check if there is recent active data to adopt
-  if (cachedClasses.length === 0) {
-    const fallback = getInitialClasses(userId);
-    if (fallback.length > 0) {
-      cachedClasses = fallback;
+  // Immediately notify caller with locally cached classes so UI renders with 0 delay
+  const userSpecific = getUserCacheClasses(userId);
+  if (userSpecific.length > 0) {
+    onClassesReceived(userSpecific);
+  } else {
+    const anyLocal = getInitialClasses(userId);
+    if (anyLocal.length > 0) {
+      onClassesReceived(anyLocal);
     }
   }
 
-  // 2. Fetch from Cloud Firestore if available
-  if (db) {
-    try {
-      const userDocRef = doc(db, 'users', userId);
-      const snapshot = await getDoc(userDocRef);
+  if (!db) {
+    setSyncStatus('offline', 'Firebase database is not connected.');
+    return () => {};
+  }
 
+  setSyncStatus('syncing');
+
+  const userDocRef = doc(db, 'users', userId);
+
+  const unsubscribe = onSnapshot(
+    userDocRef,
+    async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
         const cloudClasses = Array.isArray(data.classes) ? (data.classes as ClassItem[]) : [];
 
-        // If cloud has classes, use cloud classes and update local cache
         if (cloudClasses.length > 0) {
+          // Cloud has valid classes -> adopt them on this device
           try {
-            localStorage.setItem(cacheKey, JSON.stringify(cloudClasses));
-            localStorage.setItem(LAST_ACTIVE_CLASSES_KEY, JSON.stringify(cloudClasses));
+            const serialized = JSON.stringify(cloudClasses);
+            localStorage.setItem(cacheKey, serialized);
+            localStorage.setItem(LAST_ACTIVE_CLASSES_KEY, serialized);
           } catch {
             // ignore
           }
-          return cloudClasses;
-        }
+          setSyncStatus('synced');
+          onClassesReceived(cloudClasses);
+        } else {
+          // Cloud has 0 classes. Check if this device has local classes to upload:
+          const localToUpload = getUserCacheClasses(userId).length > 0
+            ? getUserCacheClasses(userId)
+            : getInitialClasses(userId);
 
-        // Cloud document exists but classes is empty:
-        // If the user had saved classes locally, preserve them and sync to cloud!
-        if (cachedClasses.length > 0) {
-          await saveUserClasses(userId, cachedClasses);
-          return cachedClasses;
+          if (localToUpload.length > 0) {
+            console.log('Uploading local classes to empty cloud document...');
+            await saveUserClasses(userId, localToUpload);
+            onClassesReceived(localToUpload);
+          } else {
+            // Truly empty starting state
+            setSyncStatus('synced');
+            onClassesReceived([]);
+          }
         }
-
-        // Both cloud and local are empty: brand new empty user
-        return [];
       } else {
         // Document does not exist yet in Firestore
-        // If user already had classes locally, save them to Firestore!
-        if (cachedClasses.length > 0) {
-          await saveUserClasses(userId, cachedClasses);
-          return cachedClasses;
-        }
+        const localToUpload = getUserCacheClasses(userId).length > 0
+          ? getUserCacheClasses(userId)
+          : getInitialClasses(userId);
 
-        // Completely new user starting with 0 classes
-        const initialClasses: ClassItem[] = [];
-        try {
-          await setDoc(userDocRef, {
-            classes: initialClasses,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-            email: userEmail || null,
-            displayName: userName || null,
-          });
-        } catch (setErr) {
-          console.warn('Could not initialize user document in Firestore:', setErr);
+        if (localToUpload.length > 0) {
+          console.log('Creating cloud document with local classes...');
+          await saveUserClasses(userId, localToUpload);
+          onClassesReceived(localToUpload);
+        } else {
+          // Create initial empty document for brand new user
+          try {
+            await setDoc(userDocRef, {
+              classes: [],
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              email: userEmail || null,
+              displayName: userName || null,
+            });
+            setSyncStatus('synced');
+          } catch (initErr: any) {
+            console.error('Failed to initialize user document:', initErr);
+            const msg = initErr?.code === 'permission-denied'
+              ? 'Firestore Permission Denied. Please ensure Firestore Security Rules are published in Firebase Console.'
+              : initErr?.message || 'Permission denied in Firestore';
+            setSyncStatus('error', msg);
+          }
+          onClassesReceived([]);
         }
-
-        try {
-          localStorage.setItem(cacheKey, JSON.stringify(initialClasses));
-          localStorage.setItem(LAST_ACTIVE_CLASSES_KEY, JSON.stringify(initialClasses));
-        } catch {
-          // ignore
-        }
-        return initialClasses;
       }
-    } catch (err) {
-      console.warn('Firestore fetch failed, using local cached classes:', err);
+    },
+    (error) => {
+      console.error('Firestore real-time sync error:', error);
+      let message = error.message;
+      if (error.code === 'permission-denied') {
+        message = 'Firestore Permission Denied. Please ensure rules are published in Firebase Console.';
+      } else if (error.code === 'unavailable') {
+        message = 'Firestore service is currently unavailable or offline.';
+      }
+      setSyncStatus('error', message);
     }
-  }
+  );
 
-  // If Firestore is offline or errored, return cached local data (never wipe data!)
-  return cachedClasses;
+  return unsubscribe;
 }
 
 /**
  * Save classes for a specific user to Firestore and per-user local cache.
  */
-export async function saveUserClasses(userId: string, classes: ClassItem[]): Promise<void> {
+export async function saveUserClasses(
+  userId: string,
+  classes: ClassItem[]
+): Promise<{ success: boolean; error?: string }> {
+  if (!userId) return { success: false, error: 'No user ID provided' };
+
   const cacheKey = USER_CACHE_PREFIX + userId;
 
-  // 1. Immediately save to localStorage synchronously so refresh never loses data
+  // 1. Immediately save to localStorage synchronously
   try {
     const serialized = JSON.stringify(classes);
     localStorage.setItem(cacheKey, serialized);
     localStorage.setItem(LAST_ACTIVE_CLASSES_KEY, serialized);
-    // Also sync to fallback storage keys
     for (const key of LEGACY_STORAGE_KEYS) {
       localStorage.setItem(key, serialized);
     }
@@ -182,8 +247,9 @@ export async function saveUserClasses(userId: string, classes: ClassItem[]): Pro
     console.error('Failed to write to local cache:', err);
   }
 
-  // 2. Save to Firestore in background with sanitized payload (no undefined values)
+  // 2. Save to Firestore in background
   if (db) {
+    setSyncStatus('syncing');
     try {
       const userDocRef = doc(db, 'users', userId);
       const sanitized = sanitizeForFirestore({
@@ -192,14 +258,60 @@ export async function saveUserClasses(userId: string, classes: ClassItem[]): Pro
       });
 
       await setDoc(userDocRef, sanitized, { merge: true });
-    } catch (err) {
+      setSyncStatus('synced');
+      return { success: true };
+    } catch (err: any) {
       console.error('Failed to sync classes to Firestore:', err);
+      let errorMsg = err?.message || 'Failed to sync with Firestore';
+      if (err?.code === 'permission-denied') {
+        errorMsg = 'Firestore Permission Denied. Check your Firebase Console Firestore rules.';
+      }
+      setSyncStatus('error', errorMsg);
+      return { success: false, error: errorMsg };
     }
+  } else {
+    setSyncStatus('offline', 'Firebase database is not connected.');
+    return { success: false, error: 'Firebase not configured' };
   }
 }
 
 /**
- * Guest/Unauthenticated fallback helpers
+ * Force manual upload of classes to Cloud Firestore
+ */
+export async function forceSyncToCloud(
+  userId: string,
+  classes: ClassItem[]
+): Promise<{ success: boolean; error?: string }> {
+  return await saveUserClasses(userId, classes);
+}
+
+/**
+ * Test connectivity & permissions to Firestore
+ */
+export async function testFirestoreAccess(userId: string): Promise<{ success: boolean; message: string }> {
+  if (!db) {
+    return { success: false, message: 'Firebase Firestore is not initialized.' };
+  }
+  try {
+    const userDocRef = doc(db, 'users', userId);
+    const snap = await getDoc(userDocRef);
+    await setDoc(userDocRef, { _lastPing: Date.now() }, { merge: true });
+    return {
+      success: true,
+      message: `Cloud Firestore connection verified! Read (${snap.exists() ? 'document exists' : 'ready'}) and write succeeded.`,
+    };
+  } catch (err: any) {
+    console.error('Firestore connection test failed:', err);
+    let msg = err?.message || 'Connection test failed';
+    if (err?.code === 'permission-denied') {
+      msg = 'Permission Denied: Your Firebase Firestore Security Rules are blocking access. Go to Firebase Console -> Firestore Database -> Rules and publish the required rules.';
+    }
+    return { success: false, message: msg };
+  }
+}
+
+/**
+ * Guest helpers
  */
 export function loadGuestClasses(): ClassItem[] {
   return getInitialClasses(null);
