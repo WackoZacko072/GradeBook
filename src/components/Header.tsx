@@ -3,8 +3,7 @@ import {
   BookOpen,
   ShieldCheck,
   CheckCircle2,
-  DownloadCloud,
-  GraduationCap,
+  FileText,
   LogOut,
   Settings,
   Menu,
@@ -25,7 +24,7 @@ import type { ClassItem } from '../types/grade';
 
 interface HeaderProps {
   classes: ClassItem[];
-  onOpenBackup: () => void;
+  onOpenTranscript: () => void;
   onOpenFirebaseConfig: () => void;
   onOpenMobileDrawer?: () => void;
   onOpenAiAdvisor: () => void;
@@ -33,7 +32,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   classes,
-  onOpenBackup,
+  onOpenTranscript,
   onOpenFirebaseConfig,
   onOpenMobileDrawer,
   onOpenAiAdvisor,
@@ -101,23 +100,6 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </div>
 
-        {/* Center: Segmented Navigation Pill (desktop only) */}
-        <div className="hidden md:flex items-center p-1 bg-slate-100/90 rounded-2xl border border-slate-200/60 shadow-2xs">
-          <button
-            type="button"
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-white text-blue-700 font-semibold text-xs rounded-xl shadow-xs border border-slate-200/50 cursor-pointer"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-            <span>Gradebook</span>
-          </button>
-          <div
-            title="University Planner"
-            className="flex items-center gap-1.5 px-4 py-1.5 text-slate-500 font-medium text-xs rounded-xl opacity-75 select-none"
-          >
-            <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
-            <span>University Planner</span>
-          </div>
-        </div>
 
         {/* Right: User Authentication, Sync Status & Actions */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
@@ -164,15 +146,15 @@ export const Header: React.FC<HeaderProps> = ({
             <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
           </button>
 
-          {/* Desktop Backup Button */}
+          {/* Desktop Transcript Button */}
           <button
             type="button"
-            onClick={onOpenBackup}
-            title="Export / Restore Backup"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all cursor-pointer min-h-[36px]"
+            onClick={onOpenTranscript}
+            title="Download Official Academic Transcript (PDF)"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 bg-blue-50/80 hover:bg-blue-100 border border-blue-200/60 rounded-xl transition-all cursor-pointer min-h-[36px]"
           >
-            <DownloadCloud className="w-3.5 h-3.5 text-slate-500" />
-            <span>Backup</span>
+            <FileText className="w-3.5 h-3.5 text-blue-600 stroke-[2.2]" />
+            <span>Transcript (PDF)</span>
           </button>
 
           {/* Authentication Section */}
@@ -249,12 +231,12 @@ export const Header: React.FC<HeaderProps> = ({
                       type="button"
                       onClick={() => {
                         setIsUserMenuOpen(false);
-                        onOpenBackup();
+                        onOpenTranscript();
                       }}
                       className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer min-h-[40px]"
                     >
-                      <DownloadCloud className="w-4 h-4 text-slate-400" />
-                      <span>Data Backup & Restore</span>
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span>Official Academic Transcript (PDF)</span>
                     </button>
 
                     <button

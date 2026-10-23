@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, BookOpen, Plus, DownloadCloud, Sparkles } from 'lucide-react';
+import { Layers, BookOpen, Plus, FileText, Sparkles } from 'lucide-react';
 
 interface MobileBottomNavProps {
   selectedClassId: string | null;
@@ -7,7 +7,7 @@ interface MobileBottomNavProps {
   onSelectOverview: () => void;
   onOpenMobileDrawer: () => void;
   onOpenAddClass: () => void;
-  onOpenBackup: () => void;
+  onOpenTranscript: () => void;
   onOpenAiAdvisor: () => void;
 }
 
@@ -17,7 +17,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onSelectOverview,
   onOpenMobileDrawer,
   onOpenAddClass,
-  onOpenBackup,
+  onOpenTranscript,
   onOpenAiAdvisor,
 }) => {
   return (
@@ -83,16 +83,16 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         <span className="text-[10px] tracking-tight">AI Advisor</span>
       </button>
 
-      {/* 5. Backup & Data */}
+      {/* 5. Official Transcript */}
       <button
         type="button"
-        onClick={onOpenBackup}
-        className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 cursor-pointer transition-colors text-slate-500 hover:text-slate-800"
+        onClick={onOpenTranscript}
+        className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 cursor-pointer transition-colors text-slate-500 hover:text-blue-600"
       >
         <div className="p-1 rounded-xl">
-          <DownloadCloud className="w-4 h-4" />
+          <FileText className="w-4 h-4" />
         </div>
-        <span className="text-[10px] tracking-tight">Backup</span>
+        <span className="text-[10px] tracking-tight">Transcript</span>
       </button>
     </nav>
   );

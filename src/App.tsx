@@ -14,7 +14,7 @@ import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClassDetail } from './components/ClassDetail';
 import { AddClassModal } from './components/AddClassModal';
-import { BackupModal } from './components/BackupModal';
+import { TranscriptModal } from './components/TranscriptModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { AiAdvisorDrawer } from './components/AiAdvisorDrawer';
@@ -30,7 +30,7 @@ export const App: React.FC = () => {
 
   // Modals & Navigation state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [isTranscriptModalOpen, setIsTranscriptModalOpen] = useState(false);
   const [isFirebaseConfigOpen, setIsFirebaseConfigOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
@@ -118,15 +118,6 @@ export const App: React.FC = () => {
     }
   };
 
-  // Restore backup
-  const handleRestoreClasses = (restored: ClassItem[]) => {
-    setClasses(restored);
-    if (user) saveUserClasses(user.uid, restored);
-    else saveGuestClasses(restored);
-    if (selectedClassId && !restored.some((c) => c.id === selectedClassId)) {
-      setSelectedClassId(null);
-    }
-  };
 
   // Load demo data
   const handleLoadDemoData = () => {
@@ -150,7 +141,7 @@ export const App: React.FC = () => {
       {/* Top Header */}
       <Header
         classes={classes}
-        onOpenBackup={() => setIsBackupModalOpen(true)}
+        onOpenTranscript={() => setIsTranscriptModalOpen(true)}
         onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
@@ -204,7 +195,7 @@ export const App: React.FC = () => {
         onSelectOverview={() => setSelectedClassId(null)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
         onOpenAddClass={() => setIsAddModalOpen(true)}
-        onOpenBackup={() => setIsBackupModalOpen(true)}
+        onOpenTranscript={() => setIsTranscriptModalOpen(true)}
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
       />
 
@@ -215,11 +206,11 @@ export const App: React.FC = () => {
         onAddClass={handleAddClass}
       />
 
-      <BackupModal
-        isOpen={isBackupModalOpen}
-        onClose={() => setIsBackupModalOpen(false)}
+      <TranscriptModal
+        isOpen={isTranscriptModalOpen}
+        onClose={() => setIsTranscriptModalOpen(false)}
         classes={classes}
-        onRestoreClasses={handleRestoreClasses}
+        defaultStudentName={user?.displayName || undefined}
       />
 
       <FirebaseConfigModal
