@@ -40,6 +40,11 @@ service cloud.firestore {
       allow create: if isOwner(userId) && isValidUserGradebook(request.resource.data);
       allow update: if isOwner(userId) && isValidUserGradebook(request.resource.data);
       allow delete: if isOwner(userId);
+
+      // Subcollection for Notebook data (notes, sources, question banks, flashcards)
+      match /notebook/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // Default deny all other paths

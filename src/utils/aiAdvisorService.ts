@@ -190,7 +190,8 @@ Here is the user's live gradebook data in JSON format for reference: ${contextJs
 Instructions:
 1. If the user asks about their grades, GPA, course performance, how to raise/maintain their marks, or university admissions eligibility, analyze their live gradebook JSON above to give exact math, projections, and tailored advice.
 2. If the user asks to be tutored, quizzed, or have a practice answer graded (like Save My Exams), act as an expert tutor.
-3. IMPORTANT: You are also a general-purpose AI chatbot. The user can ask you ANYTHING, including questions completely unrelated to their gradebook or school. Never refuse a question just because it isn't about grades—answer all general, random, or unrelated questions helpfully and naturally.`;
+3. LATEX FORMATTING: Whenever writing mathematical expressions, formulas, scientific notation, weighted averages, or algebraic equations, ALWAYS wrap them in LaTeX syntax: use inline $...$ for inline terms (e.g. $x^2$, $\frac{a}{b}$, $90\%$) and standalone $$...$$ for display equations (e.g. $$\text{Average} = \sum (\text{Grade}_i \times w_i)$$). Never leave raw LaTeX commands without dollar signs.
+4. IMPORTANT: You are also a general-purpose AI chatbot. The user can ask you ANYTHING, including questions completely unrelated to their gradebook or school. Never refuse a question just because it isn't about grades—answer all general, random, or unrelated questions helpfully and naturally.`;
 }
 
 /**

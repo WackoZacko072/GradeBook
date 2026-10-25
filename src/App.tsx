@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { ClassItem } from './types/grade';
+import type { NoteItem } from './types/notebook';
 import {
   getInitialClasses,
   subscribeToUserClasses,
@@ -7,12 +8,21 @@ import {
   loadGuestClasses,
   saveGuestClasses,
 } from './utils/gradebookService';
+import {
+  getInitialNotes,
+  subscribeToUserNotes,
+  saveUserNotes,
+  loadGuestNotes,
+  saveGuestNotes,
+} from './utils/notebookService';
 import { INITIAL_DEMO_CLASSES } from './utils/sampleData';
+import { INITIAL_DEMO_NOTES } from './utils/sampleNotebookData';
 import { useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClassDetail } from './components/ClassDetail';
+import { NotebookView } from './components/Notebook/NotebookView';
 import { AddClassModal } from './components/AddClassModal';
 import { TranscriptModal } from './components/TranscriptModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
@@ -23,9 +33,17 @@ import { Sparkles } from 'lucide-react';
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
 
-  // Initialize classes immediately on mount so page refresh NEVER loses data
+  // Top level active tab: Gradebook vs Notebook
+  const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook'>('gradebook');
+
+  // Gradebook classes state
   const [classes, setClasses] = useState<ClassItem[]>(() => getInitialClasses());
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+
+  // Notebook notes state
+  const [notes, setNotes] = useState<NoteItem[]>(() => getInitialNotes());
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+
   const [_isDataLoaded, setIsDataLoaded] = useState(false);
 
   // Modals & Navigation state
@@ -41,15 +59,12 @@ export const App: React.FC = () => {
   // Scroll ref for main content
   const mainContentRef = useRef<HTMLElement>(null);
 
-  // Real-time synchronization: subscribe to user classes in Firestore
-  // Automatically syncs computer and phone seamlessly without data loss!
+  // Real-time synchronization for Classes: subscribe in Firestore
   useEffect(() => {
     let unsubscribeUser: (() => void) | null = null;
-
     if (authLoading) return;
 
     if (user) {
-      // Authenticated user: real-time live sync across devices
       unsubscribeUser = subscribeToUserClasses(
         user.uid,
         (cloudClasses) => {
@@ -60,7 +75,6 @@ export const App: React.FC = () => {
         user.displayName
       );
     } else {
-      // Unauthenticated guest: load local guest classes
       const guestClasses = loadGuestClasses();
       setClasses(guestClasses);
       setIsDataLoaded(true);
@@ -73,12 +87,33 @@ export const App: React.FC = () => {
     };
   }, [user, authLoading]);
 
-  // Scroll to top when active class changes
+  // Real-time synchronization for Notebook Notes: subscribe in Firestore
+  useEffect(() => {
+    let unsubscribeNotes: (() => void) | null = null;
+    if (authLoading) return;
+
+    if (user) {
+      unsubscribeNotes = subscribeToUserNotes(user.uid, (cloudNotes) => {
+        setNotes(cloudNotes);
+      });
+    } else {
+      const guestNotes = loadGuestNotes();
+      setNotes(guestNotes);
+    }
+
+    return () => {
+      if (unsubscribeNotes) {
+        unsubscribeNotes();
+      }
+    };
+  }, [user, authLoading]);
+
+  // Scroll to top when active class or active note changes
   useEffect(() => {
     if (mainContentRef.current) {
       mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [selectedClassId]);
+  }, [selectedClassId, selectedNoteId, activeTab]);
 
   // Active selected class
   const activeClass = classes.find((c) => c.id === selectedClassId) || null;
@@ -91,7 +126,8 @@ export const App: React.FC = () => {
       else saveGuestClasses(next);
       return next;
     });
-    setSelectedClassId(newClass.id); // Open newly created class directly
+    setSelectedClassId(newClass.id);
+    setActiveTab('gradebook');
     setIsMobileDrawerOpen(false);
   };
 
@@ -118,14 +154,56 @@ export const App: React.FC = () => {
     }
   };
 
-
-  // Load demo data
+  // Load demo classes
   const handleLoadDemoData = () => {
     setClasses(INITIAL_DEMO_CLASSES);
     if (user) {
       saveUserClasses(user.uid, INITIAL_DEMO_CLASSES);
     } else {
       saveGuestClasses(INITIAL_DEMO_CLASSES);
+    }
+  };
+
+  // Notes handlers
+  const handleAddNote = (newNote: NoteItem) => {
+    setNotes((prev) => {
+      const next = [newNote, ...prev];
+      if (user) saveUserNotes(user.uid, next);
+      else saveGuestNotes(next);
+      return next;
+    });
+    setSelectedNoteId(newNote.id);
+    setActiveTab('notebook');
+    setIsMobileDrawerOpen(false);
+  };
+
+  const handleUpdateNote = (updated: NoteItem) => {
+    setNotes((prev) => {
+      const next = prev.map((n) => (n.id === updated.id ? updated : n));
+      if (user) saveUserNotes(user.uid, next);
+      else saveGuestNotes(next);
+      return next;
+    });
+  };
+
+  const handleDeleteNote = (id: string) => {
+    setNotes((prev) => {
+      const next = prev.filter((n) => n.id !== id);
+      if (user) saveUserNotes(user.uid, next);
+      else saveGuestNotes(next);
+      return next;
+    });
+    if (selectedNoteId === id) {
+      setSelectedNoteId(null);
+    }
+  };
+
+  const handleLoadDemoNotes = () => {
+    setNotes(INITIAL_DEMO_NOTES);
+    if (user) {
+      saveUserNotes(user.uid, INITIAL_DEMO_NOTES);
+    } else {
+      saveGuestNotes(INITIAL_DEMO_NOTES);
     }
   };
 
@@ -140,7 +218,14 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-[#FAFBFD] text-[#0F172A] flex flex-col font-sans">
       {/* Top Header */}
       <Header
+        activeTab={activeTab}
+        onChangeTab={(tab) => {
+          setActiveTab(tab);
+          if (tab === 'gradebook') setSelectedClassId(null);
+          if (tab === 'notebook') setSelectedNoteId(null);
+        }}
         classes={classes}
+        noteCount={notes.length}
         onOpenTranscript={() => setIsTranscriptModalOpen(true)}
         onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
@@ -151,11 +236,43 @@ export const App: React.FC = () => {
       <div className="flex-1 w-full bg-[#FAFBFD] flex overflow-hidden">
         {/* Left Sidebar (Desktop + Mobile Drawer) */}
         <Sidebar
+          activeTab={activeTab}
+          onChangeTab={(tab) => {
+            setActiveTab(tab);
+            if (tab === 'gradebook') setSelectedClassId(null);
+            if (tab === 'notebook') setSelectedNoteId(null);
+          }}
           classes={classes}
+          notes={notes}
           selectedClassId={selectedClassId}
-          onSelectOverview={() => setSelectedClassId(null)}
-          onSelectClass={(id) => setSelectedClassId(id)}
+          selectedNoteId={selectedNoteId}
+          onSelectOverview={() => {
+            setActiveTab('gradebook');
+            setSelectedClassId(null);
+          }}
+          onSelectClass={(id) => {
+            setActiveTab('gradebook');
+            setSelectedClassId(id);
+          }}
+          onSelectNote={(id) => {
+            setActiveTab('notebook');
+            setSelectedNoteId(id);
+          }}
           onOpenAddClass={() => setIsAddModalOpen(true)}
+          onCreateNote={() => {
+            const newNote: NoteItem = {
+              id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+              title: 'Untitled Note',
+              content: '',
+              sources: [],
+              multipleChoice: [],
+              longAnswer: [],
+              flashcards: [],
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            };
+            handleAddNote(newNote);
+          }}
           isMobileOpen={isMobileDrawerOpen}
           onMobileClose={() => setIsMobileDrawerOpen(false)}
         />
@@ -165,8 +282,18 @@ export const App: React.FC = () => {
           ref={mainContentRef}
           className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] pb-24 md:pb-8"
         >
-          <div className="w-full max-w-[1080px] mx-auto px-4 sm:px-8 lg:px-12 py-5 sm:py-8">
-            {activeClass ? (
+          <div className="w-full max-w-[1140px] mx-auto px-4 sm:px-8 lg:px-10 py-5 sm:py-8">
+            {activeTab === 'notebook' ? (
+              <NotebookView
+                notes={notes}
+                selectedNoteId={selectedNoteId}
+                onSelectNote={(id) => setSelectedNoteId(id)}
+                onAddNote={handleAddNote}
+                onUpdateNote={handleUpdateNote}
+                onDeleteNote={handleDeleteNote}
+                onLoadDemoNotes={handleLoadDemoNotes}
+              />
+            ) : activeClass ? (
               <ClassDetail
                 classItem={activeClass}
                 onBack={() => setSelectedClassId(null)}
@@ -190,11 +317,35 @@ export const App: React.FC = () => {
 
       {/* Mobile Bottom Navigation Bar (Docked on phones) */}
       <MobileBottomNav
+        activeTab={activeTab}
+        onChangeTab={(tab) => {
+          setActiveTab(tab);
+          if (tab === 'gradebook') setSelectedClassId(null);
+          if (tab === 'notebook') setSelectedNoteId(null);
+        }}
         selectedClassId={selectedClassId}
         classCount={classes.length}
-        onSelectOverview={() => setSelectedClassId(null)}
+        noteCount={notes.length}
+        onSelectOverview={() => {
+          setActiveTab('gradebook');
+          setSelectedClassId(null);
+        }}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
         onOpenAddClass={() => setIsAddModalOpen(true)}
+        onOpenAddNote={() => {
+          const newNote: NoteItem = {
+            id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+            title: 'Untitled Note',
+            content: '',
+            sources: [],
+            multipleChoice: [],
+            longAnswer: [],
+            flashcards: [],
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          };
+          handleAddNote(newNote);
+        }}
         onOpenTranscript={() => setIsTranscriptModalOpen(true)}
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
       />

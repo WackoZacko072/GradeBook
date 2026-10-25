@@ -1,4 +1,5 @@
 import React from 'react';
+import { LatexRenderer } from './LatexRenderer';
 
 interface MarkdownRendererProps {
   content: string;
@@ -10,6 +11,18 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
   return (
     <div className="space-y-2.5 text-xs sm:text-[13px] text-slate-800 leading-relaxed overflow-hidden">
       {blocks.map((block, index) => {
+        // Display Math Block ($$...$$ or \[...\])
+        if (block.type === 'mathblock') {
+          return (
+            <div
+              key={index}
+              className="my-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/90 overflow-x-auto text-center shadow-2xs"
+            >
+              <LatexRenderer content={block.content} block />
+            </div>
+          );
+        }
+
         if (block.type === 'heading') {
           if (block.level === 1) {
             return (
@@ -89,6 +102,17 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
         }
 
         if (block.type === 'codeblock') {
+          // If codeblock specifies latex or math, render as math
+          if (block.lang === 'latex' || block.lang === 'math' || block.lang === 'tex') {
+            return (
+              <div
+                key={index}
+                className="my-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/90 overflow-x-auto text-center shadow-2xs"
+              >
+                <LatexRenderer content={block.content} block />
+              </div>
+            );
+          }
           return (
             <pre
               key={index}
@@ -114,12 +138,13 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
 // ==========================================
 
 interface Block {
-  type: 'paragraph' | 'heading' | 'list' | 'table' | 'quote' | 'codeblock';
+  type: 'paragraph' | 'heading' | 'list' | 'table' | 'quote' | 'codeblock' | 'mathblock';
   content: string;
   level?: number;
   items?: string[];
   headers?: string[];
   rows?: string[][];
+  lang?: string;
 }
 
 function splitIntoBlocks(text: string): Block[] {
@@ -130,16 +155,40 @@ function splitIntoBlocks(text: string): Block[] {
   while (i < lines.length) {
     const line = lines[i];
 
-    // Fenced code block
+    // Fenced code block or latex block
     if (line.trim().startsWith('```')) {
+      const lang = line.trim().replace(/^```/, '').trim().toLowerCase();
       let codeContent = '';
       i++;
       while (i < lines.length && !lines[i].trim().startsWith('```')) {
         codeContent += lines[i] + '\n';
         i++;
       }
-      blocks.push({ type: 'codeblock', content: codeContent.trim() });
+      blocks.push({ type: 'codeblock', content: codeContent.trim(), lang });
       i++;
+      continue;
+    }
+
+    // Standalone Display Math block: $$ ... $$ across lines or on single line
+    if (line.trim().startsWith('$$')) {
+      let mathContent = line.trim();
+      if (mathContent.length > 2 && mathContent.slice(2).includes('$$')) {
+        // Single line $$...$$
+        blocks.push({ type: 'mathblock', content: mathContent });
+        i++;
+        continue;
+      }
+      // Multiline $$
+      i++;
+      while (i < lines.length) {
+        mathContent += '\n' + lines[i];
+        if (lines[i].trim().endsWith('$$') || lines[i].includes('$$')) {
+          i++;
+          break;
+        }
+        i++;
+      }
+      blocks.push({ type: 'mathblock', content: mathContent });
       continue;
     }
 
@@ -148,7 +197,7 @@ function splitIntoBlocks(text: string): Block[] {
       const headers = line
         .split('|')
         .map((s) => s.trim())
-        .filter((s, idx, arr) => idx > 0 && idx < arr.length - 1 || (arr.length === 2 && s.length > 0));
+        .filter((s, idx, arr) => (idx > 0 && idx < arr.length - 1) || (arr.length === 2 && s.length > 0));
       i += 2; // skip header and separator row
 
       const rows: string[][] = [];
@@ -156,7 +205,7 @@ function splitIntoBlocks(text: string): Block[] {
         const rowCells = lines[i]
           .split('|')
           .map((s) => s.trim())
-          .filter((s, idx, arr) => idx > 0 && idx < arr.length - 1 || (arr.length === 2 && s.length > 0));
+          .filter((s, idx, arr) => (idx > 0 && idx < arr.length - 1) || (arr.length === 2 && s.length > 0));
         if (rowCells.length > 0) rows.push(rowCells);
         i++;
       }
@@ -219,10 +268,54 @@ function splitIntoBlocks(text: string): Block[] {
 }
 
 /**
- * Handles inline formatting: **bold**, *italic*, `code`, etc.
+ * Handles inline formatting: LaTeX math ($...$, \(...\)), **bold**, *italic*, `code`, etc.
  */
 function renderInline(text: string): React.ReactNode {
-  // Split tokens by **bold** and `code`
+  // First, check if text contains LaTeX math
+  const hasLatex = /(\$|\\\(|\\\[)/.test(text);
+
+  if (!hasLatex) {
+    return renderFormattingOnly(text);
+  }
+
+  // Tokenize math vs non-math
+  const mathRegex = /(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|(?<!\\)\$(?!\s)(.+?)(?<!\s)\$|\\\([\s\S]+?\\\))/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let keyIdx = 0;
+
+  while ((match = mathRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(
+        <React.Fragment key={keyIdx++}>
+          {renderFormattingOnly(text.substring(lastIndex, match.index))}
+        </React.Fragment>
+      );
+    }
+
+    parts.push(
+      <LatexRenderer key={keyIdx++} content={match[0]} />
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(
+      <React.Fragment key={keyIdx++}>
+        {renderFormattingOnly(text.substring(lastIndex))}
+      </React.Fragment>
+    );
+  }
+
+  return <>{parts}</>;
+}
+
+/**
+ * Handles standard bold, italic, code formatting
+ */
+function renderFormattingOnly(text: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
   let remaining = text;
   let keyIndex = 0;

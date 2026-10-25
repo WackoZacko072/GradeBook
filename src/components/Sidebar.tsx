@@ -1,134 +1,255 @@
 import React from 'react';
-import { Layers, Plus, Calculator, X, BookOpen } from 'lucide-react';
+import {
+  Plus,
+  Calculator,
+  X,
+  BookOpen,
+  BookMarked,
+  FileText,
+} from 'lucide-react';
 import type { ClassItem } from '../types/grade';
+import type { NoteItem } from '../types/notebook';
 import { calculateClassAverage } from '../utils/gradeCalculations';
 
 interface SidebarProps {
+  activeTab: 'gradebook' | 'notebook';
+  onChangeTab: (tab: 'gradebook' | 'notebook') => void;
   classes: ClassItem[];
+  notes?: NoteItem[];
   selectedClassId: string | null;
+  selectedNoteId?: string | null;
   onSelectOverview: () => void;
   onSelectClass: (id: string) => void;
+  onSelectNote?: (id: string | null) => void;
   onOpenAddClass: () => void;
+  onCreateNote?: () => void;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
+  activeTab,
+  onChangeTab,
   classes,
+  notes = [],
   selectedClassId,
+  selectedNoteId = null,
   onSelectOverview,
   onSelectClass,
+  onSelectNote,
   onOpenAddClass,
+  onCreateNote,
   isMobileOpen = false,
   onMobileClose,
 }) => {
   const content = (
     <div className="flex flex-col justify-between h-full">
       <div className="space-y-6">
-        {/* Workspace section */}
+        {/* Workspace section with Tab Switching */}
         <div>
           <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 select-none">
             Workspace
           </span>
-          <button
-            type="button"
-            onClick={() => {
-              onSelectOverview();
-              onMobileClose?.();
-            }}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
-              selectedClassId === null
-                ? 'bg-[#EBF2FE] text-[#2563EB] shadow-2xs'
-                : 'text-slate-700 hover:bg-slate-200/60'
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Layers className="w-4 h-4" />
-              <span>Overview</span>
-            </div>
-            <span
-              className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                selectedClassId === null
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-200 text-slate-600'
-              }`}
-            >
-              {classes.length}
-            </span>
-          </button>
-        </div>
 
-        {/* Your Classes section */}
-        <div>
-          <div className="flex items-center justify-between px-3 mb-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
-              Your Classes
-            </span>
+          <div className="space-y-1">
+            {/* Gradebook Tab Button */}
             <button
               type="button"
               onClick={() => {
-                onOpenAddClass();
+                onChangeTab('gradebook');
+                onSelectOverview();
                 onMobileClose?.();
               }}
-              title="Add New Class"
-              className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
+                activeTab === 'gradebook' && selectedClassId === null
+                  ? 'bg-[#EBF2FE] text-[#2563EB] shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-200/60'
+              }`}
             >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <div className="flex items-center gap-2.5">
+                <BookOpen className="w-4 h-4 text-blue-600" />
+                <span>Gradebook</span>
+              </div>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'gradebook' && selectedClassId === null
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-200 text-slate-600'
+                }`}
+              >
+                {classes.length}
+              </span>
+            </button>
+
+            {/* Notebook Tab Button */}
+            <button
+              type="button"
+              onClick={() => {
+                onChangeTab('notebook');
+                onSelectNote?.(null);
+                onMobileClose?.();
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
+                activeTab === 'notebook' && selectedNoteId === null
+                  ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-2xs'
+                  : 'text-slate-700 hover:bg-slate-200/60'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <BookMarked className="w-4 h-4 text-indigo-600" />
+                <span>Notebook</span>
+              </div>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'notebook' && selectedNoteId === null
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-slate-200 text-slate-600'
+                }`}
+              >
+                {notes.length}
+              </span>
             </button>
           </div>
+        </div>
 
-          <div className="space-y-1 max-h-[50vh] overflow-y-auto pr-1">
-            {classes.length === 0 ? (
-              <div className="px-3 py-3 text-center bg-slate-100/60 rounded-xl border border-dashed border-slate-200">
-                <p className="text-xs text-slate-500 font-medium">No classes yet</p>
+        {/* Dynamic section: If Gradebook active -> Your Classes. If Notebook active -> Your Notes */}
+        {activeTab === 'gradebook' ? (
+          <div>
+            <div className="flex items-center justify-between px-3 mb-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
+                Your Classes
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenAddClass();
+                  onMobileClose?.();
+                }}
+                title="Add New Class"
+                className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
+            <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
+              {classes.length === 0 ? (
+                <div className="px-3 py-3 text-center bg-slate-100/60 rounded-xl border border-dashed border-slate-200">
+                  <p className="text-xs text-slate-500 font-medium">No classes yet</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenAddClass();
+                      onMobileClose?.();
+                    }}
+                    className="mt-2 text-xs font-bold text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Class
+                  </button>
+                </div>
+              ) : (
+                classes.map((c) => {
+                  const isSelected = selectedClassId === c.id;
+                  const calc = calculateClassAverage(c);
+                  const dotColor = c.color || '#2563EB';
+
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => {
+                        onSelectClass(c.id);
+                        onMobileClose?.();
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] ${
+                        isSelected
+                          ? 'bg-white text-blue-700 font-semibold shadow-2xs border border-slate-200/80'
+                          : 'text-slate-700 hover:bg-slate-200/60 font-medium'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: dotColor }}
+                        />
+                        <span className="truncate">{c.name}</span>
+                      </div>
+
+                      <span className="text-xs font-bold text-slate-500 tabular-nums ml-2 flex-shrink-0">
+                        {calc.average.toFixed(1)}%
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between px-3 mb-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
+                Your Notes
+              </span>
+              {onCreateNote && (
                 <button
                   type="button"
                   onClick={() => {
-                    onOpenAddClass();
+                    onCreateNote();
                     onMobileClose?.();
                   }}
-                  className="mt-2 text-xs font-bold text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  title="New Note"
+                  className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-200/80 rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Add Class
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
                 </button>
-              </div>
-            ) : (
-              classes.map((c) => {
-                const isSelected = selectedClassId === c.id;
-                const calc = calculateClassAverage(c);
-                const dotColor = c.color || '#2563EB';
+              )}
+            </div>
 
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => {
-                      onSelectClass(c.id);
-                      onMobileClose?.();
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] ${
-                      isSelected
-                        ? 'bg-white text-blue-700 font-semibold shadow-2xs border border-slate-200/80'
-                        : 'text-slate-700 hover:bg-slate-200/60 font-medium'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: dotColor }}
-                      />
-                      <span className="truncate">{c.name}</span>
-                    </div>
-
-                    <span className="text-xs font-bold text-slate-500 tabular-nums ml-2 flex-shrink-0">
-                      {calc.average.toFixed(1)}%
-                    </span>
-                  </button>
-                );
-              })
-            )}
+            <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
+              {notes.length === 0 ? (
+                <div className="px-3 py-3 text-center bg-slate-100/60 rounded-xl border border-dashed border-slate-200">
+                  <p className="text-xs text-slate-500 font-medium">No notes yet</p>
+                  {onCreateNote && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onCreateNote();
+                        onMobileClose?.();
+                      }}
+                      className="mt-2 text-xs font-bold text-indigo-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Create Note
+                    </button>
+                  )}
+                </div>
+              ) : (
+                notes.map((n) => {
+                  const isSelected = selectedNoteId === n.id;
+                  return (
+                    <button
+                      key={n.id}
+                      type="button"
+                      onClick={() => {
+                        onSelectNote?.(n.id);
+                        onMobileClose?.();
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] ${
+                        isSelected
+                          ? 'bg-white text-indigo-700 font-semibold shadow-2xs border border-slate-200/80'
+                          : 'text-slate-700 hover:bg-slate-200/60 font-medium'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                        <span className="truncate">{n.title || 'Untitled Note'}</span>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Bottom Inspiration Tag */}

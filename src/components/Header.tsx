@@ -12,6 +12,7 @@ import {
   CloudUpload,
   AlertTriangle,
   Sparkles,
+  BookMarked,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -23,7 +24,10 @@ import {
 import type { ClassItem } from '../types/grade';
 
 interface HeaderProps {
+  activeTab: 'gradebook' | 'notebook';
+  onChangeTab: (tab: 'gradebook' | 'notebook') => void;
   classes: ClassItem[];
+  noteCount?: number;
   onOpenTranscript: () => void;
   onOpenFirebaseConfig: () => void;
   onOpenMobileDrawer?: () => void;
@@ -31,7 +35,10 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  activeTab,
+  onChangeTab,
   classes,
+  noteCount = 0,
   onOpenTranscript,
   onOpenFirebaseConfig,
   onOpenMobileDrawer,
@@ -80,8 +87,8 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-slate-200/80 transition-all">
       <div className="w-full px-3 sm:px-6 h-16 flex items-center justify-between">
-        {/* Left: Mobile Menu Toggle + Logo */}
-        <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+        {/* Left: Mobile Menu Toggle + Logo + Navigation Tabs */}
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
           {/* Hamburger toggle for mobile drawer */}
           <button
             type="button"
@@ -92,12 +99,50 @@ export const Header: React.FC<HeaderProps> = ({
             <Menu className="w-5 h-5" />
           </button>
 
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
-            <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+          <div
+            onClick={() => onChangeTab('gradebook')}
+            className="flex items-center gap-2 cursor-pointer select-none"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
+            </div>
+            <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">
+              gradebook<span className="text-blue-600">.</span>
+            </span>
           </div>
-          <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight select-none">
-            gradebook<span className="text-blue-600">.</span>
-          </span>
+
+          {/* Primary Tabs: Gradebook & Notebook */}
+          <nav className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/70 ml-1 sm:ml-2">
+            <button
+              type="button"
+              onClick={() => onChangeTab('gradebook')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                activeTab === 'gradebook'
+                  ? 'bg-white text-blue-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-blue-600 stroke-[2.2]" />
+              <span>Gradebook</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onChangeTab('notebook')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                activeTab === 'notebook'
+                  ? 'bg-white text-blue-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <BookMarked className="w-3.5 h-3.5 text-indigo-600 stroke-[2.2]" />
+              <span>Notebook</span>
+              {noteCount > 0 && (
+                <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-indigo-100 text-indigo-700 text-[10px] font-extrabold rounded-full">
+                  {noteCount}
+                </span>
+              )}
+            </button>
+          </nav>
         </div>
 
 
