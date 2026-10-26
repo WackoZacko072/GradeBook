@@ -68,7 +68,15 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
   const readFileAsText = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = () => {
+        let result = (reader.result as string) || '';
+        // Sanitize control characters
+        result = result.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ' ').trim();
+        if (!result) {
+          result = `[Document File Attachment: ${file.name} - ${formatFileSize(file.size)}]`;
+        }
+        resolve(result);
+      };
       reader.onerror = () => reject(reader.error);
       reader.readAsText(file);
     });
@@ -115,10 +123,10 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
           </div>
           <div>
             <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-              AI Grounding Sources ({sources.length})
+              Class & Note Files ({sources.length})
             </h4>
             <p className="text-[11px] text-slate-500">
-              Upload textbook excerpts, slides, or notes to ground AI questions & flashcards
+              Upload class slides, textbook chapters, or lecture notes to ground Slate AI questions
             </p>
           </div>
         </div>
@@ -129,7 +137,7 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
             ref={fileInputRef}
             type="file"
             multiple
-            accept=".txt,.md,.markdown,.csv,.json,.rtf,.html,.xml,.tex"
+            accept=".txt,.md,.markdown,.csv,.json,.rtf,.html,.xml,.tex,.pdf,.doc,.docx"
             onChange={handleFileUpload}
             className="hidden"
           />

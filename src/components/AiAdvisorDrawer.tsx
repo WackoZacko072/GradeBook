@@ -6,11 +6,15 @@ import {
   Trash2,
   User,
   AlertCircle,
-  GraduationCap,
+  Copy,
+  Check,
+  BookMarked,
+  Layers,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
+import type { NoteItem } from '../types/notebook';
 import {
-  sendAdvisorMessage,
+  sendSlateAiMessage,
   type ChatMessage,
 } from '../utils/aiAdvisorService';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -19,15 +23,26 @@ interface AiAdvisorDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   classes: ClassItem[];
+  notes?: NoteItem[];
   prefilledPrompt?: string;
   onClearPrefilledPrompt?: () => void;
 }
 
 const STARTER_PROMPTS = [
   {
+    icon: '📝',
+    label: 'Look at my Economics notes and create a mcq',
+    prompt: 'Look at my Economics notes (and any attached course files) and create a 5-question multiple choice quiz with answers and clear explanations.',
+  },
+  {
+    icon: '🎓',
+    label: 'What universities can I get with my grades?',
+    prompt: 'Analyze my current GradeSlate GPA and course marks. What universities and programs (e.g., UBC, U of T, McGill, Waterloo, US Top 30/50) can I get into with my grades, and what are my admission odds?',
+  },
+  {
     icon: '💡',
-    label: 'How can I raise my lowest grade?',
-    prompt: 'Look at my lowest performing class. What specific assignments or categories are pulling me down, and what is the exact mathematical path to raise it?',
+    label: 'How can I raise my lowest grade to an A?',
+    prompt: 'Look at my lowest performing class. What specific assignments or categories are pulling me down, and what is the exact mathematical path to raise it to an A?',
   },
   {
     icon: '🎯',
@@ -35,34 +50,31 @@ const STARTER_PROMPTS = [
     prompt: 'Calculate what scores I need on all remaining upcoming assignments and final exams to achieve my target grade in each course and hit a competitive GPA.',
   },
   {
-    icon: '⚖️',
-    label: 'Which upcoming assignments have the highest leverage?',
-    prompt: 'Rank all upcoming and ungraded assignments across all my courses by their percentage weight and leverage on my final course grades.',
+    icon: '🧠',
+    label: 'Generate Flashcards from my Notes',
+    prompt: 'Scan my notes library and generate 5 high-yield study flashcards for my upcoming tests.',
   },
   {
-    icon: '🎓',
-    label: 'What university programs can I get into with my grades?',
-    prompt: 'Analyze my current GPA and grades. What university programs (e.g. UBC, U of T, McGill, competitive Canadian/US programs like Computer Science or Engineering) can I get into, and what are my admission odds?',
-  },
-  {
-    icon: '📋',
-    label: 'Full Gradebook Audit & Action Plan',
-    prompt: 'Give me a comprehensive academic audit: breakdown my strengths, weaknesses, GPA projection, and a prioritized study action plan for the rest of the term.',
+    icon: '⚡',
+    label: 'Ask Slate AI anything (General Gemini chat)',
+    prompt: 'Explain the difference between fiscal and monetary policy simply, with real-world examples and formulas.',
   },
 ];
 
-const LOCAL_CHAT_HISTORY_KEY = 'gradebook_advisor_chat_v1';
+const LOCAL_CHAT_HISTORY_KEY = 'gradeslate_slate_ai_chat_v1';
 
 export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   isOpen,
   onClose,
   classes,
+  notes = [],
   prefilledPrompt,
   onClearPrefilledPrompt,
 }) => {
   const [inputPrompt, setInputPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Load chat history from localStorage
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -129,7 +141,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     setErrorBanner(null);
 
     try {
-      const reply = await sendAdvisorMessage(prompt, messages, classes);
+      const reply = await sendSlateAiMessage(prompt, messages, classes, notes);
       const aiMessage: ChatMessage = {
         id: 'msg_' + (Date.now() + 1),
         role: 'model',
@@ -138,7 +150,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
       };
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err: any) {
-      console.error('AI Advisor error:', err);
+      console.error('Slate AI error:', err);
       let msg = err.message || 'Failed to generate response. Please try again.';
       if (msg === 'QUOTA_EXCEEDED') {
         msg = 'Gemini API rate limit reached. Please wait a few seconds and try again.';
@@ -149,6 +161,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCopyMessage = (id: string, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -167,22 +185,24 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
       />
 
       {/* Slide-over panel */}
-      <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-250 border-l border-slate-200">
-        {/* Header - matching blue & white logo identity */}
-        <div className="p-4 border-b border-slate-200/80 bg-slate-50/70 flex items-center justify-between flex-shrink-0">
+      <div className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-250 border-l border-slate-200">
+        {/* Header - Slate AI identity */}
+        <div className="p-4 border-b border-slate-200/80 bg-slate-50/80 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
-              <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-xs flex-shrink-0">
+              <Sparkles className="w-4 h-4 text-white stroke-[2.4]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">AI Academic Advisor</h3>
-                <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-md uppercase tracking-wider flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Gemini Live Chat
+                <h3 className="font-extrabold text-slate-900 text-sm tracking-tight">Slate AI</h3>
+                <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-extrabold rounded-md uppercase tracking-wider flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                  Gemini Live
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500">Conversational advisor & live grade strategist</p>
+              <p className="text-[11px] text-slate-500">
+                Co-Pilot & Strategist • Whole Gradebook + Notes Analyzer
+              </p>
             </div>
           </div>
 
@@ -210,6 +230,24 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           </div>
         </div>
 
+        {/* Live Context Badge Bar */}
+        <div className="px-4 py-1.5 bg-blue-50/50 border-b border-blue-100/70 flex items-center justify-between text-[11px] text-blue-700">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold flex items-center gap-1">
+              <Layers className="w-3 h-3 text-blue-500" />
+              {classes.length} Classes Synced
+            </span>
+            <span className="text-blue-300">•</span>
+            <span className="font-semibold flex items-center gap-1">
+              <BookMarked className="w-3 h-3 text-indigo-500" />
+              {notes.length} Notes Injected
+            </span>
+          </div>
+          <span className="text-[10px] text-blue-600/80 font-medium hidden sm:inline">
+            Active Workspace Grounding
+          </span>
+        </div>
+
         {/* Error notification banner if any */}
         {errorBanner && (
           <div className="p-3 bg-rose-50 border-b border-rose-200 text-rose-900 text-xs flex items-center justify-between">
@@ -231,18 +269,18 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAFBFD]">
           {messages.length === 0 ? (
             <div className="py-6 px-2 flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-500/10 to-indigo-500/20 border border-blue-200/60 flex items-center justify-center text-blue-600 mb-3 shadow-2xs">
-                <GraduationCap className="w-6 h-6" />
+              <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center mb-3 shadow-md shadow-blue-500/20">
+                <Sparkles className="w-6 h-6 stroke-[2.2]" />
               </div>
-              <h4 className="font-extrabold text-slate-900 text-sm">Welcome to your Academic Advisor</h4>
-              <p className="text-xs text-slate-500 max-w-xs mt-1 leading-relaxed">
-                I dynamically read your live courses, category weights, completed scores, and remaining exams to formulate exact grade strategies and chat about your goals.
+              <h4 className="font-extrabold text-slate-900 text-base">Meet Slate AI</h4>
+              <p className="text-xs text-slate-500 max-w-sm mt-1.5 leading-relaxed">
+                Powered by Gemini. I have real-time access to all your <strong>grades</strong>, <strong>classes</strong>, and <strong>study notes</strong>. Ask me to create MCQs, analyze university admissions, or build a study roadmap.
               </p>
 
               {/* Quick Starter Chips */}
-              <div className="w-full mt-6 space-y-2 text-left">
+              <div className="w-full mt-5 space-y-2 text-left">
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
-                  Suggested Questions:
+                  Try asking Slate:
                 </p>
                 {STARTER_PROMPTS.map((starter, i) => (
                   <button
@@ -251,8 +289,8 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                     onClick={() => handleSend(starter.prompt)}
                     className="w-full text-left p-3 bg-white hover:bg-blue-50/70 border border-slate-200/80 hover:border-blue-300 rounded-xl transition-all shadow-2xs group cursor-pointer"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{starter.icon}</span>
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base flex-shrink-0">{starter.icon}</span>
                       <span className="font-bold text-xs text-slate-800 group-hover:text-blue-700">
                         {starter.label}
                       </span>
@@ -269,13 +307,13 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {msg.role === 'model' && (
-                    <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs">
                       <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
                     </div>
                   )}
 
                   <div
-                    className={`max-w-[85%] rounded-2xl p-3.5 shadow-2xs text-xs ${
+                    className={`max-w-[88%] rounded-2xl p-3.5 shadow-2xs text-xs relative group ${
                       msg.role === 'user'
                         ? 'bg-blue-600 text-white rounded-br-xs font-medium'
                         : 'bg-white border border-slate-200/90 text-slate-800 rounded-bl-xs'
@@ -284,7 +322,28 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                     {msg.role === 'user' ? (
                       <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                     ) : (
-                      <MarkdownRenderer content={msg.content} />
+                      <>
+                        <MarkdownRenderer content={msg.content} />
+                        <div className="flex items-center justify-end gap-1.5 mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                          <button
+                            type="button"
+                            onClick={() => handleCopyMessage(msg.id, msg.content)}
+                            className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer px-1.5 py-0.5 rounded hover:bg-slate-100"
+                          >
+                            {copiedId === msg.id ? (
+                              <>
+                                <Check className="w-3 h-3 text-emerald-600" />
+                                <span className="text-emerald-600 font-semibold">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3 h-3" />
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </>
                     )}
                   </div>
 
@@ -298,13 +357,13 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
 
               {isLoading && (
                 <div className="flex gap-2.5 justify-start">
-                  <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs animate-pulse">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs animate-pulse">
                     <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
                   </div>
                   <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-xs p-3.5 shadow-2xs">
                     <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
                       <div className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
-                      <span>Calculating grade formulas & analyzing data...</span>
+                      <span>Slate AI is scanning your gradebook & notes...</span>
                     </div>
                   </div>
                 </div>
@@ -323,7 +382,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
               value={inputPrompt}
               onChange={(e) => setInputPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about What-If grades, finals, GPA, or university admissions..."
+              placeholder="Ask Slate AI anything (e.g. 'Look at my Economics notes and create a mcq', or 'what universities can I get with my grades?')..."
               disabled={isLoading}
               className="w-full resize-none pr-12 pl-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-800 placeholder-slate-400"
             />
@@ -338,8 +397,8 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
             </button>
           </div>
           <div className="flex items-center justify-between mt-2 px-1 text-[10px] text-slate-400">
-            <span>⚡ Powered by Gemini 3.5 Flash</span>
-            <span>Live Gradebook Injected</span>
+            <span>⚡ Slate AI • Powered by Google Gemini</span>
+            <span>All Notes & Grades Grounded</span>
           </div>
         </div>
       </div>

@@ -263,6 +263,7 @@ export const App: React.FC = () => {
             const newNote: NoteItem = {
               id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
               title: 'Untitled Note',
+              icon: '📝',
               content: '',
               sources: [],
               multipleChoice: [],
@@ -273,6 +274,7 @@ export const App: React.FC = () => {
             };
             handleAddNote(newNote);
           }}
+          onOpenSlateAi={() => handleOpenAiAdvisor()}
           isMobileOpen={isMobileDrawerOpen}
           onMobileClose={() => setIsMobileDrawerOpen(false)}
         />
@@ -286,12 +288,14 @@ export const App: React.FC = () => {
             {activeTab === 'notebook' ? (
               <NotebookView
                 notes={notes}
+                classes={classes}
                 selectedNoteId={selectedNoteId}
                 onSelectNote={(id) => setSelectedNoteId(id)}
                 onAddNote={handleAddNote}
                 onUpdateNote={handleUpdateNote}
                 onDeleteNote={handleDeleteNote}
                 onLoadDemoNotes={handleLoadDemoNotes}
+                onOpenSlateAi={(prompt) => handleOpenAiAdvisor(prompt)}
               />
             ) : activeClass ? (
               <ClassDetail
@@ -369,22 +373,24 @@ export const App: React.FC = () => {
         onClose={() => setIsFirebaseConfigOpen(false)}
       />
 
-      {/* Small floating AI symbol in corner - matching the blue & white logo */}
+      {/* Slate AI Floating Button */}
       <button
         type="button"
         onClick={() => handleOpenAiAdvisor()}
-        title="AI Academic Advisor"
-        aria-label="Open AI Academic Advisor"
-        className="fixed bottom-20 md:bottom-6 right-5 md:right-7 z-40 w-12 h-12 md:w-13 md:h-13 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow-lg hover:shadow-xl shadow-blue-600/30 flex items-center justify-center transition-all cursor-pointer group border-2 border-white"
+        title="Slate AI — Gemini Academic Co-Pilot"
+        aria-label="Open Slate AI"
+        className="fixed bottom-20 md:bottom-6 right-5 md:right-7 z-40 px-3.5 py-2.5 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-700 hover:via-indigo-700 hover:to-sky-600 active:scale-95 text-white shadow-lg hover:shadow-xl shadow-blue-600/30 flex items-center gap-2 transition-all cursor-pointer group border border-white/30"
       >
-        <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-white stroke-[2.2] group-hover:scale-110 transition-transform duration-200" />
+        <Sparkles className="w-5 h-5 text-white stroke-[2.2] group-hover:scale-110 transition-transform duration-200" />
+        <span className="font-extrabold text-xs hidden sm:inline tracking-tight">Slate AI</span>
       </button>
 
-      {/* AI Academic Advisor Drawer */}
+      {/* Slate AI Drawer */}
       <AiAdvisorDrawer
         isOpen={isAiAdvisorOpen}
         onClose={() => setIsAiAdvisorOpen(false)}
         classes={classes}
+        notes={notes}
         prefilledPrompt={prefilledAdvisorPrompt}
         onClearPrefilledPrompt={() => setPrefilledAdvisorPrompt(undefined)}
       />

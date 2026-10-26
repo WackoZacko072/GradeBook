@@ -9,32 +9,51 @@ import {
   Layers,
   Sparkles,
   Calendar,
+  Filter,
 } from 'lucide-react';
 import type { NoteItem } from '../../types/notebook';
+import type { ClassItem } from '../../types/grade';
 
 interface NotesLibraryProps {
   notes: NoteItem[];
+  classes?: ClassItem[];
   onSelectNote: (noteId: string) => void;
-  onCreateNote: () => void;
+  onCreateNote: (defaultClassId?: string) => void;
   onDeleteNote: (noteId: string) => void;
   onLoadDemoNotes: () => void;
+  onOpenSlateAi?: (prompt?: string) => void;
 }
 
 export const NotesLibrary: React.FC<NotesLibraryProps> = ({
   notes,
+  classes = [],
   onSelectNote,
   onCreateNote,
   onDeleteNote,
   onLoadDemoNotes,
+  onOpenSlateAi,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedClassFilter, setSelectedClassFilter] = useState<string>('all');
   const [noteToDelete, setNoteToDelete] = useState<NoteItem | null>(null);
 
+  // Filter by search and class
   const filteredNotes = notes.filter((n) => {
+    // Class filter
+    if (selectedClassFilter !== 'all') {
+      if (selectedClassFilter === 'general') {
+        if (n.classId) return false;
+      } else if (n.classId !== selectedClassFilter) {
+        return false;
+      }
+    }
+
+    // Search query filter
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
     return (
       n.title.toLowerCase().includes(q) ||
+      (n.className && n.className.toLowerCase().includes(q)) ||
       n.content.toLowerCase().includes(q) ||
       n.sources.some((s) => s.name.toLowerCase().includes(q))
     );
@@ -66,7 +85,7 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Your study library: typed notes, source grounding, AI question banks, and flashcards.
+            Notion-style note taking, class file attachments, and Slate AI question generators.
           </p>
         </div>
 
@@ -79,13 +98,27 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
               className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-semibold rounded-xl transition-all cursor-pointer min-h-[40px]"
             >
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-              <span>Load Sample Note</span>
+              <span>Load Sample Notes</span>
+            </button>
+          )}
+
+          {/* Quick Ask Slate AI Button */}
+          {onOpenSlateAi && (
+            <button
+              type="button"
+              onClick={() => onOpenSlateAi('Look at my notes and create a mcq quiz')}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all cursor-pointer min-h-[40px]"
+            >
+              <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
+              <span>Ask Slate AI</span>
             </button>
           )}
 
           <button
             type="button"
-            onClick={onCreateNote}
+            onClick={() =>
+              onCreateNote(selectedClassFilter !== 'all' && selectedClassFilter !== 'general' ? selectedClassFilter : undefined)
+            }
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs shadow-blue-500/20 transition-all cursor-pointer min-h-[40px]"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -94,28 +127,80 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
         </div>
       </div>
 
-      {/* Search Bar */}
-      {notes.length > 0 && (
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search notes by title, topic, formula, or uploaded sources..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500 shadow-2xs transition-all"
-          />
-          {searchQuery && (
+      {/* Class Filter Bar & Search */}
+      <div className="space-y-3">
+        {/* Class Filter Pills */}
+        {classes.length > 0 && (
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1 flex-shrink-0">
+              <Filter className="w-3 h-3 text-slate-400" />
+              Filter:
+            </span>
+
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+              onClick={() => setSelectedClassFilter('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex-shrink-0 ${
+                selectedClassFilter === 'all'
+                  ? 'bg-blue-600 text-white shadow-2xs'
+                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
+              }`}
             >
-              Clear
+              All Notes ({notes.length})
             </button>
-          )}
-        </div>
-      )}
+
+            {classes.map((cls) => {
+              const count = notes.filter((n) => n.classId === cls.id).length;
+              return (
+                <button
+                  key={cls.id}
+                  type="button"
+                  onClick={() => setSelectedClassFilter(cls.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex-shrink-0 flex items-center gap-1.5 ${
+                    selectedClassFilter === cls.id
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
+                  }`}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: cls.color || '#2563EB' }}
+                  />
+                  <span>{cls.name}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
+                    selectedClassFilter === cls.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Search Input */}
+        {notes.length > 0 && (
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search notes by title, class, topic, formula, or uploaded files..."
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500 shadow-2xs transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Notes Grid */}
       {filteredNotes.length === 0 ? (
@@ -124,12 +209,12 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
             <BookOpen className="w-7 h-7 stroke-[2.2]" />
           </div>
           <h3 className="text-base font-extrabold text-slate-900">
-            {searchQuery ? 'No notes matched your search' : 'No notes yet in your Notebook'}
+            {searchQuery ? 'No notes matched your search' : 'No notes found for this filter'}
           </h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1.5 leading-relaxed">
             {searchQuery
               ? 'Try searching with different keywords or clear your query.'
-              : 'Create your first note to start writing, upload textbook/lecture sources, and generate AI multiple-choice, long answer questions, and flashcards.'}
+              : 'Create a new note to start typing notes, attach class files, and let Slate AI generate MCQs.'}
           </p>
           <div className="mt-5 flex items-center justify-center gap-3">
             {searchQuery ? (
@@ -144,11 +229,13 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
               <>
                 <button
                   type="button"
-                  onClick={onCreateNote}
+                  onClick={() =>
+                    onCreateNote(selectedClassFilter !== 'all' && selectedClassFilter !== 'general' ? selectedClassFilter : undefined)
+                  }
                   className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5"
                 >
                   <Plus className="w-4 h-4 stroke-[2.5]" />
-                  <span>Create First Note</span>
+                  <span>Create Note</span>
                 </button>
                 <button
                   type="button"
@@ -156,7 +243,7 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
                   className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer flex items-center gap-1.5"
                 >
                   <Sparkles className="w-4 h-4 text-blue-600" />
-                  <span>Load Sample Physics/Calc Note</span>
+                  <span>Load Sample Notes</span>
                 </button>
               </>
             )}
@@ -170,7 +257,7 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
             const sourceCount = note.sources?.length || 0;
             const flashcardCount = note.flashcards?.length || 0;
 
-            // Extract text excerpt without markdown symbols
+            // Extract clean excerpt without markdown symbols
             const cleanExcerpt = note.content
               ? note.content
                   .replace(/#+\s+/g, '')
@@ -188,11 +275,21 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
                 className="group relative bg-white hover:bg-blue-50/20 border border-slate-200/90 hover:border-blue-300 rounded-2xl p-5 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between"
               >
                 <div>
-                  {/* Card Header: Title & Delete */}
+                  {/* Card Header: Icon, Class Tag & Delete */}
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-extrabold text-slate-900 text-base group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug">
-                      {note.title || 'Untitled Note'}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{note.icon || '📝'}</span>
+                      {note.className ? (
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200/80 rounded-md text-[10px] font-extrabold uppercase tracking-wider">
+                          {note.className}
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold">
+                          General
+                        </span>
+                      )}
+                    </div>
+
                     <button
                       type="button"
                       onClick={(e) => {
@@ -207,6 +304,11 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
                     </button>
                   </div>
 
+                  {/* Title */}
+                  <h3 className="font-extrabold text-slate-900 text-base group-hover:text-blue-700 transition-colors line-clamp-2 leading-snug mb-2">
+                    {note.title || 'Untitled Note'}
+                  </h3>
+
                   {/* Content snippet */}
                   <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed mb-4">
                     {cleanExcerpt}
@@ -218,41 +320,58 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
                   {/* Feature chips */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {sourceCount > 0 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                        <Paperclip className="w-3 h-3 text-emerald-600" />
-                        <span>{sourceCount} {sourceCount === 1 ? 'source' : 'sources'}</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                        <Paperclip className="w-3 h-3" />
+                        {sourceCount} {sourceCount === 1 ? 'file' : 'files'}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-500">
-                        <Paperclip className="w-3 h-3 text-slate-400" />
-                        <span>0 sources</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] text-slate-400 bg-slate-100">
+                        <Paperclip className="w-3 h-3" />
+                        0 files
                       </span>
                     )}
 
-                    {totalQuestions > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60">
-                        <HelpCircle className="w-3 h-3 text-indigo-600" />
-                        <span>{totalQuestions} {totalQuestions === 1 ? 'Q' : 'Qs'}</span>
+                    {totalQuestions > 0 ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/60">
+                        <HelpCircle className="w-3 h-3" />
+                        {totalQuestions} questions
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] text-slate-400 bg-slate-100">
+                        <HelpCircle className="w-3 h-3" />
+                        0 questions
                       </span>
                     )}
 
                     {flashcardCount > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/60">
-                        <Layers className="w-3 h-3 text-amber-600" />
-                        <span>{flashcardCount} cards</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+                        <Layers className="w-3 h-3" />
+                        {flashcardCount} cards
                       </span>
                     )}
                   </div>
 
-                  {/* Date footer */}
+                  {/* Card Bottom: Date & Slate AI Quick Button */}
                   <div className="flex items-center justify-between text-[11px] text-slate-400">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      <span>Updated {formatDate(note.updatedAt || note.createdAt)}</span>
+                      {formatDate(note.updatedAt || note.createdAt)}
                     </span>
-                    <span className="text-blue-600 font-bold group-hover:translate-x-0.5 transition-transform">
-                      Open &rarr;
-                    </span>
+
+                    {onOpenSlateAi && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const topic = note.className || note.title;
+                          onOpenSlateAi(`Look at my ${topic} notes and create a mcq`);
+                        }}
+                        className="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline cursor-pointer"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        Create MCQ
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -261,7 +380,7 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Note Confirmation Dialog */}
       {noteToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -274,7 +393,7 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
             </div>
             <h3 className="text-base font-extrabold text-slate-900">Delete this note?</h3>
             <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-              Are you sure you want to delete <span className="font-bold text-slate-800">"{noteToDelete.title}"</span>? All typed text, uploaded sources, question banks, and flashcards will be removed.
+              Are you sure you want to delete <span className="font-bold text-slate-800">"{noteToDelete.title}"</span>? This will permanently remove its notes, sources, question bank, and flashcards.
             </p>
             <div className="mt-5 flex items-center justify-end gap-2.5">
               <button

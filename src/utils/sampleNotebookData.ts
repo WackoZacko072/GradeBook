@@ -137,7 +137,131 @@ $$\\text{Total Distance} = \\int_{t_1}^{t_2} |v(t)|\\,dt$$`,
         mastered: false,
       },
     ],
+    classId: 'class_precalc12',
+    className: 'Pre-Calculus 12',
+    icon: '📐',
     createdAt: Date.now() - 172800000,
     updatedAt: Date.now() - 3600000,
+  },
+  {
+    id: 'note_demo_economics_12',
+    title: 'Economics 12: Supply, Demand & Market Equilibrium',
+    classId: 'class_econ12',
+    className: 'Economics 12',
+    icon: '📈',
+    content: `# Economics 12: Supply, Demand & Market Equilibrium
+
+## 1. The Law of Demand & Elasticity
+The **Law of Demand** states that, ceteris paribus (all other factors held constant), as the price of a good increases, the quantity demanded decreases.
+- **Demand Curve**: Downward sloping due to the income effect and substitution effect.
+- **Price Elasticity of Demand (PED)**:
+  $$\\text{PED} = \\frac{\\% \\Delta Q_d}{\\% \\Delta P} = \\frac{\\frac{Q_2 - Q_1}{Q_1}}{\\frac{P_2 - P_1}{P_1}}$$
+- If $|\\text{PED}| > 1$: Elastic (luxury goods, many substitutes).
+- If $|\\text{PED}| < 1$: Inelastic (necessities, insulin, electricity).
+- If $|\\text{PED}| = 1$: Unitary elastic.
+
+## 2. The Law of Supply
+The **Law of Supply** states that as the price of a good rises, producers are willing to supply more to maximize profit.
+- **Supply Determinants**: Cost of inputs, technology changes, government taxes/subsidies, number of sellers, and producer expectations.
+
+## 3. Market Equilibrium & Price Controls
+Market equilibrium occurs where the quantity demanded equals the quantity supplied:
+$$Q_d(P^*) = Q_s(P^*)$$
+
+- **Price Ceiling**: Legal maximum price set below equilibrium (creates shortage: $Q_d > Q_s$). Example: Rent control.
+- **Price Floor**: Legal minimum price set above equilibrium (creates surplus: $Q_s > Q_d$). Example: Minimum wage, agricultural subsidies.
+- **Consumer Surplus ($CS$)**: Area beneath the demand curve and above market price $P^*$.
+- **Producer Surplus ($PS$)**: Area above the supply curve and below market price $P^*$.
+- **Deadweight Loss ($DWL$)**: Loss in total economic surplus caused by market distortions or price interventions.`,
+    sources: [
+      {
+        id: 'src_econ_ch2_summary',
+        name: 'AP_Econ_Unit2_Market_Forces.pdf',
+        type: 'file',
+        fileSize: '4.8 KB',
+        addedAt: Date.now() - 72000000,
+        content: `Chapter 2 Key Takeaways - Microeconomics:
+- Determinants of Demand (Shift in Demand Curve vs Movement along Curve):
+  * TRIBE: Tastes, Related goods prices (Complements & Substitutes), Income (Normal vs Inferior goods), Buyers number, Expectations.
+- Determinants of Supply:
+  * ROTTEN: Resource costs, Other goods prices, Technology, Taxes & Subsidies, Expectations, Number of sellers.
+- Total Revenue Test:
+  * When price rises and Total Revenue falls -> Demand is Elastic.
+  * When price rises and Total Revenue rises -> Demand is Inelastic.
+- Deadweight loss is represented geometrically as a triangle between demand and supply curves: DWL = 0.5 * (P_buyer - P_seller) * (Q_market - Q_distorted).`,
+      },
+    ],
+    multipleChoice: [
+      {
+        id: 'econ_mc_1',
+        question: 'If a $10\\%$ increase in the price of coffee leads to a $25\\%$ decrease in quantity demanded, what is the Price Elasticity of Demand (PED)?',
+        options: [
+          '$-2.5$ (Elastic)',
+          '$-0.4$ (Inelastic)',
+          '$-1.0$ (Unitary)',
+          '$-0.25$ (Perfectly Inelastic)',
+        ],
+        correctIndex: 0,
+        explanation: '$\\text{PED} = \\frac{\\% \\Delta Q_d}{\\% \\Delta P} = \\frac{-25\\%}{+10\\%} = -2.5$. Because $|\\text{PED}| = 2.5 > 1$, demand is price elastic.',
+      },
+      {
+        id: 'econ_mc_2',
+        question: 'What is the immediate market effect of a government-imposed **Price Ceiling** set strictly below the equilibrium price?',
+        options: [
+          'A persistent shortage where quantity demanded exceeds quantity supplied ($Q_d > Q_s$)',
+          'A persistent surplus where quantity supplied exceeds quantity demanded ($Q_s > Q_d$)',
+          'An increase in total producer surplus',
+          'The supply curve shifts to the right',
+        ],
+        correctIndex: 0,
+        explanation: 'When a binding price ceiling is set below equilibrium, low prices encourage excessive demand while discouraging suppliers, leading to a shortage ($Q_d > Q_s$) and non-price rationing.',
+      },
+      {
+        id: 'econ_mc_3',
+        question: 'If beef and chicken are substitute goods, an increase in the price of beef will cause which of the following in the chicken market?',
+        options: [
+          'The demand curve for chicken shifts rightward, increasing both price and quantity',
+          'The supply curve of chicken shifts leftward',
+          'The demand curve for chicken shifts leftward',
+          'Movement downward along the chicken demand curve',
+        ],
+        correctIndex: 0,
+        explanation: 'As beef becomes more expensive, consumers substitute toward chicken. This shifts the chicken demand curve to the right, driving up both the equilibrium price and quantity of chicken.',
+      },
+    ],
+    longAnswer: [
+      {
+        id: 'econ_la_1',
+        question: 'Explain why a price ceiling creates a deadweight loss in an otherwise competitive market. Illustrate your answer by referencing consumer surplus and producer surplus.',
+        sampleAnswer: 'In a competitive market at equilibrium, total economic surplus ($CS + PS$) is maximized with zero deadweight loss. When a price ceiling is imposed below the equilibrium price:\n1. The quantity traded falls from $Q^*$ to $Q_s$ because suppliers reduce production at the lower mandated price.\n2. Although remaining consumers pay less, some consumers cannot obtain the good due to shortages.\n3. Transactions between $Q_s$ and $Q^*$ that would have generated surplus for both buyers and sellers are prevented.\n4. This unrealized economic surplus forms a deadweight loss triangle, representing net efficiency loss to society.',
+        keyRubricPoints: [
+          'Identifies that trade is constrained to $Q_s$, below efficient market equilibrium quantity $Q^*$.',
+          'Explains the reduction in producer surplus and the transfer/rationing effects for consumers.',
+          'Explicitly defines deadweight loss as lost mutual gains from mutually beneficial trades that are prevented by the ceiling.',
+        ],
+      },
+    ],
+    flashcards: [
+      {
+        id: 'econ_fc_1',
+        front: 'Price Elasticity of Demand (PED) Formula',
+        back: '$$\\text{PED} = \\frac{\\% \\Delta Q_d}{\\% \\Delta P}$$',
+        mastered: true,
+      },
+      {
+        id: 'econ_fc_2',
+        front: 'Difference between a Change in Demand vs Change in Quantity Demanded',
+        back: '- **Change in Quantity Demanded**: Movement along the curve caused ONLY by a change in the good\'s own price.\n- **Change in Demand**: Entire curve shifts right or left caused by non-price factors (TRIBE).',
+        mastered: false,
+      },
+      {
+        id: 'econ_fc_3',
+        front: 'Binding Price Ceiling vs Binding Price Floor',
+        back: '- **Price Ceiling**: Max legal price, binding when set **BELOW** equilibrium -> causes **Shortage**.\n- **Price Floor**: Min legal price, binding when set **ABOVE** equilibrium -> causes **Surplus**.',
+        mastered: true,
+      },
+    ],
+    createdAt: Date.now() - 86400000,
+    updatedAt: Date.now() - 1800000,
   },
 ];

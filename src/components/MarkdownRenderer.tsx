@@ -79,22 +79,73 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
         if (block.type === 'list') {
           const items = block.items || [];
           return (
-            <ul key={index} className="space-y-1 my-1.5 pl-3 list-none">
-              {items.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-slate-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
-                  <span>{renderInline(item)}</span>
-                </li>
-              ))}
+            <ul key={index} className="space-y-1.5 my-2 pl-1 list-none">
+              {items.map((item, i) => {
+                const isChecked = item.startsWith('[x] ') || item.startsWith('[X] ');
+                const isUnchecked = item.startsWith('[ ] ');
+
+                if (isChecked || isUnchecked) {
+                  const todoText = item.replace(/^\[[ xX]\]\s*/, '');
+                  return (
+                    <li key={i} className="flex items-start gap-2.5 text-slate-700">
+                      <span
+                        className={`w-4 h-4 rounded-md mt-0.5 flex items-center justify-center flex-shrink-0 border text-[11px] font-bold ${
+                          isChecked
+                            ? 'bg-blue-600 border-blue-600 text-white'
+                            : 'border-slate-300 bg-white shadow-2xs'
+                        }`}
+                      >
+                        {isChecked ? '✓' : ''}
+                      </span>
+                      <span className={isChecked ? 'line-through text-slate-400' : ''}>
+                        {renderInline(todoText)}
+                      </span>
+                    </li>
+                  );
+                }
+
+                return (
+                  <li key={i} className="flex items-start gap-2 text-slate-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                    <span>{renderInline(item)}</span>
+                  </li>
+                );
+              })}
             </ul>
           );
         }
 
         if (block.type === 'quote') {
+          const raw = block.content.trim();
+          const isIdea = raw.startsWith('💡');
+          const isWarning = raw.startsWith('⚠️');
+
+          if (isIdea) {
+            return (
+              <div
+                key={index}
+                className="my-3 p-3.5 bg-amber-50/80 border border-amber-200/90 text-amber-950 rounded-xl text-xs sm:text-[13px] shadow-2xs leading-relaxed"
+              >
+                {renderInline(block.content)}
+              </div>
+            );
+          }
+
+          if (isWarning) {
+            return (
+              <div
+                key={index}
+                className="my-3 p-3.5 bg-rose-50/80 border border-rose-200/90 text-rose-950 rounded-xl text-xs sm:text-[13px] shadow-2xs leading-relaxed"
+              >
+                {renderInline(block.content)}
+              </div>
+            );
+          }
+
           return (
             <div
               key={index}
-              className="my-2 p-2.5 bg-blue-50/70 border-l-3 border-blue-500 text-blue-900 rounded-r-xl text-xs"
+              className="my-2.5 p-3 bg-blue-50/70 border-l-4 border-blue-600 text-blue-950 rounded-r-xl text-xs sm:text-[13px] shadow-2xs"
             >
               {renderInline(block.content)}
             </div>

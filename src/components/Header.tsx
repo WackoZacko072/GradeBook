@@ -103,11 +103,11 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onChangeTab('gradebook')}
             className="flex items-center gap-2 cursor-pointer select-none"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
               <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
             </div>
             <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">
-              gradebook<span className="text-blue-600">.</span>
+              gradeslate<span className="text-blue-600">.</span>
             </span>
           </div>
 
@@ -180,15 +180,16 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* AI Advisor icon button - matching blue & white logo */}
+          {/* Slate AI header button */}
           <button
             type="button"
             onClick={onOpenAiAdvisor}
-            title="AI Academic Advisor"
-            aria-label="AI Academic Advisor"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow-xs flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
+            title="Slate AI — Gemini Academic Co-Pilot"
+            aria-label="Slate AI"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-700 hover:via-indigo-700 hover:to-sky-600 active:scale-95 text-white shadow-xs transition-all cursor-pointer flex-shrink-0"
           >
             <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
+            <span className="text-xs font-bold hidden sm:inline">Slate AI</span>
           </button>
 
           {/* Desktop Transcript Button */}

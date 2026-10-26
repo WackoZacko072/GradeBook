@@ -1,4 +1,5 @@
 import type { ClassItem } from '../types/grade';
+import type { NoteItem } from '../types/notebook';
 import {
   calculateClassAverage,
   calculateOverallAverage,
@@ -177,21 +178,90 @@ export function buildGradebookContext(classes: ClassItem[]): any {
 }
 
 /**
- * Builds the system instructions for the AI Academic Advisor chatbot
- * with automatic background gradebook context injection.
+ * Builds a structured JSON representation of the student's notebook and uploaded sources
+ * for direct injection into Slate AI.
  */
-export function buildAdvisorSystemPrompt(classes: ClassItem[]): string {
-  const contextJson = JSON.stringify(buildGradebookContext(classes), null, 2);
+export function buildNotebookContext(notes: NoteItem[] = []): any {
+  return notes.map((n) => ({
+    id: n.id,
+    title: n.title || 'Untitled Note',
+    classId: n.classId || null,
+    className: n.className || 'General',
+    wordCount: n.content ? n.content.trim().split(/\s+/).filter(Boolean).length : 0,
+    content: n.content || '',
+    sourcesCount: (n.sources || []).length,
+    sources: (n.sources || []).map((s) => ({
+      name: s.name,
+      fileSize: s.fileSize,
+      contentSnippet: s.content ? s.content.substring(0, 2000) : '',
+    })),
+    existingMultipleChoiceCount: (n.multipleChoice || []).length,
+    existingFlashcardsCount: (n.flashcards || []).length,
+  }));
+}
 
-  return `You are a versatile, intelligent AI assistant and Academic Advisor embedded inside a student's gradebook app. 
+/**
+ * Builds the system instructions for Slate AI with complete Gradebook + Notebook workspace context.
+ */
+export function buildSlateAiSystemPrompt(classes: ClassItem[], notes: NoteItem[] = []): string {
+  const gradebookJson = JSON.stringify(buildGradebookContext(classes), null, 2);
+  const notebookJson = JSON.stringify(buildNotebookContext(notes), null, 2);
 
-Here is the user's live gradebook data in JSON format for reference: ${contextJson}
+  return `You are **Slate AI**, an elite, multi-talented AI academic co-pilot and strategist powered by Google Gemini, embedded directly inside GradeSlate.
 
-Instructions:
-1. If the user asks about their grades, GPA, course performance, how to raise/maintain their marks, or university admissions eligibility, analyze their live gradebook JSON above to give exact math, projections, and tailored advice.
-2. If the user asks to be tutored, quizzed, or have a practice answer graded (like Save My Exams), act as an expert tutor.
-3. LATEX FORMATTING: Whenever writing mathematical expressions, formulas, scientific notation, weighted averages, or algebraic equations, ALWAYS wrap them in LaTeX syntax: use inline $...$ for inline terms (e.g. $x^2$, $\frac{a}{b}$, $90\%$) and standalone $$...$$ for display equations (e.g. $$\text{Average} = \sum (\text{Grade}_i \times w_i)$$). Never leave raw LaTeX commands without dollar signs.
-4. IMPORTANT: You are also a general-purpose AI chatbot. The user can ask you ANYTHING, including questions completely unrelated to their gradebook or school. Never refuse a question just because it isn't about grades—answer all general, random, or unrelated questions helpfully and naturally.`;
+You have complete, live access to the student's entire GradeSlate academic workspace:
+1. **LIVE GRADEBOOK**: Courses, current averages, letter grades, target marks, weighted categories (tests, exams, homework, labs), upcoming assessments, and cumulative GPA.
+GRADEBOOK CONTEXT:
+${gradebookJson}
+
+2. **STUDENT NOTEBOOK**: All notes, assigned class tags, full typed notes, attached class/lecture files, sources, and study materials.
+NOTEBOOK CONTEXT:
+${notebookJson}
+
+### CORE CAPABILITIES & INSTRUCTIONS:
+
+1. **NOTE ANALYSIS & QUIZ CREATION (MCQs, Flashcards, Practice Questions)**:
+   - When the user asks: "Look at my Economics notes and create a mcq" (or asks about any course or topic like Calculus, Chemistry, English, etc.), search their notebook context for that course/topic.
+   - Extract key principles, formulas, definitions, and theories directly from their typed notes and uploaded file sources.
+   - Create challenging, exam-ready multiple-choice questions with 4 distinct options labeled A, B, C, and D.
+   - Explicitly indicate the correct answer and provide a detailed, crystal-clear step-by-step pedagogical explanation.
+   - Format questions cleanly with bold markers:
+     **Question 1**: ...
+     - **A)** ...
+     - **B)** ...
+     - **C)** ...
+     - **D)** ...
+     *Correct Answer*: **B**
+     *Explanation*: ...
+   - You can also generate flashcards (Front / Back) or long-answer rubric practice upon request.
+
+2. **UNIVERSITY ADMISSIONS & GRADEBOOK AUDIT**:
+   - When the user asks: "what universities can I get with my grades", "what are my chances for Computer Science at UBC/Toronto/McGill/Waterloo", or about US/international colleges:
+     * Evaluate their current GradeSlate GPA (weighted and unweighted) and their exact course marks.
+     * Highlight their standout strengths (e.g., high STEM/Math marks, strong English marks).
+     * Categorize admission prospects into:
+       - 🌟 **Reach Programs** (highly competitive, top tier, e.g. Waterloo CS/SE, UofT St. George, Ivy/Top 20 US)
+       - 🎯 **Target Programs** (strong statistical match, high probability of admission)
+       - 🛡️ **Safety Programs** (solid foundation, very high likelihood)
+     * Include specific competitive cutoffs, prerequisites, and high-impact actions they can take right now in their remaining upcoming assignments to maximize their odds.
+
+3. **GRADE PROJECTIONS & STRATEGY**:
+   - Calculate the exact mathematical scores required on upcoming assignments or final exams using their configured category weights. Always show the math.
+
+4. **CREATE ANYTHING / GENERAL GEMINI CHAT**:
+   - As Slate AI, you are a complete Gemini assistant. The user can ask you to create ANYTHING: write code, draft or polish an essay, explain complex physics, solve math problems, write creative stories, or chat casually. Never refuse non-school questions; answer naturally, concisely, and helpfully.
+
+5. **LATEX MATHEMATICS FORMATTING**:
+   - Always format math, formulas, scientific notation, percentages, and equations using standard KaTeX/LaTeX:
+     * Inline formulas: $x^2 + y^2 = r^2$, $\\text{PED} = -2.5$, $98\\%$
+     * Block/display formulas: $$\\Delta s = \\int_{t_1}^{t_2} v(t)\\,dt$$`;
+}
+
+/**
+ * Builds the system instructions for the AI Academic Advisor chatbot (legacy wrapper).
+ */
+export function buildAdvisorSystemPrompt(classes: ClassItem[], notes: NoteItem[] = []): string {
+  return buildSlateAiSystemPrompt(classes, notes);
 }
 
 /**
@@ -251,31 +321,29 @@ export async function testGeminiApiKey(key: string): Promise<{ success: boolean;
 }
 
 /**
- * Sends chat message to Google Gemini API with the dynamic live gradebook context injected.
- * Automatically tries modern models (gemini-2.0-flash -> gemini-1.5-flash -> fallbacks),
- * maintaining full conversational chatbot context across turns.
+ * Sends chat message to Slate AI (Google Gemini API) with dynamic live gradebook and notebook context injected.
  */
-export async function sendAdvisorMessage(
+export async function sendSlateAiMessage(
   userPrompt: string,
   history: ChatMessage[],
   classes: ClassItem[],
+  notes: NoteItem[] = [],
   preferredModel?: GeminiModel
 ): Promise<string> {
   const apiKey = getGeminiApiKey();
 
-  // If no Gemini API key is configured yet
   if (!apiKey) {
-    return `### ⚠️ AI Service Unavailable\n\nNo Gemini API key is configured. Please make sure \`VITE_GEMINI_API_KEY\` is set in your environment variables.`;
+    return `### ⚠️ Slate AI Unavailable\n\nNo Gemini API key is configured. Please make sure \`VITE_GEMINI_API_KEY\` is set in your environment variables.`;
   }
 
-  // Determine model sequence: start with preferred or gemini-3.5-flash
   const startingModel = preferredModel || getSelectedGeminiModel() || 'gemini-3.5-flash';
   const modelsToTry: GeminiModel[] = [
     startingModel,
     ...FALLBACK_MODELS.filter((m) => m !== startingModel),
   ];
 
-  const systemInstructionText = buildAdvisorSystemPrompt(classes);
+  const systemInstructionText = buildSlateAiSystemPrompt(classes, notes);
+
 
   // Build clean, alternating multi-turn conversation contents for the Gemini REST API
   // Rules:
@@ -407,5 +475,17 @@ export async function sendAdvisorMessage(
 
   // If other error occurred, show clear error
   return `### ⚠️ Unable to Reach Gemini AI\n${lastError?.message || 'Unknown network error'}.\n\nPlease check your internet connection and try again.`;
+}
+
+/**
+  * Backwards-compatible wrapper for sendSlateAiMessage
+  */
+export async function sendAdvisorMessage(
+  userPrompt: string,
+  history: ChatMessage[],
+  classes: ClassItem[],
+  preferredModel?: GeminiModel
+): Promise<string> {
+  return sendSlateAiMessage(userPrompt, history, classes, [], preferredModel);
 }
 

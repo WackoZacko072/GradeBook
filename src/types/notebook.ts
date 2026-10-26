@@ -39,6 +39,9 @@ export interface NoteItem {
   id: string;
   title: string;
   content: string;
+  classId?: string;
+  className?: string;
+  icon?: string;
   sources: NoteSource[];
   multipleChoice: MultipleChoiceQuestion[];
   longAnswer: LongAnswerQuestion[];
@@ -46,3 +49,4 @@ export interface NoteItem {
   createdAt: number;
   updatedAt: number;
 }
+
