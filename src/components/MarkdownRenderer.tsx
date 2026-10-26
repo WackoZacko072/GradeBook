@@ -26,22 +26,42 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
         if (block.type === 'heading') {
           if (block.level === 1) {
             return (
-              <h3 key={index} className="text-sm sm:text-base font-extrabold text-slate-900 mt-3 mb-1 border-b border-slate-200 pb-1">
+              <h3
+                key={index}
+                className="text-sm sm:text-base font-extrabold text-slate-900 mt-3.5 mb-1.5 border-b border-slate-200 pb-1"
+              >
                 {renderInline(block.content)}
               </h3>
             );
           }
           if (block.level === 2) {
             return (
-              <h4 key={index} className="text-xs sm:text-sm font-bold text-slate-900 mt-2.5 mb-1 text-blue-700">
+              <h4
+                key={index}
+                className="text-xs sm:text-sm font-extrabold text-blue-700 mt-3 mb-1"
+              >
                 {renderInline(block.content)}
               </h4>
             );
           }
+          if (block.level === 3) {
+            return (
+              <h5
+                key={index}
+                className="text-xs sm:text-sm font-bold text-slate-900 mt-2.5 mb-1"
+              >
+                {renderInline(block.content)}
+              </h5>
+            );
+          }
+          // level 4, 5, 6
           return (
-            <h5 key={index} className="text-xs font-bold text-slate-900 mt-2 mb-0.5">
+            <h6
+              key={index}
+              className="text-xs font-bold text-slate-800 mt-2 mb-0.5"
+            >
               {renderInline(block.content)}
-            </h5>
+            </h6>
           );
         }
 
@@ -153,7 +173,6 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
         }
 
         if (block.type === 'codeblock') {
-          // If codeblock specifies latex or math, render as math
           if (block.lang === 'latex' || block.lang === 'math' || block.lang === 'tex') {
             return (
               <div
@@ -174,6 +193,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           );
         }
 
+        // Paragraph
         return (
           <p key={index} className="text-slate-700">
             {renderInline(block.content)}
@@ -185,7 +205,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
 };
 
 // ==========================================
-// Parsing Helpers
+// Parsing Blocks
 // ==========================================
 
 interface Block {
@@ -204,11 +224,12 @@ function splitIntoBlocks(text: string): Block[] {
   let i = 0;
 
   while (i < lines.length) {
-    const line = lines[i];
+    const rawLine = lines[i];
+    const trimmed = rawLine.trim();
 
-    // Fenced code block or latex block
-    if (line.trim().startsWith('```')) {
-      const lang = line.trim().replace(/^```/, '').trim().toLowerCase();
+    // 1. Fenced code block or latex block
+    if (trimmed.startsWith('```')) {
+      const lang = trimmed.replace(/^```/, '').trim().toLowerCase();
       let codeContent = '';
       i++;
       while (i < lines.length && !lines[i].trim().startsWith('```')) {
@@ -220,9 +241,9 @@ function splitIntoBlocks(text: string): Block[] {
       continue;
     }
 
-    // Standalone Display Math block: $$ ... $$ across lines or on single line
-    if (line.trim().startsWith('$$')) {
-      let mathContent = line.trim();
+    // 2. Standalone Display Math block: $$ ... $$ across lines or on single line
+    if (trimmed.startsWith('$$')) {
+      let mathContent = trimmed;
       if (mathContent.length > 2 && mathContent.slice(2).includes('$$')) {
         // Single line $$...$$
         blocks.push({ type: 'mathblock', content: mathContent });
@@ -243,9 +264,9 @@ function splitIntoBlocks(text: string): Block[] {
       continue;
     }
 
-    // Markdown Table
-    if (line.includes('|') && lines[i + 1] && lines[i + 1].includes('|') && lines[i + 1].includes('-')) {
-      const headers = line
+    // 3. Markdown Table
+    if (rawLine.includes('|') && lines[i + 1] && lines[i + 1].includes('|') && lines[i + 1].includes('-')) {
+      const headers = rawLine
         .split('|')
         .map((s) => s.trim())
         .filter((s, idx, arr) => (idx > 0 && idx < arr.length - 1) || (arr.length === 2 && s.length > 0));
@@ -264,69 +285,104 @@ function splitIntoBlocks(text: string): Block[] {
       continue;
     }
 
-    // Headings
-    if (line.startsWith('### ')) {
-      blocks.push({ type: 'heading', level: 3, content: line.replace('### ', '').trim() });
-      i++;
-      continue;
-    }
-    if (line.startsWith('## ')) {
-      blocks.push({ type: 'heading', level: 2, content: line.replace('## ', '').trim() });
-      i++;
-      continue;
-    }
-    if (line.startsWith('# ')) {
-      blocks.push({ type: 'heading', level: 1, content: line.replace('# ', '').trim() });
+    // 4. Headings: 1 to 6 hash marks (e.g., #, ##, ###, ####, #####, ######)
+    const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      // Strip any trailing # if present
+      const cleanHeading = headingMatch[2].replace(/\s+#+$/, '').trim();
+      blocks.push({ type: 'heading', level, content: cleanHeading });
       i++;
       continue;
     }
 
-    // Blockquote
-    if (line.startsWith('> ')) {
-      blocks.push({ type: 'quote', content: line.replace('> ', '').trim() });
+    // 5. Blockquote
+    if (trimmed.startsWith('> ') || trimmed === '>') {
+      blocks.push({ type: 'quote', content: trimmed.replace(/^>\s*/, '').trim() });
       i++;
       continue;
     }
 
-    // Bullet List
-    if (line.trim().startsWith('* ') || line.trim().startsWith('- ') || /^\d+\.\s/.test(line.trim())) {
+    // 6. Bullet or Numbered List
+    if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || /^\d+[\.\)]\s/.test(trimmed)) {
       const items: string[] = [];
       while (
         i < lines.length &&
         (lines[i].trim().startsWith('* ') ||
           lines[i].trim().startsWith('- ') ||
-          /^\d+\.\s/.test(lines[i].trim()))
+          /^\d+[\.\)]\s/.test(lines[i].trim()))
       ) {
-        items.push(lines[i].trim().replace(/^(\*|-|\d+\.)\s+/, ''));
+        // Strip bullet / number prefix
+        const itemText = lines[i].trim().replace(/^(\*|-|\d+[\.\)])\s+/, '');
+        // Also strip any accidental heading prefix inside the list item, e.g. "### Question 1" -> "Question 1"
+        const cleanItem = itemText.replace(/^#{1,6}\s+/, '');
+        items.push(cleanItem);
         i++;
       }
       blocks.push({ type: 'list', content: '', items });
       continue;
     }
 
-    // Blank line
-    if (!line.trim()) {
+    // 7. Blank line
+    if (!trimmed) {
       i++;
       continue;
     }
 
-    // Paragraph
-    blocks.push({ type: 'paragraph', content: line.trim() });
+    // 8. Paragraph: clean up any stray leading # so users don't see random hashtags
+    const cleanParagraph = trimmed.replace(/^#{1,6}\s+/, '');
+    blocks.push({ type: 'paragraph', content: cleanParagraph });
     i++;
   }
 
   return blocks;
 }
 
+// ==========================================
+// Inline Formatting & LaTeX Tokenizer
+// ==========================================
+
+/**
+ * Normalizes text where bold/italic tags cross over LaTeX boundaries,
+ * e.g., "**Formula: $E=mc^2$**" -> "**Formula:** $E=mc^2$"
+ * This prevents math delimiters from splitting bold pairs and leaving stray asterisks.
+ */
+function normalizeMathAsterisks(text: string): string {
+  // Bold wrapping math: **prefix $math$ suffix**
+  let normalized = text.replace(
+    /\*\*([^*$\n]*?)(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|(?<!\\)\$(?!\s)[^$\n]+?(?<!\s)\$|\\\([\s\S]+?\\\))([^*$\n]*?)\*\*/g,
+    (_match, p1, math, p2) => {
+      const b1 = p1.trim() ? `**${p1.trim()}** ` : '';
+      const b2 = p2.trim() ? ` **${p2.trim()}**` : '';
+      return `${b1}${math}${b2}`.trim();
+    }
+  );
+
+  // Single asterisk italic wrapping math: *prefix $math$ suffix*
+  normalized = normalized.replace(
+    /(?<!\*)\*([^*$\n]+?)(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|(?<!\\)\$(?!\s)[^$\n]+?(?<!\s)\$|\\\([\s\S]+?\\\))([^*$\n]*?)\*(?!\*)/g,
+    (_match, p1, math, p2) => {
+      const i1 = p1.trim() ? `*${p1.trim()}* ` : '';
+      const i2 = p2.trim() ? ` *${p2.trim()}*` : '';
+      return `${i1}${math}${i2}`.trim();
+    }
+  );
+
+  return normalized;
+}
+
 /**
  * Handles inline formatting: LaTeX math ($...$, \(...\)), **bold**, *italic*, `code`, etc.
  */
 function renderInline(text: string): React.ReactNode {
-  // First, check if text contains LaTeX math
-  const hasLatex = /(\$|\\\(|\\\[)/.test(text);
+  // Normalize math with surrounding asterisks first
+  const normalized = normalizeMathAsterisks(text);
+
+  // Check if text contains LaTeX math
+  const hasLatex = /(\$|\\\(|\\\[)/.test(normalized);
 
   if (!hasLatex) {
-    return renderFormattingOnly(text);
+    return renderFormattingOnly(normalized);
   }
 
   // Tokenize math vs non-math
@@ -336,11 +392,11 @@ function renderInline(text: string): React.ReactNode {
   let match: RegExpExecArray | null;
   let keyIdx = 0;
 
-  while ((match = mathRegex.exec(text)) !== null) {
+  while ((match = mathRegex.exec(normalized)) !== null) {
     if (match.index > lastIndex) {
       parts.push(
         <React.Fragment key={keyIdx++}>
-          {renderFormattingOnly(text.substring(lastIndex, match.index))}
+          {renderFormattingOnly(normalized.substring(lastIndex, match.index))}
         </React.Fragment>
       );
     }
@@ -352,10 +408,10 @@ function renderInline(text: string): React.ReactNode {
     lastIndex = match.index + match[0].length;
   }
 
-  if (lastIndex < text.length) {
+  if (lastIndex < normalized.length) {
     parts.push(
       <React.Fragment key={keyIdx++}>
-        {renderFormattingOnly(text.substring(lastIndex))}
+        {renderFormattingOnly(normalized.substring(lastIndex))}
       </React.Fragment>
     );
   }
@@ -364,7 +420,12 @@ function renderInline(text: string): React.ReactNode {
 }
 
 /**
- * Handles standard bold, italic, code formatting
+ * Robust Markdown inline formatting:
+ * - Bold + Italic: ***text***
+ * - Bold: **text** or __text__
+ * - Italic: *text* or _text_
+ * - Inline Code: `code`
+ * - Strips any stray orphaned asterisks (e.g. dangling ** or *) so they never pollute the text
  */
 function renderFormattingOnly(text: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
@@ -372,38 +433,82 @@ function renderFormattingOnly(text: string): React.ReactNode {
   let keyIndex = 0;
 
   while (remaining.length > 0) {
-    // Check for bold: **text**
-    const boldMatch = remaining.match(/^(.*?)\*\*(.*?)\*\*(.*)/s);
-    // Check for inline code: `code`
+    // 1. Inline code: `code`
     const codeMatch = remaining.match(/^(.*?)`([^`]+)`(.*)/s);
+    // 2. Bold + Italic: ***text***
+    const boldItalicMatch = remaining.match(/^(.*?)\*\*\*([^*]+)\*\*\*(.*)/s);
+    // 3. Bold: **text**
+    const boldMatch = remaining.match(/^(.*?)\*\*([^*]+)\*\*(.*)/s);
+    // 4. Italic: *text*
+    const italicMatch = remaining.match(/^(.*?)(?<!\*)\*([^*]+)\*(?!\*)(.*)/s);
 
-    if (boldMatch && (!codeMatch || boldMatch[1].length <= codeMatch[1].length)) {
-      if (boldMatch[1]) {
-        parts.push(boldMatch[1]);
+    // Pick whichever match starts earliest in the string
+    type MatchCandidate = { type: string; before: string; content: string; after: string; start: number };
+    const candidates: MatchCandidate[] = [];
+
+    if (codeMatch) {
+      candidates.push({ type: 'code', before: codeMatch[1], content: codeMatch[2], after: codeMatch[3], start: codeMatch[1].length });
+    }
+    if (boldItalicMatch) {
+      candidates.push({ type: 'boldItalic', before: boldItalicMatch[1], content: boldItalicMatch[2], after: boldItalicMatch[3], start: boldItalicMatch[1].length });
+    }
+    if (boldMatch) {
+      candidates.push({ type: 'bold', before: boldMatch[1], content: boldMatch[2], after: boldMatch[3], start: boldMatch[1].length });
+    }
+    if (italicMatch) {
+      candidates.push({ type: 'italic', before: italicMatch[1], content: italicMatch[2], after: italicMatch[3], start: italicMatch[1].length });
+    }
+
+    if (candidates.length === 0) {
+      // No more paired markdown tags found.
+      // Clean up any stray dangling asterisks like stray "** " or " *"
+      const cleaned = remaining.replace(/\*{1,3}/g, '');
+      if (cleaned) {
+        parts.push(cleaned);
       }
-      parts.push(
-        <strong key={keyIndex++} className="font-bold text-slate-900">
-          {boldMatch[2]}
-        </strong>
-      );
-      remaining = boldMatch[3];
-    } else if (codeMatch) {
-      if (codeMatch[1]) {
-        parts.push(codeMatch[1]);
-      }
+      break;
+    }
+
+    // Sort by earliest match in the string
+    candidates.sort((a, b) => a.start - b.start);
+    const best = candidates[0];
+
+    // Push preceding text (cleaned of any stray unclosed asterisks)
+    if (best.before) {
+      const cleanBefore = best.before.replace(/\*{1,3}/g, '');
+      if (cleanBefore) parts.push(cleanBefore);
+    }
+
+    if (best.type === 'code') {
       parts.push(
         <code
           key={keyIndex++}
           className="px-1.5 py-0.5 bg-slate-100 text-blue-700 font-mono text-[11px] rounded-md border border-slate-200"
         >
-          {codeMatch[2]}
+          {best.content}
         </code>
       );
-      remaining = codeMatch[3];
-    } else {
-      parts.push(remaining);
-      break;
+    } else if (best.type === 'boldItalic') {
+      parts.push(
+        <strong key={keyIndex++} className="font-extrabold italic text-slate-900">
+          {best.content}
+        </strong>
+      );
+    } else if (best.type === 'bold') {
+      parts.push(
+        <strong key={keyIndex++} className="font-bold text-slate-900">
+          {best.content}
+        </strong>
+      );
+    } else if (best.type === 'italic') {
+      parts.push(
+        <em key={keyIndex++} className="italic text-slate-800">
+          {best.content}
+        </em>
+      );
     }
+
+    remaining = best.after;
   }
 
   return <>{parts}</>;
