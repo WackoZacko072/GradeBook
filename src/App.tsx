@@ -393,6 +393,12 @@ export const App: React.FC = () => {
         notes={notes}
         prefilledPrompt={prefilledAdvisorPrompt}
         onClearPrefilledPrompt={() => setPrefilledAdvisorPrompt(undefined)}
+        onNavigate={(tab) => {
+          setActiveTab(tab);
+          if (tab === 'gradebook') setSelectedClassId(null);
+          if (tab === 'notebook') setSelectedNoteId(null);
+          setIsAiAdvisorOpen(false);
+        }}
       />
     </div>
   );

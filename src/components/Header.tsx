@@ -11,7 +11,7 @@ import {
   AlertCircle,
   CloudUpload,
   AlertTriangle,
-  Sparkles,
+  User,
   BookMarked,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -31,7 +31,7 @@ interface HeaderProps {
   onOpenTranscript: () => void;
   onOpenFirebaseConfig: () => void;
   onOpenMobileDrawer?: () => void;
-  onOpenAiAdvisor: () => void;
+  onOpenAiAdvisor?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -42,7 +42,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenTranscript,
   onOpenFirebaseConfig,
   onOpenMobileDrawer,
-  onOpenAiAdvisor,
 }) => {
   const { user, isConfigured, signInWithGoogle, logout, authError } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -86,9 +85,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-slate-200/80 transition-all">
-      <div className="w-full px-3 sm:px-6 h-16 flex items-center justify-between">
-        {/* Left: Mobile Menu Toggle + Logo + Navigation Tabs */}
-        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+      <div className="relative w-full px-3 sm:px-6 h-16 flex items-center justify-between">
+        {/* Left: Mobile Menu Toggle + Logo */}
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 z-20">
           {/* Hamburger toggle for mobile drawer */}
           <button
             type="button"
@@ -106,48 +105,47 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
               <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
             </div>
-            <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">
+            <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight hidden xs:inline">
               gradeslate<span className="text-blue-600">.</span>
             </span>
           </div>
-
-          {/* Primary Tabs: Gradebook & Notebook */}
-          <nav className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/70 ml-1 sm:ml-2">
-            <button
-              type="button"
-              onClick={() => onChangeTab('gradebook')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                activeTab === 'gradebook'
-                  ? 'bg-white text-blue-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-blue-600 stroke-[2.2]" />
-              <span>Gradebook</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onChangeTab('notebook')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                activeTab === 'notebook'
-                  ? 'bg-white text-blue-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <BookMarked className="w-3.5 h-3.5 text-indigo-600 stroke-[2.2]" />
-              <span>Notebook</span>
-              {noteCount > 0 && (
-                <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-indigo-100 text-indigo-700 text-[10px] font-extrabold rounded-full">
-                  {noteCount}
-                </span>
-              )}
-            </button>
-          </nav>
         </div>
 
+        {/* Center: Primary Task Bar (Gradebook & Notebook) */}
+        <nav className="absolute left-1/2 -translate-x-1/2 flex items-center p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 shadow-2xs z-10">
+          <button
+            type="button"
+            onClick={() => onChangeTab('gradebook')}
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === 'gradebook'
+                ? 'bg-white text-blue-700 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5 text-blue-600 stroke-[2.2]" />
+            <span>Gradebook</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onChangeTab('notebook')}
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === 'notebook'
+                ? 'bg-white text-blue-700 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <BookMarked className="w-3.5 h-3.5 text-indigo-600 stroke-[2.2]" />
+            <span>Notebook</span>
+            {noteCount > 0 && (
+              <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-indigo-100 text-indigo-700 text-[10px] font-extrabold rounded-full">
+                {noteCount}
+              </span>
+            )}
+          </button>
+        </nav>
 
-        {/* Right: User Authentication, Sync Status & Actions */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        {/* Right: User Authentication, Sync Status & Profile Menu */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 z-20">
           {user ? (
             <>
               {syncStatus.state === 'syncing' ? (
@@ -180,39 +178,16 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
 
-          {/* Slate AI header button */}
-          <button
-            type="button"
-            onClick={onOpenAiAdvisor}
-            title="Slate AI — Gemini Academic Co-Pilot"
-            aria-label="Slate AI"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-700 hover:via-indigo-700 hover:to-sky-600 active:scale-95 text-white shadow-xs transition-all cursor-pointer flex-shrink-0"
-          >
-            <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
-            <span className="text-xs font-bold hidden sm:inline">Slate AI</span>
-          </button>
-
-          {/* Desktop Transcript Button */}
-          <button
-            type="button"
-            onClick={onOpenTranscript}
-            title="Download Official Academic Transcript (PDF)"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 bg-blue-50/80 hover:bg-blue-100 border border-blue-200/60 rounded-xl transition-all cursor-pointer min-h-[36px]"
-          >
-            <FileText className="w-3.5 h-3.5 text-blue-600 stroke-[2.2]" />
-            <span>Transcript (PDF)</span>
-          </button>
-
-          {/* Authentication Section */}
-          {user ? (
-            <div className="relative" ref={menuRef}>
-              <button
-                type="button"
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2 p-1 sm:pl-2 sm:pr-2.5 bg-slate-100 hover:bg-slate-200/80 rounded-full transition-all cursor-pointer border border-slate-200 min-h-[38px]"
-                aria-label="User account menu"
-              >
-                {user.photoURL ? (
+          {/* Unified Profile Button and Dropdown Menu */}
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center gap-2 p-1 sm:pl-2 sm:pr-2.5 bg-slate-100 hover:bg-slate-200/80 rounded-full transition-all cursor-pointer border border-slate-200 min-h-[38px]"
+              aria-label="Profile and account menu"
+            >
+              {user ? (
+                user.photoURL ? (
                   <img
                     src={user.photoURL}
                     alt={user.displayName || 'User'}
@@ -222,10 +197,16 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
                     {(user.displayName || user.email || 'U')[0].toUpperCase()}
                   </div>
-                )}
-                <span className="text-xs font-semibold text-slate-800 max-w-[80px] sm:max-w-[100px] truncate hidden sm:inline">
-                  {user.displayName?.split(' ')[0] || user.email?.split('@')[0]}
-                </span>
+                )
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+              )}
+              <span className="text-xs font-semibold text-slate-800 max-w-[80px] sm:max-w-[100px] truncate hidden sm:inline">
+                {user ? (user.displayName?.split(' ')[0] || user.email?.split('@')[0]) : 'Profile'}
+              </span>
+              {user && (
                 <span
                   className={`w-2 h-2 rounded-full sm:hidden mr-1 ${
                     syncStatus.state === 'error'
@@ -236,26 +217,48 @@ export const Header: React.FC<HeaderProps> = ({
                   }`}
                   title={syncStatus.state}
                 />
-              </button>
+              )}
+            </button>
 
-              {/* User Dropdown */}
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-72 max-w-[88vw] bg-white rounded-2xl shadow-xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-xs font-bold text-slate-900 truncate">
-                      {user.displayName || 'Gradebook User'}
-                    </p>
-                    <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                      {user.email}
-                    </p>
+            {/* User / Profile Dropdown */}
+            {isUserMenuOpen && (
+              <div className="absolute right-0 mt-2 w-72 max-w-[88vw] bg-white rounded-2xl shadow-xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 py-3 border-b border-slate-100">
+                  <p className="text-xs font-bold text-slate-900 truncate">
+                    {user ? (user.displayName || 'Gradebook User') : 'Guest Student'}
+                  </p>
+                  <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                    {user ? user.email : 'Local Storage Mode'}
+                  </p>
+                  {user ? (
                     <div className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                       <span>Signed in with Google</span>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full w-fit">
+                      <ShieldCheck className="w-3 h-3 text-slate-500" />
+                      <span>Private & Offline</span>
+                    </div>
+                  )}
+                </div>
 
-                  <div className="py-1">
-                    {/* Manual Force Cloud Sync Button */}
+                <div className="py-1">
+                  {/* Official Academic Transcript (PDF) */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      onOpenTranscript();
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs text-slate-800 hover:bg-slate-50 flex items-center gap-2 cursor-pointer min-h-[40px] font-semibold"
+                  >
+                    <FileText className="w-4 h-4 text-blue-600" />
+                    <span>Official Academic Transcript (PDF)</span>
+                  </button>
+
+                  {user ? (
+                    /* Manual Force Cloud Sync Button */
                     <button
                       type="button"
                       disabled={isForceSyncing}
@@ -272,32 +275,56 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       )}
                     </button>
-
+                  ) : (
+                    /* Sign in with Google Button inside Profile menu */
                     <button
                       type="button"
                       onClick={() => {
                         setIsUserMenuOpen(false);
-                        onOpenTranscript();
+                        if (isConfigured) {
+                          signInWithGoogle();
+                        } else {
+                          onOpenFirebaseConfig();
+                        }
                       }}
-                      className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer min-h-[40px]"
+                      className="w-full text-left px-4 py-2.5 text-xs text-blue-700 hover:bg-blue-50/80 flex items-center gap-2 cursor-pointer min-h-[40px] font-semibold"
                     >
-                      <FileText className="w-4 h-4 text-blue-600" />
-                      <span>Official Academic Transcript (PDF)</span>
+                      <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.02 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                        />
+                      </svg>
+                      <span>Sign in with Google</span>
                     </button>
+                  )}
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        onOpenFirebaseConfig();
-                      }}
-                      className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer min-h-[40px]"
-                    >
-                      <Settings className="w-4 h-4 text-slate-400" />
-                      <span>Firebase & Rules Settings</span>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      onOpenFirebaseConfig();
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer min-h-[40px]"
+                  >
+                    <Settings className="w-4 h-4 text-slate-400" />
+                    <span>Firebase & Rules Settings</span>
+                  </button>
+                </div>
 
+                {user && (
                   <div className="border-t border-slate-100 pt-1 mt-1">
                     <button
                       type="button"
@@ -311,51 +338,10 @@ export const Header: React.FC<HeaderProps> = ({
                       <span>Sign Out</span>
                     </button>
                   </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={isConfigured ? signInWithGoogle : onOpenFirebaseConfig}
-                className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl border border-slate-300 shadow-2xs hover:shadow-xs transition-all cursor-pointer min-h-[38px]"
-              >
-                {/* Official Google G Logo */}
-                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.02 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                  />
-                </svg>
-                <span className="hidden sm:inline">Sign in with Google</span>
-                <span className="sm:hidden">Sign in</span>
-              </button>
-
-              {!isConfigured && (
-                <button
-                  type="button"
-                  onClick={onOpenFirebaseConfig}
-                  title="Configure Firebase Keys"
-                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
-                >
-                  <Settings className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

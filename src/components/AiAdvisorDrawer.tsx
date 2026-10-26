@@ -10,9 +10,11 @@ import {
   Plus,
   Home,
   MessageSquare,
-  PanelLeft,
   X,
   Edit2,
+  Menu,
+  BookOpen,
+  BookMarked,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem } from '../types/notebook';
@@ -29,6 +31,7 @@ interface AiAdvisorDrawerProps {
   notes?: NoteItem[];
   prefilledPrompt?: string;
   onClearPrefilledPrompt?: () => void;
+  onNavigate?: (tab: 'gradebook' | 'notebook') => void;
 }
 
 export interface ChatSession {
@@ -100,6 +103,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   notes = [],
   prefilledPrompt,
   onClearPrefilledPrompt,
+  onNavigate,
 }) => {
   const [sessions, setSessions] = useState<ChatSession[]>(() => loadInitialSessions());
   const [currentSessionId, setCurrentSessionId] = useState<string>(() => {
@@ -111,7 +115,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768;
+    }
+    return true;
+  });
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
 
@@ -170,7 +179,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     if (currentSession.messages.length === 0) {
       setInputPrompt('');
       inputRef.current?.focus();
-      setIsSidebarOpenMobile(false);
+      if (window.innerWidth < 768) setIsSidebarOpen(false);
       return;
     }
 
@@ -178,14 +187,14 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     setSessions((prev) => [fresh, ...prev]);
     setCurrentSessionId(fresh.id);
     setInputPrompt('');
-    setIsSidebarOpenMobile(false);
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
     setTimeout(() => inputRef.current?.focus(), 50);
   };
 
   // Switch to an existing session
   const handleSelectSession = (sessionId: string) => {
     setCurrentSessionId(sessionId);
-    setIsSidebarOpenMobile(false);
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
   };
 
   // Delete a session
@@ -282,7 +291,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     setInputPrompt('');
     setIsLoading(true);
     setErrorBanner(null);
-    setIsSidebarOpenMobile(false);
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
       const reply = await sendSlateAiMessage(prompt, currentSession.messages, classes, notes);
@@ -323,24 +332,24 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-[#FAFBFD] flex flex-col overflow-hidden animate-in fade-in duration-200">
       {/* Top Header Bar */}
-      <header className="h-16 px-4 sm:px-6 bg-white border-b border-slate-200/90 flex items-center justify-between flex-shrink-0 z-20 shadow-2xs">
-        {/* Left: Branding & Mobile Sidebar Toggle */}
-        <div className="flex items-center gap-3">
-          {/* Mobile Sidebar Toggle */}
+      <header className="h-16 px-3 sm:px-6 bg-white border-b border-slate-200/90 flex items-center justify-between flex-shrink-0 z-20 shadow-2xs">
+        {/* Left: 3-line hamburger menu button + Branding */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Three-line button on top left-hand corner to toggle sidebar */}
           <button
             type="button"
-            onClick={() => setIsSidebarOpenMobile(!isSidebarOpenMobile)}
-            className="md:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-            title="Toggle Previous Chats"
-            aria-label="Toggle Previous Chats"
+            onClick={() => setIsSidebarOpen((prev) => !prev)}
+            className="p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center -ml-1"
+            title={isSidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+            aria-label="Toggle sidebar menu"
           >
-            <PanelLeft className="w-5 h-5" />
+            <Menu className="w-5 h-5 stroke-[2.2]" />
           </button>
 
           <div
             onClick={onClose}
             className="flex items-center gap-2.5 select-none cursor-pointer"
-            title="Return to GradeSlate Home"
+            title="Return to GradeSlate Workspace"
           >
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-xs flex-shrink-0">
               <Sparkles className="w-4 h-4 text-white stroke-[2.4]" />
@@ -354,7 +363,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                 <span className="font-extrabold text-slate-800 text-sm">Slate AI</span>
               </div>
               <p className="text-[11px] text-slate-500 hidden sm:block">
-                Academic Co-Pilot & Strategist • Whole Gradebook Analyzer
+                Academic Co-Pilot & Whole Gradebook Analyzer
               </p>
             </div>
           </div>
@@ -372,65 +381,141 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           </div>
         </div>
 
-        {/* Right Actions: + New Chat & Home Button */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* New Chat Button */}
+        {/* Right Actions: + New Chat */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleNewChat}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 hover:text-blue-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer border border-slate-200/80"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50/80 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer border border-blue-200/70"
             title="Start a new chat"
           >
-            <Plus className="w-4 h-4 text-blue-600" />
+            <Plus className="w-4 h-4 text-blue-600 stroke-[2.4]" />
             <span className="hidden sm:inline">New Chat</span>
-          </button>
-
-          {/* Home Button (Returns to GradeSlate Home) */}
-          <button
-            type="button"
-            onClick={onClose}
-            title="Return to GradeSlate Home"
-            className="flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer"
-          >
-            <Home className="w-4 h-4" />
-            <span>Home</span>
           </button>
         </div>
       </header>
 
-      {/* Main Workspace with Visible Sidebar */}
+      {/* Main Workspace with Visible / Toggleable Sidebar */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Left Sidebar: Previous Chats */}
+        {/* Mobile Backdrop when Sidebar is Open */}
+        {isSidebarOpen && (
+          <div
+            className="md:hidden fixed inset-0 top-16 bg-slate-900/40 backdrop-blur-xs z-30 animate-in fade-in duration-150"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Left Sidebar: Workspace Selection & Previous Chats */}
         <aside
           className={`${
-            isSidebarOpenMobile ? 'fixed inset-y-16 left-0 z-40 w-72 shadow-2xl flex' : 'hidden'
-          } md:flex md:static w-72 lg:w-80 border-r border-slate-200/90 bg-white flex-col flex-shrink-0 h-full overflow-hidden`}
+            isSidebarOpen
+              ? 'fixed inset-y-16 left-0 z-40 w-72 shadow-2xl flex md:static md:w-72 md:shadow-none'
+              : 'hidden'
+          } lg:w-80 border-r border-slate-200/90 bg-white flex-col flex-shrink-0 h-full overflow-hidden transition-all`}
         >
-          {/* Sidebar Top: New Chat & Header */}
-          <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
-            <span className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
-              <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
-              Previous Chats
-            </span>
-            <div className="flex items-center gap-1">
+          {/* Workspace Switcher Section */}
+          <div className="p-3 border-b border-slate-100 bg-slate-50/80">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                Workspace
+              </span>
               <button
                 type="button"
-                onClick={handleNewChat}
-                className="p-1.5 text-slate-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                title="New Chat"
+                onClick={() => setIsSidebarOpen(false)}
+                className="md:hidden p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200/60 transition-colors cursor-pointer"
+                title="Hide sidebar"
+                aria-label="Hide sidebar"
               >
-                <Plus className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </button>
-              {isSidebarOpenMobile && (
-                <button
-                  type="button"
-                  onClick={() => setIsSidebarOpenMobile(false)}
-                  className="md:hidden p-1.5 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
             </div>
+
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  if (onNavigate) {
+                    onNavigate('gradebook');
+                  } else {
+                    onClose();
+                  }
+                }}
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-blue-700 hover:bg-blue-50/80 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100/70 text-blue-600 rounded-lg group-hover:bg-blue-200/70 transition-colors">
+                    <BookOpen className="w-3.5 h-3.5 stroke-[2.2]" />
+                  </div>
+                  <span>Gradebook</span>
+                </div>
+                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-blue-600 bg-slate-200/60 group-hover:bg-blue-100/70 px-2 py-0.5 rounded-full">
+                  {classes.length} {classes.length === 1 ? 'class' : 'classes'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  if (onNavigate) {
+                    onNavigate('notebook');
+                  } else {
+                    onClose();
+                  }
+                }}
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-indigo-700 hover:bg-indigo-50/80 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-indigo-100/70 text-indigo-600 rounded-lg group-hover:bg-indigo-200/70 transition-colors">
+                    <BookMarked className="w-3.5 h-3.5 stroke-[2.2]" />
+                  </div>
+                  <span>Notebook</span>
+                </div>
+                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-indigo-600 bg-slate-200/60 group-hover:bg-indigo-100/70 px-2 py-0.5 rounded-full">
+                  {notes.length} {notes.length === 1 ? 'note' : 'notes'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-slate-200/70 text-slate-600 rounded-lg group-hover:bg-slate-300/70 transition-colors">
+                    <Home className="w-3.5 h-3.5 stroke-[2.2]" />
+                  </div>
+                  <span>Back to Workspace</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* New Chat Action Button */}
+          <div className="p-3 pb-1">
+            <button
+              type="button"
+              onClick={() => {
+                handleNewChat();
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-600 hover:from-blue-700 hover:via-indigo-700 hover:to-sky-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[2.6]" />
+              <span>Start New Chat</span>
+            </button>
+          </div>
+
+          {/* Previous Chats Section Header */}
+          <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+              Previous Chats
+            </span>
+            <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+              {sessions.length}
+            </span>
           </div>
 
           {/* Previous Chats List */}
@@ -443,7 +528,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
               return (
                 <div
                   key={session.id}
-                  onClick={() => !isEditing && handleSelectSession(session.id)}
+                  onClick={() => {
+                    if (!isEditing) {
+                      handleSelectSession(session.id);
+                      if (window.innerWidth < 768) setIsSidebarOpen(false);
+                    }
+                  }}
                   className={`group flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-all ${
                     isActive
                       ? 'bg-blue-50 text-blue-900 font-bold border border-blue-200/70 shadow-2xs'
