@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   User,
   BookMarked,
+  BookCheck,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -24,10 +25,11 @@ import {
 import type { ClassItem } from '../types/grade';
 
 interface HeaderProps {
-  activeTab: 'gradebook' | 'notebook';
-  onChangeTab: (tab: 'gradebook' | 'notebook') => void;
+  activeTab: 'gradebook' | 'notebook' | 'slab';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab') => void;
   classes: ClassItem[];
   noteCount?: number;
+  slabCount?: number;
   onOpenTranscript: () => void;
   onOpenFirebaseConfig: () => void;
   onOpenMobileDrawer?: () => void;
@@ -39,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   onChangeTab,
   classes,
   noteCount = 0,
+  slabCount = 0,
   onOpenTranscript,
   onOpenFirebaseConfig,
   onOpenMobileDrawer,
@@ -111,12 +114,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Center: Primary Task Bar (Gradebook & Notebook) */}
+        {/* Center: Primary Task Bar (Gradebook, Notebook & Slab) */}
         <nav className="absolute left-1/2 -translate-x-1/2 flex items-center p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 shadow-2xs z-10">
           <button
             type="button"
             onClick={() => onChangeTab('gradebook')}
-            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === 'gradebook'
                 ? 'bg-white text-blue-700 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -128,9 +131,9 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => onChangeTab('notebook')}
-            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === 'notebook'
-                ? 'bg-white text-blue-700 shadow-2xs'
+                ? 'bg-white text-indigo-700 shadow-2xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -139,6 +142,23 @@ export const Header: React.FC<HeaderProps> = ({
             {noteCount > 0 && (
               <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-indigo-100 text-indigo-700 text-[10px] font-extrabold rounded-full">
                 {noteCount}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => onChangeTab('slab')}
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === 'slab'
+                ? 'bg-white text-violet-700 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <BookCheck className="w-3.5 h-3.5 text-violet-600 stroke-[2.2]" />
+            <span>Slab</span>
+            {slabCount > 0 && (
+              <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-violet-100 text-violet-700 text-[10px] font-extrabold rounded-full">
+                {slabCount}
               </span>
             )}
           </button>

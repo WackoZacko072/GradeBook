@@ -5,25 +5,31 @@ import {
   X,
   BookOpen,
   BookMarked,
+  BookCheck,
   FileText,
   Sparkles,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem } from '../types/notebook';
+import type { SlabItem } from '../types/slab';
 import { calculateClassAverage } from '../utils/gradeCalculations';
 
 interface SidebarProps {
-  activeTab: 'gradebook' | 'notebook';
-  onChangeTab: (tab: 'gradebook' | 'notebook') => void;
+  activeTab: 'gradebook' | 'notebook' | 'slab';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab') => void;
   classes: ClassItem[];
   notes?: NoteItem[];
+  slabs?: SlabItem[];
   selectedClassId: string | null;
   selectedNoteId?: string | null;
+  selectedSlabId?: string | null;
   onSelectOverview: () => void;
   onSelectClass: (id: string) => void;
   onSelectNote?: (id: string | null) => void;
+  onSelectSlab?: (id: string | null) => void;
   onOpenAddClass: () => void;
   onCreateNote?: () => void;
+  onCreateSlab?: () => void;
   onOpenSlateAi?: () => void;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
@@ -34,13 +40,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onChangeTab,
   classes,
   notes = [],
+  slabs = [],
   selectedClassId,
   selectedNoteId = null,
+  selectedSlabId = null,
   onSelectOverview,
   onSelectClass,
   onSelectNote,
+  onSelectSlab,
   onOpenAddClass,
   onCreateNote,
+  onCreateSlab,
   onOpenSlateAi,
   isMobileOpen = false,
   onMobileClose,
@@ -65,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
                 activeTab === 'gradebook' && selectedClassId === null
-                  ? 'bg-[#EBF2FE] text-[#2563EB] shadow-2xs'
+                  ? 'bg-[#EBF2FE] text-[#2563EB] shadow-2xs font-bold'
                   : 'text-slate-700 hover:bg-slate-200/60'
               }`}
             >
@@ -94,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
                 activeTab === 'notebook' && selectedNoteId === null
-                  ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-2xs'
+                  ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-2xs font-bold'
                   : 'text-slate-700 hover:bg-slate-200/60'
               }`}
             >
@@ -113,7 +123,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </button>
 
-            {/* Slate AI Quick Action Button */}
+            {/* Slab Tab Button (placed between Notebook and Slate AI) */}
+            <button
+              type="button"
+              onClick={() => {
+                onChangeTab('slab');
+                onSelectSlab?.(null);
+                onMobileClose?.();
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
+                activeTab === 'slab' && selectedSlabId === null
+                  ? 'bg-violet-50 text-violet-700 shadow-2xs font-bold'
+                  : 'text-slate-700 hover:bg-slate-200/60'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <BookCheck className="w-4 h-4 text-violet-600" />
+                <span>Slab</span>
+              </div>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                  activeTab === 'slab' && selectedSlabId === null
+                    ? 'bg-violet-600 text-white'
+                    : 'bg-slate-200 text-slate-600'
+                }`}
+              >
+                {slabs.length}
+              </span>
+            </button>
+
+            {/* Slate AI Quick Action Button (Gemini badge removed) */}
             <button
               type="button"
               onClick={() => {
@@ -128,15 +167,77 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
                 <span className="group-hover:text-blue-700 font-bold">Slate AI</span>
               </div>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md font-extrabold bg-blue-100 text-blue-700">
-                Gemini
-              </span>
             </button>
           </div>
         </div>
 
-        {/* Dynamic section: If Gradebook active -> Your Classes. If Notebook active -> Your Notes */}
-        {activeTab === 'gradebook' ? (
+        {/* Dynamic section: If Slab active -> Your Slabs. If Gradebook active -> Your Classes. If Notebook active -> Your Notes */}
+        {activeTab === 'slab' ? (
+          <div>
+            <div className="flex items-center justify-between px-3 mb-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">
+                Your Slabs
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onCreateSlab?.();
+                  onMobileClose?.();
+                }}
+                className="p-1 text-violet-600 hover:bg-violet-50 rounded-lg transition-colors cursor-pointer"
+                title="Create new Slab set"
+                aria-label="Create new Slab set"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-1">
+              {slabs.length === 0 ? (
+                <div className="px-3 py-4 text-center">
+                  <p className="text-xs text-slate-400">No study sets yet.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onCreateSlab?.();
+                      onMobileClose?.();
+                    }}
+                    className="mt-2 text-xs font-bold text-violet-600 hover:text-violet-700 cursor-pointer"
+                  >
+                    + Create with Gemini
+                  </button>
+                </div>
+              ) : (
+                slabs.map((s) => {
+                  const isSelected = selectedSlabId === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => {
+                        onSelectSlab?.(s.id);
+                        onMobileClose?.();
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] ${
+                        isSelected
+                          ? 'bg-white text-violet-700 font-semibold shadow-2xs border border-slate-200/80'
+                          : 'text-slate-700 hover:bg-slate-200/60 font-medium'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <BookCheck className="w-4 h-4 text-violet-500 flex-shrink-0" />
+                        <span className="truncate">{s.title || 'Untitled Slab'}</span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 flex-shrink-0">
+                        {s.flashcards.length + s.mcqs.length}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        ) : activeTab === 'gradebook' ? (
           <div>
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider select-none">

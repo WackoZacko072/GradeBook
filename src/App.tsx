@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { ClassItem } from './types/grade';
 import type { NoteItem } from './types/notebook';
+import type { SlabItem } from './types/slab';
 import {
   getInitialClasses,
   subscribeToUserClasses,
@@ -17,12 +18,14 @@ import {
 } from './utils/notebookService';
 import { INITIAL_DEMO_CLASSES } from './utils/sampleData';
 import { INITIAL_DEMO_NOTES } from './utils/sampleNotebookData';
+import { INITIAL_DEMO_SLABS } from './utils/sampleSlabData';
 import { useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClassDetail } from './components/ClassDetail';
 import { NotebookView } from './components/Notebook/NotebookView';
+import { SlabView } from './components/Slab/SlabView';
 import { AddClassModal } from './components/AddClassModal';
 import { TranscriptModal } from './components/TranscriptModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
@@ -30,11 +33,26 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import { AiAdvisorDrawer } from './components/AiAdvisorDrawer';
 import { Sparkles } from 'lucide-react';
 
+const SLABS_STORAGE_KEY = 'gradeslate_slabs_v1';
+
+function loadLocalSlabs(): SlabItem[] {
+  try {
+    const saved = localStorage.getItem(SLABS_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn('Failed to parse saved slabs', e);
+  }
+  return INITIAL_DEMO_SLABS;
+}
+
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
 
-  // Top level active tab: Gradebook vs Notebook
-  const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook'>('gradebook');
+  // Top level active tab: Gradebook vs Notebook vs Slab
+  const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook' | 'slab'>('gradebook');
 
   // Gradebook classes state
   const [classes, setClasses] = useState<ClassItem[]>(() => getInitialClasses());
@@ -43,6 +61,10 @@ export const App: React.FC = () => {
   // Notebook notes state
   const [notes, setNotes] = useState<NoteItem[]>(() => getInitialNotes());
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+
+  // Slab flashcards and MCQ state
+  const [slabs, setSlabs] = useState<SlabItem[]>(() => loadLocalSlabs());
+  const [selectedSlabId, setSelectedSlabId] = useState<string | null>(null);
 
   const [_isDataLoaded, setIsDataLoaded] = useState(false);
 
@@ -108,12 +130,21 @@ export const App: React.FC = () => {
     };
   }, [user, authLoading]);
 
-  // Scroll to top when active class or active note changes
+  // Save Slabs to localStorage whenever updated
+  useEffect(() => {
+    try {
+      localStorage.setItem(SLABS_STORAGE_KEY, JSON.stringify(slabs));
+    } catch (e) {
+      console.warn('Failed to save slabs to localStorage', e);
+    }
+  }, [slabs]);
+
+  // Scroll to top when active class, active note, or active slab changes
   useEffect(() => {
     if (mainContentRef.current) {
       mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [selectedClassId, selectedNoteId, activeTab]);
+  }, [selectedClassId, selectedNoteId, selectedSlabId, activeTab]);
 
   // Active selected class
   const activeClass = classes.find((c) => c.id === selectedClassId) || null;
@@ -207,6 +238,25 @@ export const App: React.FC = () => {
     }
   };
 
+  // Slab handlers (Interactive Flashcards & MCQ Study Sets)
+  const handleAddSlab = (newSlab: SlabItem) => {
+    setSlabs((prev) => [newSlab, ...prev]);
+    setSelectedSlabId(newSlab.id);
+    setActiveTab('slab');
+    setIsMobileDrawerOpen(false);
+  };
+
+  const handleUpdateSlab = (updated: SlabItem) => {
+    setSlabs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+  };
+
+  const handleDeleteSlab = (id: string) => {
+    setSlabs((prev) => prev.filter((s) => s.id !== id));
+    if (selectedSlabId === id) {
+      setSelectedSlabId(null);
+    }
+  };
+
   const handleOpenAiAdvisor = (prompt?: string) => {
     if (prompt) {
       setPrefilledAdvisorPrompt(prompt);
@@ -223,9 +273,11 @@ export const App: React.FC = () => {
           setActiveTab(tab);
           if (tab === 'gradebook') setSelectedClassId(null);
           if (tab === 'notebook') setSelectedNoteId(null);
+          if (tab === 'slab') setSelectedSlabId(null);
         }}
         classes={classes}
         noteCount={notes.length}
+        slabCount={slabs.length}
         onOpenTranscript={() => setIsTranscriptModalOpen(true)}
         onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
@@ -241,11 +293,14 @@ export const App: React.FC = () => {
             setActiveTab(tab);
             if (tab === 'gradebook') setSelectedClassId(null);
             if (tab === 'notebook') setSelectedNoteId(null);
+            if (tab === 'slab') setSelectedSlabId(null);
           }}
           classes={classes}
           notes={notes}
+          slabs={slabs}
           selectedClassId={selectedClassId}
           selectedNoteId={selectedNoteId}
+          selectedSlabId={selectedSlabId}
           onSelectOverview={() => {
             setActiveTab('gradebook');
             setSelectedClassId(null);
@@ -257,6 +312,10 @@ export const App: React.FC = () => {
           onSelectNote={(id) => {
             setActiveTab('notebook');
             setSelectedNoteId(id);
+          }}
+          onSelectSlab={(id) => {
+            setActiveTab('slab');
+            setSelectedSlabId(id);
           }}
           onOpenAddClass={() => setIsAddModalOpen(true)}
           onCreateNote={() => {
@@ -274,6 +333,10 @@ export const App: React.FC = () => {
             };
             handleAddNote(newNote);
           }}
+          onCreateSlab={() => {
+            setActiveTab('slab');
+            setSelectedSlabId(null);
+          }}
           onOpenSlateAi={() => handleOpenAiAdvisor()}
           isMobileOpen={isMobileDrawerOpen}
           onMobileClose={() => setIsMobileDrawerOpen(false)}
@@ -285,7 +348,17 @@ export const App: React.FC = () => {
           className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] pb-24 md:pb-8"
         >
           <div className="w-full max-w-[1140px] mx-auto px-4 sm:px-8 lg:px-10 py-5 sm:py-8">
-            {activeTab === 'notebook' ? (
+            {activeTab === 'slab' ? (
+              <SlabView
+                slabs={slabs}
+                notes={notes}
+                selectedSlabId={selectedSlabId}
+                onSelectSlab={(id) => setSelectedSlabId(id)}
+                onAddSlab={handleAddSlab}
+                onUpdateSlab={handleUpdateSlab}
+                onDeleteSlab={handleDeleteSlab}
+              />
+            ) : activeTab === 'notebook' ? (
               <NotebookView
                 notes={notes}
                 classes={classes}
@@ -326,10 +399,12 @@ export const App: React.FC = () => {
           setActiveTab(tab);
           if (tab === 'gradebook') setSelectedClassId(null);
           if (tab === 'notebook') setSelectedNoteId(null);
+          if (tab === 'slab') setSelectedSlabId(null);
         }}
         selectedClassId={selectedClassId}
         classCount={classes.length}
         noteCount={notes.length}
+        slabCount={slabs.length}
         onSelectOverview={() => {
           setActiveTab('gradebook');
           setSelectedClassId(null);
@@ -349,6 +424,10 @@ export const App: React.FC = () => {
             updatedAt: Date.now(),
           };
           handleAddNote(newNote);
+        }}
+        onOpenAddSlab={() => {
+          setActiveTab('slab');
+          setSelectedSlabId(null);
         }}
         onOpenTranscript={() => setIsTranscriptModalOpen(true)}
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
@@ -391,12 +470,14 @@ export const App: React.FC = () => {
         onClose={() => setIsAiAdvisorOpen(false)}
         classes={classes}
         notes={notes}
+        slabs={slabs}
         prefilledPrompt={prefilledAdvisorPrompt}
         onClearPrefilledPrompt={() => setPrefilledAdvisorPrompt(undefined)}
         onNavigate={(tab) => {
           setActiveTab(tab);
           if (tab === 'gradebook') setSelectedClassId(null);
           if (tab === 'notebook') setSelectedNoteId(null);
+          if (tab === 'slab') setSelectedSlabId(null);
           setIsAiAdvisorOpen(false);
         }}
       />

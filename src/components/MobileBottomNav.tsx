@@ -1,16 +1,18 @@
 import React from 'react';
-import { BookOpen, Plus, Sparkles, BookMarked, Layers } from 'lucide-react';
+import { BookOpen, Plus, Sparkles, BookMarked, BookCheck, Layers } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  activeTab: 'gradebook' | 'notebook';
-  onChangeTab: (tab: 'gradebook' | 'notebook') => void;
+  activeTab: 'gradebook' | 'notebook' | 'slab';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab') => void;
   selectedClassId: string | null;
   classCount: number;
   noteCount?: number;
+  slabCount?: number;
   onSelectOverview: () => void;
   onOpenMobileDrawer: () => void;
   onOpenAddClass: () => void;
   onOpenAddNote?: () => void;
+  onOpenAddSlab?: () => void;
   onOpenTranscript?: () => void;
   onOpenAiAdvisor: () => void;
 }
@@ -21,15 +23,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   selectedClassId,
   classCount,
   noteCount = 0,
+  slabCount = 0,
   onSelectOverview,
   onOpenMobileDrawer,
   onOpenAddClass,
   onOpenAddNote,
+  onOpenAddSlab,
   onOpenAiAdvisor,
 }) => {
   const handleCenterAdd = () => {
     if (activeTab === 'notebook' && onOpenAddNote) {
       onOpenAddNote();
+    } else if (activeTab === 'slab' && onOpenAddSlab) {
+      onOpenAddSlab();
     } else {
       onOpenAddClass();
     }
@@ -86,24 +92,61 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         <span className="text-[10px] tracking-tight">Notebook</span>
       </button>
 
-      {/* 3. Center Add Action Button (Class or Note depending on active tab) */}
+      {/* 3. Slab Tab (Flashcards & MCQs) */}
+      <button
+        type="button"
+        onClick={() => onChangeTab('slab')}
+        className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1 cursor-pointer transition-colors relative ${
+          activeTab === 'slab' ? 'text-violet-600 font-bold' : 'text-slate-500 hover:text-slate-800'
+        }`}
+      >
+        <div
+          className={`p-1 rounded-xl transition-all relative ${
+            activeTab === 'slab' ? 'bg-violet-50' : ''
+          }`}
+        >
+          <BookCheck className="w-4 h-4" />
+          {slabCount > 0 && (
+            <span className="absolute -top-1 -right-1.5 px-1.5 py-0.2 text-[8px] font-extrabold bg-violet-600 text-white rounded-full leading-tight">
+              {slabCount}
+            </span>
+          )}
+        </div>
+        <span className="text-[10px] tracking-tight">Slab</span>
+      </button>
+
+      {/* 4. Center Add Action Button */}
       <div className="flex-1 flex justify-center -mt-3.5">
         <button
           type="button"
           onClick={handleCenterAdd}
           className={`w-11 h-11 rounded-2xl active:scale-95 text-white flex items-center justify-center shadow-lg transition-all cursor-pointer border-2 border-white ${
-            activeTab === 'notebook'
+            activeTab === 'slab'
+              ? 'bg-violet-600 hover:bg-violet-700 shadow-violet-500/30'
+              : activeTab === 'notebook'
               ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/30'
               : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/30'
           }`}
-          title={activeTab === 'notebook' ? 'Create Note' : 'Add Class'}
-          aria-label={activeTab === 'notebook' ? 'Create Note' : 'Add Class'}
+          title={
+            activeTab === 'slab'
+              ? 'Create Slab Set'
+              : activeTab === 'notebook'
+              ? 'Create Note'
+              : 'Add Class'
+          }
+          aria-label={
+            activeTab === 'slab'
+              ? 'Create Slab Set'
+              : activeTab === 'notebook'
+              ? 'Create Note'
+              : 'Add Class'
+          }
         >
           <Plus className="w-5 h-5 stroke-[2.6]" />
         </button>
       </div>
 
-      {/* 4. Classes Drawer Tab */}
+      {/* 5. Classes Drawer Tab */}
       <button
         type="button"
         onClick={onOpenMobileDrawer}
@@ -126,7 +169,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         <span className="text-[10px] tracking-tight">Classes</span>
       </button>
 
-      {/* 5. AI Advisor Tab */}
+      {/* 6. AI Advisor Tab */}
       <button
         type="button"
         onClick={onOpenAiAdvisor}

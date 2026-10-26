@@ -15,9 +15,11 @@ import {
   Menu,
   BookOpen,
   BookMarked,
+  BookCheck,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem } from '../types/notebook';
+import type { SlabItem } from '../types/slab';
 import {
   sendSlateAiMessage,
   type ChatMessage,
@@ -29,9 +31,10 @@ interface AiAdvisorDrawerProps {
   onClose: () => void;
   classes: ClassItem[];
   notes?: NoteItem[];
+  slabs?: SlabItem[];
   prefilledPrompt?: string;
   onClearPrefilledPrompt?: () => void;
-  onNavigate?: (tab: 'gradebook' | 'notebook') => void;
+  onNavigate?: (tab: 'gradebook' | 'notebook' | 'slab') => void;
 }
 
 export interface ChatSession {
@@ -101,6 +104,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   onClose,
   classes,
   notes = [],
+  slabs = [],
   prefilledPrompt,
   onClearPrefilledPrompt,
   onNavigate,
@@ -474,6 +478,29 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                 </div>
                 <span className="text-[10px] font-semibold text-slate-400 group-hover:text-indigo-600 bg-slate-200/60 group-hover:bg-indigo-100/70 px-2 py-0.5 rounded-full">
                   {notes.length} {notes.length === 1 ? 'note' : 'notes'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.innerWidth < 768) setIsSidebarOpen(false);
+                  if (onNavigate) {
+                    onNavigate('slab');
+                  } else {
+                    onClose();
+                  }
+                }}
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-violet-700 hover:bg-violet-50/80 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-violet-100/70 text-violet-600 rounded-lg group-hover:bg-violet-200/70 transition-colors">
+                    <BookCheck className="w-3.5 h-3.5 stroke-[2.2]" />
+                  </div>
+                  <span>Slab</span>
+                </div>
+                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-violet-600 bg-slate-200/60 group-hover:bg-violet-100/70 px-2 py-0.5 rounded-full">
+                  {slabs.length} {slabs.length === 1 ? 'set' : 'sets'}
                 </span>
               </button>
 
