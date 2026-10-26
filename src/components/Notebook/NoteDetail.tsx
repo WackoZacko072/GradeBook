@@ -3,8 +3,6 @@ import {
   ArrowLeft,
   Trash2,
   Check,
-  HelpCircle,
-  Layers,
   Sparkles,
   Eye,
   Edit3,
@@ -24,18 +22,10 @@ import {
   ChevronDown,
   LayoutTemplate,
 } from 'lucide-react';
-import type {
-  NoteItem,
-  NoteSource,
-  MultipleChoiceQuestion,
-  LongAnswerQuestion,
-  FlashcardItem,
-} from '../../types/notebook';
+import type { NoteItem, NoteSource } from '../../types/notebook';
 import type { ClassItem } from '../../types/grade';
 import { MarkdownRenderer } from '../MarkdownRenderer';
 import { SourcesSection } from './SourcesSection';
-import { QuestionBankView } from './QuestionBankView';
-import { FlashcardsView } from './FlashcardsView';
 
 interface NoteDetailProps {
   note: NoteItem;
@@ -65,7 +55,6 @@ export const NoteDetail: React.FC<NoteDetailProps> = ({
   // UI state
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const [viewMode, setViewMode] = useState<'write' | 'split' | 'preview'>('write');
-  const [studyTab, setStudyTab] = useState<'questions' | 'flashcards'>('questions');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
@@ -385,29 +374,6 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
     });
   };
 
-  // Update questions
-  const handleUpdateQuestions = (
-    multipleChoice: MultipleChoiceQuestion[],
-    longAnswer: LongAnswerQuestion[]
-  ) => {
-    onUpdateNote({
-      ...note,
-      multipleChoice,
-      longAnswer,
-      updatedAt: Date.now(),
-    });
-  };
-
-  // Update flashcards
-  const handleUpdateFlashcards = (flashcards: FlashcardItem[]) => {
-    onUpdateNote({
-      ...note,
-      flashcards,
-      updatedAt: Date.now(),
-    });
-  };
-
-  const totalQuestions = (note.multipleChoice?.length || 0) + (note.longAnswer?.length || 0);
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
@@ -596,345 +562,276 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
         )}
       </div>
 
-      {/* Main Two-Column Layout (Note Canvas on Left, Study Studio on Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Notion-like Editor (7 cols) */}
-        <div className="lg:col-span-7 space-y-4">
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
-            {/* Sticky Notion Formatting & View Mode Toolbar */}
-            <div className="px-3.5 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2 flex-wrap">
-              {/* Left Toolbar: View Mode Switches */}
-              <div className="flex items-center p-0.5 bg-slate-200/80 rounded-lg">
+      {/* Notion-Style Full-Width Canvas */}
+      <div className="w-full space-y-4">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
+          {/* Sticky Notion Formatting & View Mode Toolbar */}
+          <div className="px-3.5 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2 flex-wrap">
+            {/* Left Toolbar: View Mode Switches */}
+            <div className="flex items-center p-0.5 bg-slate-200/80 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setViewMode('write')}
+                title="Focused note-taking mode"
+                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                  viewMode === 'write'
+                    ? 'bg-white text-blue-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Write</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('split')}
+                title="Side-by-side live formatted preview"
+                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                  viewMode === 'split'
+                    ? 'bg-white text-blue-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Columns className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Split</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('preview')}
+                title="Formatted interactive preview"
+                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                  viewMode === 'preview'
+                    ? 'bg-white text-blue-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Preview</span>
+              </button>
+            </div>
+
+            {/* Middle Toolbar: Notion Formatting Buttons (Available in write & split) */}
+            {viewMode !== 'preview' && (
+              <div className="flex items-center gap-1 text-slate-600 flex-wrap">
+                {/* Headings */}
                 <button
                   type="button"
-                  onClick={() => setViewMode('write')}
-                  title="Focused note-taking mode"
-                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    viewMode === 'write'
-                      ? 'bg-white text-blue-700 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  onClick={() => handleInsertSnippet('# ', '', 'Heading 1')}
+                  title="Heading 1 (# )"
+                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  <span>Write</span>
+                  H1
                 </button>
                 <button
                   type="button"
-                  onClick={() => setViewMode('split')}
-                  title="Side-by-side live formatted preview"
-                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    viewMode === 'split'
-                      ? 'bg-white text-blue-700 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  onClick={() => handleInsertSnippet('## ', '', 'Heading 2')}
+                  title="Heading 2 (## )"
+                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
-                  <Columns className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Split</span>
+                  H2
                 </button>
                 <button
                   type="button"
-                  onClick={() => setViewMode('preview')}
-                  title="Formatted interactive preview"
-                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    viewMode === 'preview'
-                      ? 'bg-white text-blue-700 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  onClick={() => handleInsertSnippet('### ', '', 'Heading 3')}
+                  title="Heading 3 (### )"
+                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>Preview</span>
+                  H3
+                </button>
+
+                <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
+
+                {/* Bold, Italic, Strikethrough, Code */}
+                <button
+                  type="button"
+                  onClick={() => handleInsertSnippet('**', '**', 'bold text')}
+                  title="Bold (**text**)"
+                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                >
+                  <Bold className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertSnippet('*', '*', 'italic text')}
+                  title="Italic (*text*)"
+                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                >
+                  <Italic className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertSnippet('`', '`', 'code')}
+                  title="Inline Code (`code`)"
+                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                >
+                  <Code className="w-3.5 h-3.5" />
+                </button>
+
+                <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
+
+                {/* Bullet list, Numbered list, Todo Checklist */}
+                <button
+                  type="button"
+                  onClick={() => handleInsertSnippet('- ', '', 'Bullet point')}
+                  title="Bullet List (- )"
+                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertSnippet('1. ', '', 'Numbered point')}
+                  title="Numbered List (1. )"
+                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                >
+                  <ListOrdered className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertSnippet('- [ ] ', '', 'Checklist task')}
+                  title="Notion Checklist (- [ ] )"
+                  className="p-1 hover:bg-blue-100 text-blue-700 rounded-md transition-colors cursor-pointer"
+                >
+                  <CheckSquare className="w-3.5 h-3.5" />
+                </button>
+
+                <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
+
+                {/* Notion Callout & LaTeX */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleInsertSnippet('> 💡 **Key Concept**: ', '\n', 'Important definition or takeaway')
+                  }
+                  title="Notion Callout Box (> 💡 )"
+                  className="p-1 hover:bg-amber-100 text-amber-700 rounded-md transition-colors cursor-pointer"
+                >
+                  <Lightbulb className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleInsertSnippet('$$', '$$', 'E = mc^2')}
+                  title="KaTeX Math Formula ($$formula$$)"
+                  className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md text-[11px] font-bold border border-blue-200 cursor-pointer"
+                >
+                  <Sigma className="w-3 h-3" />
+                  <span>$Math$</span>
                 </button>
               </div>
+            )}
 
-              {/* Middle Toolbar: Notion Formatting Buttons (Available in write & split) */}
-              {viewMode !== 'preview' && (
-                <div className="flex items-center gap-1 text-slate-600 flex-wrap">
-                  {/* Headings */}
-                  <button
-                    type="button"
-                    onClick={() => handleInsertSnippet('# ', '', 'Heading 1')}
-                    title="Heading 1 (# )"
-                    className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
-                  >
-                    H1
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInsertSnippet('## ', '', 'Heading 2')}
-                    title="Heading 2 (## )"
-                    className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
-                  >
-                    H2
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInsertSnippet('### ', '', 'Heading 3')}
-                    title="Heading 3 (### )"
-                    className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
-                  >
-                    H3
-                  </button>
+            {/* Right Toolbar: Notion Templates Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
+                className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 rounded-md transition-colors cursor-pointer"
+              >
+                <LayoutTemplate className="w-3.5 h-3.5 text-blue-600" />
+                <span className="hidden sm:inline">Templates</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
 
-                  <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
-
-                  {/* Bold, Italic, Strikethrough, Code */}
+              {isTemplatesOpen && (
+                <div className="absolute right-0 top-8 z-30 w-56 p-1.5 bg-white border border-slate-200 rounded-xl shadow-xl space-y-1 animate-in zoom-in-95 duration-150">
                   <button
                     type="button"
-                    onClick={() => handleInsertSnippet('**', '**', 'bold text')}
-                    title="Bold (**text**)"
-                    className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                    onClick={() => handleInsertTemplate('lecture')}
+                    className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
                   >
-                    <Bold className="w-3.5 h-3.5" />
+                    <div className="font-bold text-slate-800">📚 Lecture Notes</div>
+                    <div className="text-[10px] text-slate-400">Objectives, notes & key takeaways</div>
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleInsertSnippet('*', '*', 'italic text')}
-                    title="Italic (*text*)"
-                    className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                    onClick={() => handleInsertTemplate('cornell')}
+                    className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
                   >
-                    <Italic className="w-3.5 h-3.5" />
+                    <div className="font-bold text-slate-800">⚖️ Cornell Method</div>
+                    <div className="text-[10px] text-slate-400">Cues, derivations & summary</div>
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleInsertSnippet('`', '`', 'code')}
-                    title="Inline Code (`code`)"
-                    className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                    onClick={() => handleInsertTemplate('exam')}
+                    className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
                   >
-                    <Code className="w-3.5 h-3.5" />
-                  </button>
-
-                  <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
-
-                  {/* Bullet list, Numbered list, Todo Checklist */}
-                  <button
-                    type="button"
-                    onClick={() => handleInsertSnippet('- ', '', 'Bullet point')}
-                    title="Bullet List (- )"
-                    className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
-                  >
-                    <List className="w-3.5 h-3.5" />
+                    <div className="font-bold text-slate-800">📈 Exam Prep & Formulas</div>
+                    <div className="text-[10px] text-slate-400">Formulas, common traps & checklist</div>
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleInsertSnippet('1. ', '', 'Numbered point')}
-                    title="Numbered List (1. )"
-                    className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                    onClick={() => handleInsertTemplate('analysis')}
+                    className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
                   >
-                    <ListOrdered className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInsertSnippet('- [ ] ', '', 'Checklist task')}
-                    title="Notion Checklist (- [ ] )"
-                    className="p-1 hover:bg-blue-100 text-blue-700 rounded-md transition-colors cursor-pointer"
-                  >
-                    <CheckSquare className="w-3.5 h-3.5" />
-                  </button>
-
-                  <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
-
-                  {/* Notion Callout & LaTeX */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleInsertSnippet('> 💡 **Key Concept**: ', '\n', 'Important definition or takeaway')
-                    }
-                    title="Notion Callout Box (> 💡 )"
-                    className="p-1 hover:bg-amber-100 text-amber-700 rounded-md transition-colors cursor-pointer"
-                  >
-                    <Lightbulb className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInsertSnippet('$$', '$$', 'E = mc^2')}
-                    title="KaTeX Math Formula ($$formula$$)"
-                    className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md text-[11px] font-bold border border-blue-200 cursor-pointer"
-                  >
-                    <Sigma className="w-3 h-3" />
-                    <span>$Math$</span>
+                    <div className="font-bold text-slate-800">📊 Analytical & Case Notes</div>
+                    <div className="text-[10px] text-slate-400">Market dynamics & equations</div>
                   </button>
                 </div>
               )}
-
-              {/* Right Toolbar: Notion Templates Dropdown */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
-                  className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 rounded-md transition-colors cursor-pointer"
-                >
-                  <LayoutTemplate className="w-3.5 h-3.5 text-blue-600" />
-                  <span className="hidden sm:inline">Templates</span>
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-
-                {isTemplatesOpen && (
-                  <div className="absolute right-0 top-8 z-30 w-56 p-1.5 bg-white border border-slate-200 rounded-xl shadow-xl space-y-1 animate-in zoom-in-95 duration-150">
-                    <button
-                      type="button"
-                      onClick={() => handleInsertTemplate('lecture')}
-                      className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
-                    >
-                      <div className="font-bold text-slate-800">📚 Lecture Notes</div>
-                      <div className="text-[10px] text-slate-400">Objectives, notes & key takeaways</div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleInsertTemplate('cornell')}
-                      className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
-                    >
-                      <div className="font-bold text-slate-800">⚖️ Cornell Method</div>
-                      <div className="text-[10px] text-slate-400">Cues, derivations & summary</div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleInsertTemplate('exam')}
-                      className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
-                    >
-                      <div className="font-bold text-slate-800">📈 Exam Prep & Formulas</div>
-                      <div className="text-[10px] text-slate-400">Formulas, common traps & checklist</div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleInsertTemplate('analysis')}
-                      className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
-                    >
-                      <div className="font-bold text-slate-800">📊 Analytical & Case Notes</div>
-                      <div className="text-[10px] text-slate-400">Market dynamics & equations</div>
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
+          </div>
 
-            {/* Editor Canvas: Write, Split, or Preview */}
-            {viewMode === 'write' ? (
-              <div className="p-4 sm:p-6 min-h-[420px] flex flex-col">
+          {/* Editor Canvas: Write, Split, or Preview */}
+          {viewMode === 'write' ? (
+            <div className="p-4 sm:p-7 min-h-[460px] flex flex-col">
+              <textarea
+                ref={textareaRef}
+                id="note-editor-textarea"
+                rows={22}
+                value={content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                onBlur={handleContentBlur}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your notes naturally... Hit Enter on bullets or checkboxes (- [ ]) for automatic continuation, or write formulas like $E=mc^2$ or $$\text{PED}=\frac{\%\Delta Q}{\%\Delta P}$$."
+                className="w-full flex-1 text-sm sm:text-base font-sans text-slate-800 placeholder-slate-400 focus:outline-hidden resize-y min-h-[420px] leading-relaxed"
+              />
+            </div>
+          ) : viewMode === 'split' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 min-h-[460px]">
+              {/* Left Split: Editor */}
+              <div className="p-4 sm:p-5 flex flex-col">
                 <textarea
                   ref={textareaRef}
-                  id="note-editor-textarea"
-                  rows={20}
+                  rows={22}
                   value={content}
                   onChange={(e) => handleContentChange(e.target.value)}
                   onBlur={handleContentBlur}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type your notes naturally... Hit Enter on bullets or checkboxes (- [ ]) for automatic continuation, or write formulas like $E=mc^2$ or $$\\text{PED}=\\frac{\\%\\Delta Q}{\\%\\Delta P}$$."
-                  className="w-full flex-1 text-sm sm:text-base font-sans text-slate-800 placeholder-slate-400 focus:outline-hidden resize-y min-h-[380px] leading-relaxed"
+                  placeholder="Type notes on left, see live render on right..."
+                  className="w-full flex-1 text-xs sm:text-sm font-mono text-slate-800 placeholder-slate-400 focus:outline-hidden resize-none min-h-[420px] leading-relaxed"
                 />
               </div>
-            ) : viewMode === 'split' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 min-h-[420px]">
-                {/* Left Split: Editor */}
-                <div className="p-4 flex flex-col">
-                  <textarea
-                    ref={textareaRef}
-                    rows={20}
-                    value={content}
-                    onChange={(e) => handleContentChange(e.target.value)}
-                    onBlur={handleContentBlur}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type notes on left, see live render on right..."
-                    className="w-full flex-1 text-xs sm:text-sm font-mono text-slate-800 placeholder-slate-400 focus:outline-hidden resize-none leading-relaxed"
-                  />
-                </div>
-                {/* Right Split: Live KaTeX & Markdown Rendering */}
-                <div className="p-4 sm:p-5 overflow-y-auto bg-[#FAFBFD] min-h-[380px]">
-                  {content.trim() ? (
-                    <MarkdownRenderer content={content} />
-                  ) : (
-                    <p className="text-xs text-slate-400 italic">Live preview will appear here...</p>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="p-6 min-h-[420px] overflow-y-auto bg-[#FAFBFD]">
+              {/* Right Split: Live KaTeX & Markdown Rendering */}
+              <div className="p-4 sm:p-6 overflow-y-auto bg-[#FAFBFD] min-h-[420px]">
                 {content.trim() ? (
                   <MarkdownRenderer content={content} />
                 ) : (
-                  <p className="text-xs text-slate-400 italic">
-                    Nothing typed yet. Switch back to Write mode to take notes.
-                  </p>
+                  <p className="text-xs text-slate-400 italic">Live preview will appear here...</p>
                 )}
               </div>
-            )}
-
-            {/* Bottom Editor Bar */}
-            <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="flex items-center gap-1.5">
-                <span>Tab = Indent</span>
-                <span>&bull;</span>
-                <span>Enter = Auto List</span>
-                <span>&bull;</span>
-                <span>KaTeX ($...$) Supported</span>
-              </span>
-              <span>Notion-Style Canvas</span>
             </div>
-          </div>
-        </div>
-
-        {/* Right Column: Study Studio (5 cols) */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
-            {/* Study Studio Header & Tabs */}
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xs">
-                  <Sparkles className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-slate-900 text-sm">Study Studio</h3>
-                  <p className="text-[10px] text-slate-500">AI-generated from note & sources</p>
-                </div>
-              </div>
-
-              {/* Tab Switcher: Question Bank vs Flashcards */}
-              <div className="flex items-center p-1 bg-slate-100 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setStudyTab('questions')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    studyTab === 'questions'
-                      ? 'bg-white text-blue-700 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <HelpCircle className="w-3.5 h-3.5" />
-                  <span>Questions ({totalQuestions})</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStudyTab('flashcards')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    studyTab === 'flashcards'
-                      ? 'bg-white text-blue-700 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>Flashcards ({note.flashcards?.length || 0})</span>
-                </button>
-              </div>
+          ) : (
+            <div className="p-6 sm:p-8 min-h-[460px] overflow-y-auto bg-[#FAFBFD]">
+              {content.trim() ? (
+                <MarkdownRenderer content={content} />
+              ) : (
+                <p className="text-xs text-slate-400 italic">
+                  Nothing typed yet. Switch back to Write mode to take notes.
+                </p>
+              )}
             </div>
+          )}
 
-            {/* Active Study Tool */}
-            {studyTab === 'questions' ? (
-              <QuestionBankView
-                noteTitle={note.title}
-                noteContent={note.content}
-                sources={note.sources || []}
-                multipleChoice={note.multipleChoice || []}
-                longAnswer={note.longAnswer || []}
-                onUpdateQuestions={handleUpdateQuestions}
-              />
-            ) : (
-              <FlashcardsView
-                noteTitle={note.title}
-                noteContent={note.content}
-                sources={note.sources || []}
-                flashcards={note.flashcards || []}
-                onUpdateFlashcards={handleUpdateFlashcards}
-              />
-            )}
+          {/* Bottom Editor Bar */}
+          <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <span>Tab = Indent</span>
+              <span>&bull;</span>
+              <span>Enter = Auto List</span>
+              <span>&bull;</span>
+              <span>KaTeX ($...$) Supported</span>
+            </span>
+            <span>Notion-Style Canvas</span>
           </div>
         </div>
       </div>
@@ -952,7 +849,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
             </div>
             <h3 className="text-base font-extrabold text-slate-900">Delete this note?</h3>
             <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-              Are you sure you want to delete <span className="font-bold text-slate-800">"{note.title}"</span>? This will permanently remove its notes, sources, question bank, and flashcards.
+              Are you sure you want to delete <span className="font-bold text-slate-800">"{note.title}"</span>? This will permanently remove its notes and attached class files.
             </p>
             <div className="mt-5 flex items-center justify-end gap-2.5">
               <button
