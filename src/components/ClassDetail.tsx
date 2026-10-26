@@ -200,25 +200,25 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-6 sm:space-y-8 animate-fade-scale select-none">
       {/* Back button and Navigation bar */}
       <div className="flex items-center justify-between">
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200/80 rounded-xl transition-all cursor-pointer shadow-2xs min-h-[44px]"
+          className="flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#282a2c] hover:bg-slate-100 dark:hover:bg-[#353739] border border-slate-200/80 dark:border-[#3c4043] rounded-xl transition-all cursor-pointer shadow-2xs min-h-[44px] google-btn-press"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>All Classes</span>
         </button>
 
-        <span className="text-xs text-slate-400 font-medium">
+        <span className="text-xs text-slate-400 dark:text-[#80868b] font-medium">
           Auto-saves in real-time
         </span>
       </div>
 
       {/* Class Overview Hero Card */}
-      <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200/80 relative overflow-hidden">
+      <section className="bg-white dark:bg-[#282a2c] rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200/80 dark:border-[#3c4043] relative overflow-hidden transition-colors">
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex-1">
             {/* Editable Class Name */}
@@ -234,26 +234,26 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                       if (e.key === 'Escape') setIsEditingClassName(false);
                     }}
                     autoFocus
-                    className="w-full px-3.5 py-2 text-2xl font-bold bg-slate-50 border border-blue-500 rounded-xl text-slate-900 focus:outline-none"
+                    className="w-full px-3.5 py-2 text-2xl font-bold bg-slate-50 dark:bg-[#242526] border border-blue-500 dark:border-[#8ab4f8] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={handleSaveClassName}
-                    className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl cursor-pointer"
+                    className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-[#353739] rounded-xl cursor-pointer"
                   >
                     <Check className="w-5 h-5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsEditingClassName(false)}
-                    className="p-2 text-slate-400 hover:bg-slate-100 rounded-xl cursor-pointer"
+                    className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#353739] rounded-xl cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2.5 group">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
                     {classItem.name}
                   </h1>
                   <button
@@ -263,7 +263,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                       setIsEditingClassName(true);
                     }}
                     title="Rename Class"
-                    className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                    className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] hover:bg-blue-50 dark:hover:bg-[#353739] rounded-lg transition-colors cursor-pointer"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -271,25 +271,26 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
               )}
             </div>
 
-            <p className="text-xs text-slate-500 mt-1 font-medium">
+            <p className="text-xs text-slate-500 dark:text-[#c4c7c5] mt-1 font-medium">
               Current Overall Course Grade
             </p>
 
             <div className="mt-3 flex items-baseline gap-4 flex-wrap">
-              <div className="text-5xl sm:text-6xl font-extrabold text-slate-900 tracking-tight">
+              <div className="text-5xl sm:text-6xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
                 {classCalc.average.toFixed(2)}
-                <span className="text-3xl sm:text-4xl text-blue-600 font-semibold">%</span>
+                <span className="text-3xl sm:text-4xl text-blue-600 dark:text-[#8ab4f8] font-semibold">%</span>
               </div>
-              <div className={`px-3 py-1 text-sm font-bold rounded-xl border ${letterGradeInfo.badgeBg}`}>
+              <div className={`px-3 py-1 text-sm font-bold rounded-xl border ${letterGradeInfo.badgeBg} dark:bg-[#353739] dark:text-[#e8eaed] dark:border-[#444746]`}>
                 Grade: {letterGradeInfo.letter}
               </div>
               {classCalc.isDefault100 && (
-                <span className="text-xs px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-medium border border-blue-200/60">
+                <span className="text-xs px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-700 dark:text-[#8ab4f8] font-medium border border-blue-200/60 dark:border-[#8ab4f8]/30">
                   Default 100% (No graded tasks yet)
                 </span>
               )}
             </div>
           </div>
+
 
           <div className="flex items-center gap-2 flex-wrap">
             {/* Ask AI Advisor Button */}
@@ -311,9 +312,9 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
               type="button"
               onClick={() => setIsManageWeightsOpen(true)}
               title="Configure categories and weights"
-              className="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all flex items-center gap-2 cursor-pointer min-h-[44px]"
+              className="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-[#c4c7c5] bg-slate-100 hover:bg-slate-200 dark:bg-[#353739] dark:hover:bg-[#444746] rounded-xl transition-all flex items-center gap-2 cursor-pointer min-h-[44px] google-btn-press"
             >
-              <Sliders className="w-4 h-4 text-slate-500" />
+              <Sliders className="w-4 h-4 text-slate-500 dark:text-[#80868b]" />
               <span>Configure Weights</span>
             </button>
 
@@ -322,7 +323,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                 type="button"
                 onClick={() => setIsConfirmDeleteClassOpen(true)}
                 title="Delete this class"
-                className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer min-h-[44px]"
+                className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-all cursor-pointer min-h-[44px] google-btn-press"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -331,23 +332,23 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
         </div>
 
         {/* Visual Weighted Progress & Contribution Breakdown */}
-        <div className="mt-6 pt-5 border-t border-slate-100 space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-[#3c4043] space-y-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#c4c7c5] font-medium">
             <span>Class Grade Meter</span>
             <span>{classCalc.average.toFixed(2)}%</span>
           </div>
 
-          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex">
+          <div className="w-full h-3 bg-slate-100 dark:bg-[#353739] rounded-full overflow-hidden flex">
             {classItem.categories.map((cat, idx) => {
               const calc = classCalc.categoryCalculations[cat.id];
               const contribution = calc ? calc.contribution : 0;
               const blueShades = [
-                'bg-blue-600',
-                'bg-blue-500',
-                'bg-sky-500',
-                'bg-indigo-500',
-                'bg-cyan-600',
-                'bg-blue-400',
+                'bg-blue-600 dark:bg-[#8ab4f8]',
+                'bg-blue-500 dark:bg-[#78a9f7]',
+                'bg-sky-500 dark:bg-[#6ba2f5]',
+                'bg-indigo-500 dark:bg-[#c58af9]',
+                'bg-cyan-600 dark:bg-[#81c995]',
+                'bg-blue-400 dark:bg-[#5b95f2]',
               ];
               const colorClass = blueShades[idx % blueShades.length];
 
@@ -355,7 +356,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                 <div
                   key={cat.id}
                   title={`${cat.name}: contributes ${contribution.toFixed(2)}% (Weight: ${cat.weight}%, Avg: ${calc?.average.toFixed(2)}%)`}
-                  className={`h-full ${colorClass} transition-all duration-300 relative border-r border-white/30 last:border-r-0`}
+                  className={`h-full ${colorClass} transition-all duration-300 relative border-r border-white/30 dark:border-black/30 last:border-r-0`}
                   style={{ width: `${Math.min(100, Math.max(0, contribution))}%` }}
                 />
               );
@@ -363,31 +364,31 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
           </div>
 
           {/* Contribution legend chips */}
-          <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-slate-500">
-            <span className="font-semibold text-slate-600">Breakdown:</span>
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-slate-500 dark:text-[#9aa0a6]">
+            <span className="font-semibold text-slate-600 dark:text-[#c4c7c5]">Breakdown:</span>
             {classItem.categories.map((cat, idx) => {
               const calc = classCalc.categoryCalculations[cat.id];
               const contribution = calc ? calc.contribution : 0;
               const blueShades = [
-                'bg-blue-600',
-                'bg-blue-500',
-                'bg-sky-500',
-                'bg-indigo-500',
-                'bg-cyan-600',
-                'bg-blue-400',
+                'bg-blue-600 dark:bg-[#8ab4f8]',
+                'bg-blue-500 dark:bg-[#78a9f7]',
+                'bg-sky-500 dark:bg-[#6ba2f5]',
+                'bg-indigo-500 dark:bg-[#c58af9]',
+                'bg-cyan-600 dark:bg-[#81c995]',
+                'bg-blue-400 dark:bg-[#5b95f2]',
               ];
               const dotColor = blueShades[idx % blueShades.length];
 
               return (
                 <div
                   key={cat.id}
-                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/60"
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 dark:bg-[#353739] border border-slate-200/60 dark:border-[#444746]"
                 >
                   <span className={`w-2 h-2 rounded-full ${dotColor}`} />
-                  <span className="font-medium text-slate-800">{cat.name}:</span>
-                  <span className="text-slate-500">+{contribution.toFixed(2)}%</span>
+                  <span className="font-medium text-slate-800 dark:text-[#e8eaed]">{cat.name}:</span>
+                  <span className="text-slate-500 dark:text-[#9aa0a6]">+{contribution.toFixed(2)}%</span>
                   {calc?.isDefault100 && (
-                    <span className="text-[9px] text-blue-600 font-semibold">(100%)</span>
+                    <span className="text-[9px] text-blue-600 dark:text-[#8ab4f8] font-semibold">(100%)</span>
                   )}
                 </div>
               );
@@ -398,16 +399,16 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
 
       {/* STRICT WEIGHT VALIDATION ERROR BANNER */}
       {!classCalc.isWeightValid && (
-        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-rose-900 animate-in fade-in duration-200">
+        <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-rose-900 dark:text-rose-200 animate-slide-up">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-rose-100 text-rose-700 rounded-xl flex-shrink-0 mt-0.5">
+            <div className="p-2 bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 rounded-xl flex-shrink-0 mt-0.5">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-rose-900">
+              <h3 className="text-sm font-bold text-rose-900 dark:text-rose-100">
                 Category Weights Must Total Exactly 100%
               </h3>
-              <p className="text-xs text-rose-700 mt-0.5">
+              <p className="text-xs text-rose-700 dark:text-rose-300 mt-0.5">
                 {classCalc.weightError || 'The sum of all category weights must equal 100% for accurate grade calculations.'}
               </p>
             </div>
@@ -415,7 +416,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
           <button
             type="button"
             onClick={() => setIsManageWeightsOpen(true)}
-            className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all cursor-pointer shadow-sm shadow-rose-200 flex-shrink-0"
+            className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all cursor-pointer shadow-sm shadow-rose-200 dark:shadow-none flex-shrink-0 google-btn-press"
           >
             Adjust Weights
           </button>
@@ -423,17 +424,18 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
       )}
 
       {/* Add Grading Category Section */}
-      <div className="bg-blue-50/60 rounded-2xl p-4 sm:p-5 border border-blue-200/60">
+      <div className="bg-blue-50/60 dark:bg-[#282a2c] rounded-2xl p-4 sm:p-5 border border-blue-200/60 dark:border-[#3c4043] transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-blue-900 uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <div className="flex items-center gap-1.5 text-xs font-bold text-blue-900 dark:text-[#8ab4f8] uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-[#8ab4f8]" />
               Add Grading Category
             </div>
-            <p className="text-xs text-blue-700/80 mt-0.5">
+            <p className="text-xs text-blue-700/80 dark:text-[#c4c7c5] mt-0.5">
               Customize categories for this course (weights must total 100%).
             </p>
           </div>
+
 
           {!showAddCategoryInput ? (
             <button
@@ -505,18 +507,18 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
       {/* Weighted Grading Categories List */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-[#e8eaed] tracking-tight">
             Grading Categories ({classItem.categories.length})
           </h2>
-          <span className="text-xs text-slate-500 font-medium">
+          <span className="text-xs text-slate-500 dark:text-[#80868b] font-medium">
             Category weights must sum to 100%
           </span>
         </div>
 
         {classItem.categories.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 text-center border border-slate-200/80">
-            <p className="text-sm font-semibold text-slate-800">No grading categories defined.</p>
-            <p className="text-xs text-slate-500 mt-1">
+          <div className="bg-white dark:bg-[#282a2c] rounded-2xl p-8 text-center border border-slate-200/80 dark:border-[#3c4043]">
+            <p className="text-sm font-semibold text-slate-800 dark:text-[#e8eaed]">No grading categories defined.</p>
+            <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1">
               Add categories like Tests, Quizzes, or Assignments above.
             </p>
           </div>
@@ -548,27 +550,27 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
       </div>
 
       {/* Total Weight Status Bar at bottom */}
-      <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#282a2c] rounded-2xl p-5 border border-slate-200/80 dark:border-[#3c4043] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-bold text-slate-900">
+            <span className="text-sm font-bold text-slate-900 dark:text-[#e8eaed]">
               Total Category Weight:
             </span>
             <span
               className={`text-sm font-extrabold px-2 py-0.5 rounded-md border ${
                 classCalc.isWeightValid
-                  ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                  : 'text-rose-700 bg-rose-50 border-rose-300'
+                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+                  : 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800/60'
               }`}
             >
               {roundTo(classCalc.totalWeight, 2).toFixed(1)}%
             </span>
             {classCalc.isWeightValid ? (
-              <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                 <Check className="w-3.5 h-3.5 stroke-[3]" /> Exactly 100%
               </span>
             ) : (
-              <span className="text-xs text-rose-600 font-semibold flex items-center gap-1">
+              <span className="text-xs text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1">
                 <AlertTriangle className="w-3.5 h-3.5" />
                 {classCalc.totalWeight < 100
                   ? `Short by ${(100 - classCalc.totalWeight).toFixed(1)}%`
@@ -576,7 +578,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-400 dark:text-[#80868b] mt-1">
             {classCalc.isWeightValid
               ? 'All category weights total exactly 100%.'
               : 'Category weights must equal 100% before class averages are finalized.'}
@@ -587,14 +589,14 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
           <button
             type="button"
             onClick={handleEqualizeWeights}
-            className="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer min-h-[40px]"
+            className="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-[#c4c7c5] bg-slate-100 hover:bg-slate-200 dark:bg-[#353739] dark:hover:bg-[#444746] rounded-xl transition-colors cursor-pointer min-h-[40px] google-btn-press"
           >
             Equalize Weights
           </button>
           <button
             type="button"
             onClick={() => setIsManageWeightsOpen(true)}
-            className="flex-1 sm:flex-initial px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors cursor-pointer min-h-[40px]"
+            className="flex-1 sm:flex-initial px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors cursor-pointer min-h-[40px] google-btn-press"
           >
             Configure Weights
           </button>
@@ -680,19 +682,19 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden transition-all">
+    <div className="bg-white dark:bg-[#282a2c] rounded-2xl border border-slate-200/80 dark:border-[#3c4043] shadow-xs overflow-hidden transition-all google-card">
       {/* Category Header */}
-      <div className="p-4 sm:p-5 bg-slate-50/60 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 bg-slate-50/60 dark:bg-[#242526] border-b border-slate-100 dark:border-[#3c4043] flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Name and Reorder */}
         <div className="flex items-center gap-2.5 flex-1">
           {/* Reorder Buttons */}
-          <div className="flex flex-col gap-0.5 text-slate-400">
+          <div className="flex flex-col gap-0.5 text-slate-400 dark:text-[#80868b]">
             <button
               type="button"
               disabled={catIndex === 0}
               onClick={() => onMoveCategory('up')}
               title="Move category up"
-              className="p-1 hover:text-slate-800 disabled:opacity-20 cursor-pointer"
+              className="p-1 hover:text-slate-800 dark:hover:text-[#e8eaed] disabled:opacity-20 cursor-pointer"
             >
               <ArrowUp className="w-3.5 h-3.5" />
             </button>
@@ -701,7 +703,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
               disabled={catIndex === totalCategories - 1}
               onClick={() => onMoveCategory('down')}
               title="Move category down"
-              className="p-1 hover:text-slate-800 disabled:opacity-20 cursor-pointer"
+              className="p-1 hover:text-slate-800 dark:hover:text-[#e8eaed] disabled:opacity-20 cursor-pointer"
             >
               <ArrowDown className="w-3.5 h-3.5" />
             </button>
@@ -718,26 +720,26 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                   if (e.key === 'Escape') setIsEditingName(false);
                 }}
                 autoFocus
-                className="w-full px-2.5 py-1 text-sm bg-white border border-blue-500 rounded-lg text-slate-900 focus:outline-none"
+                className="w-full px-2.5 py-1 text-sm bg-white dark:bg-[#1e1f20] border border-blue-500 dark:border-[#8ab4f8] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none"
               />
               <button
                 type="button"
                 onClick={saveName}
-                className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg cursor-pointer"
+                className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-[#353739] rounded-lg cursor-pointer"
               >
                 <Check className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => setIsEditingName(false)}
-                className="p-1 text-slate-400 hover:bg-slate-100 rounded-lg cursor-pointer"
+                className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#353739] rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]">
                 {category.name}
               </h3>
               <button
@@ -747,7 +749,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                   setIsEditingName(true);
                 }}
                 title="Rename category"
-                className="p-1 text-slate-400 hover:text-blue-600 rounded-md cursor-pointer"
+                className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] rounded-md cursor-pointer"
               >
                 <Edit2 className="w-3.5 h-3.5" />
               </button>
@@ -758,13 +760,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           {catCalc.isDefault100 ? (
             <span
               title="Category has no graded assessments entered yet, so its calculated average automatically defaults to 100%."
-              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-700 dark:text-[#8ab4f8] border border-blue-200/80 dark:border-[#8ab4f8]/30"
             >
-              <Info className="w-3 h-3 text-blue-500" />
+              <Info className="w-3 h-3 text-blue-500 dark:text-[#8ab4f8]" />
               No grades yet (100%)
             </span>
           ) : (
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">
               {catCalc.gradedCount} graded of {catCalc.totalCount}
             </span>
           )}
@@ -774,7 +776,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
         <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap justify-between md:justify-end">
           {/* Weight percentage input */}
           <div className="flex items-center gap-2">
-            <label htmlFor={`weight-input-${category.id}`} className="text-xs font-semibold text-slate-600">
+            <label htmlFor={`weight-input-${category.id}`} className="text-xs font-semibold text-slate-600 dark:text-[#c4c7c5]">
               Weight:
             </label>
             <div className="relative">
@@ -787,9 +789,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                 inputMode="decimal"
                 value={category.weight}
                 onChange={(e) => onWeightChange(e.target.value)}
-                className="w-20 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 min-h-[38px]"
+                className="w-20 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
               />
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-[#80868b] pointer-events-none">
                 %
               </span>
             </div>
@@ -797,10 +799,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 
           {/* Category calculated average */}
           <div className="text-right min-w-[90px]">
-            <div className="text-xs text-slate-400 font-medium">Average</div>
-            <div className="text-lg font-extrabold text-slate-900 tracking-tight">
+            <div className="text-xs text-slate-400 dark:text-[#80868b] font-medium">Average</div>
+            <div className="text-lg font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
               {catCalc.average.toFixed(2)}
-              <span className="text-sm text-blue-600 font-semibold">%</span>
+              <span className="text-sm text-blue-600 dark:text-[#8ab4f8] font-semibold">%</span>
             </div>
           </div>
 
@@ -809,7 +811,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             type="button"
             onClick={onDeleteCategory}
             title="Delete Category"
-            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer min-h-[38px]"
+            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer min-h-[38px] google-btn-press"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -819,17 +821,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
       {/* Assessments list inside this category */}
       <div className="p-4 sm:p-5 space-y-3">
         {category.assessments.length === 0 ? (
-          <div className="py-6 px-4 bg-slate-50/50 rounded-xl text-center border border-dashed border-slate-200">
-            <p className="text-xs font-medium text-slate-500">
+          <div className="py-6 px-4 bg-slate-50/50 dark:bg-[#242526] rounded-xl text-center border border-dashed border-slate-200 dark:border-[#3c4043]">
+            <p className="text-xs font-medium text-slate-500 dark:text-[#9aa0a6]">
               No assessments in this category yet.
             </p>
-            <p className="text-[11px] text-blue-600 mt-0.5">
+            <p className="text-[11px] text-blue-600 dark:text-[#8ab4f8] mt-0.5">
               Category average is automatically 100% until grades are added.
             </p>
             <button
               type="button"
               onClick={onAddAssessment}
-              className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 google-btn-press"
             >
               <Plus className="w-3.5 h-3.5" />
               Add First Assessment
@@ -856,7 +858,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
             <button
               type="button"
               onClick={onAddAssessment}
-              className="px-3.5 py-2 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50/80 hover:bg-blue-100 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer min-h-[40px]"
+              className="px-3.5 py-2 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] hover:text-blue-700 bg-blue-50/80 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer min-h-[40px] google-btn-press"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Add Assessment to {category.name}</span>
@@ -925,10 +927,10 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
   const isGraded = assessment.score !== null && assessment.score !== undefined;
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 sm:px-4 sm:py-3 bg-white rounded-xl border border-slate-200/70 hover:border-blue-300 hover:shadow-2xs transition-all">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 sm:px-4 sm:py-3 bg-white dark:bg-[#242526] rounded-xl border border-slate-200/70 dark:border-[#3c4043] hover:border-blue-300 dark:hover:border-blue-500/40 hover:shadow-2xs transition-all">
       {/* Title Input */}
       <div className="flex items-center gap-2 flex-1">
-        <span className="text-xs font-semibold text-slate-300 w-5 text-right select-none">
+        <span className="text-xs font-semibold text-slate-300 dark:text-[#5f6368] w-5 text-right select-none">
           {assIndex + 1}.
         </span>
         <input
@@ -936,7 +938,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
           value={assessment.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
           placeholder="Assessment title..."
-          className="w-full text-sm font-semibold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-600 focus:outline-none transition-colors py-1"
+          className="w-full text-sm font-semibold text-slate-900 dark:text-[#e8eaed] bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-[#5f6368] focus:border-blue-600 dark:focus:border-[#8ab4f8] focus:outline-none transition-colors py-1"
         />
       </div>
 
@@ -952,7 +954,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
             })
           }
           title="Toggle between Percentage and Points earned"
-          className="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer select-none min-h-[38px] min-w-[38px] flex items-center justify-center"
+          className="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-slate-200 dark:border-[#3c4043] text-slate-600 dark:text-[#c4c7c5] hover:text-blue-600 dark:hover:text-[#8ab4f8] hover:bg-blue-50 dark:hover:bg-[#303134] transition-colors cursor-pointer select-none min-h-[38px] min-w-[38px] flex items-center justify-center"
         >
           {isPointsMode ? 'Pts' : '%'}
         </button>
@@ -968,9 +970,9 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Pts"
               value={assessment.earnedScore !== undefined ? assessment.earnedScore : ''}
               onChange={(e) => handlePointsEarnedChange(e.target.value)}
-              className="w-16 px-2 py-1.5 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[38px]"
+              className="w-16 px-2 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
             />
-            <span className="text-xs font-bold text-slate-400">/</span>
+            <span className="text-xs font-bold text-slate-400 dark:text-[#9aa0a6]">/</span>
             <input
               type="number"
               min="1"
@@ -979,7 +981,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Total"
               value={assessment.maxScore !== undefined ? assessment.maxScore : 100}
               onChange={(e) => handlePointsMaxChange(e.target.value)}
-              className="w-16 px-2 py-1.5 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[38px]"
+              className="w-16 px-2 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
             />
           </div>
         ) : (
@@ -993,9 +995,9 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Grade"
               value={assessment.score !== null && assessment.score !== undefined ? assessment.score : ''}
               onChange={(e) => handlePercentageChange(e.target.value)}
-              className="w-24 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 min-h-[38px]"
+              className="w-24 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
             />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-[#9aa0a6] pointer-events-none">
               %
             </span>
           </div>
@@ -1004,11 +1006,11 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
         {/* Calculated percentage badge */}
         <div className="min-w-[65px] text-right">
           {isGraded ? (
-            <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded-md border border-blue-200/60 inline-block">
+            <span className="text-xs font-bold text-blue-700 dark:text-[#8ab4f8] bg-blue-50 dark:bg-blue-950/40 px-2 py-1 rounded-md border border-blue-200/60 dark:border-blue-800/40 inline-block">
               {assessment.score?.toFixed(1)}%
             </span>
           ) : (
-            <span className="text-[11px] font-medium text-slate-400 italic">
+            <span className="text-[11px] font-medium text-slate-400 dark:text-[#9aa0a6] italic">
               Ungraded
             </span>
           )}
@@ -1020,7 +1022,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
             type="button"
             onClick={onReset}
             title="Reset grade to blank/ungraded"
-            className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
@@ -1031,7 +1033,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
           type="button"
           onClick={onDelete}
           title="Delete assessment"
-          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+          className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

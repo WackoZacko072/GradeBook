@@ -12,7 +12,6 @@ interface NotebookViewProps {
   onAddNote: (newNote: NoteItem) => void;
   onUpdateNote: (updatedNote: NoteItem) => void;
   onDeleteNote: (noteId: string) => void;
-  onLoadDemoNotes: () => void;
   onOpenSlateAi?: (prompt?: string) => void;
 }
 
@@ -24,7 +23,6 @@ export const NotebookView: React.FC<NotebookViewProps> = ({
   onAddNote,
   onUpdateNote,
   onDeleteNote,
-  onLoadDemoNotes,
   onOpenSlateAi,
 }) => {
   const activeNote = notes.find((n) => n.id === selectedNoteId) || null;
@@ -72,7 +70,6 @@ export const NotebookView: React.FC<NotebookViewProps> = ({
       onSelectNote={(id) => onSelectNote(id)}
       onCreateNote={handleCreateNewNote}
       onDeleteNote={onDeleteNote}
-      onLoadDemoNotes={onLoadDemoNotes}
       onOpenSlateAi={onOpenSlateAi}
     />
   );

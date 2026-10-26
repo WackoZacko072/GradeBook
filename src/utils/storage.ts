@@ -1,5 +1,4 @@
 import type { ClassItem } from '../types/grade';
-import { INITIAL_DEMO_CLASSES } from './sampleData';
 
 const PRIMARY_STORAGE_KEY = 'grade_calculator_data_v1';
 const SECONDARY_STORAGE_KEY = 'zachary_gradebook_data_v1';
@@ -19,17 +18,17 @@ export function loadClasses(): ClassItem[] {
     }
 
     if (!raw) {
-      return INITIAL_DEMO_CLASSES;
+      return [];
     }
 
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
-    return INITIAL_DEMO_CLASSES;
+    return [];
   } catch (err) {
     console.error('Failed to load gradebook data from localStorage:', err);
-    return INITIAL_DEMO_CLASSES;
+    return [];
   }
 }
 

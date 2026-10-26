@@ -33,8 +33,11 @@ interface AiAdvisorDrawerProps {
   notes?: NoteItem[];
   slabs?: SlabItem[];
   prefilledPrompt?: string;
+  initialPrompt?: string;
   onClearPrefilledPrompt?: () => void;
   onNavigate?: (tab: 'gradebook' | 'notebook' | 'slab') => void;
+  onNavigateToClass?: (id: string) => void;
+  onNavigateToNote?: (id: string) => void;
 }
 
 export interface ChatSession {
@@ -106,6 +109,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   notes = [],
   slabs = [],
   prefilledPrompt,
+  initialPrompt,
   onClearPrefilledPrompt,
   onNavigate,
 }) => {
@@ -156,12 +160,13 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
 
   // Handle prefilled prompt from other components
   useEffect(() => {
-    if (prefilledPrompt && isOpen) {
-      setInputPrompt(prefilledPrompt);
+    const promptToUse = prefilledPrompt || initialPrompt;
+    if (promptToUse && isOpen) {
+      setInputPrompt(promptToUse);
       if (onClearPrefilledPrompt) onClearPrefilledPrompt();
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [prefilledPrompt, isOpen, onClearPrefilledPrompt]);
+  }, [prefilledPrompt, initialPrompt, isOpen, onClearPrefilledPrompt]);
 
   // Handle ESC key to return home
   useEffect(() => {
@@ -334,16 +339,16 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#FAFBFD] flex flex-col overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-[#FAFBFD] dark:bg-[#1e1f20] flex flex-col overflow-hidden animate-in fade-in duration-200">
       {/* Top Header Bar */}
-      <header className="h-16 px-3 sm:px-6 bg-white border-b border-slate-200/90 flex items-center justify-between flex-shrink-0 z-20 shadow-2xs">
+      <header className="h-16 px-3 sm:px-6 bg-white dark:bg-[#282a2c] border-b border-slate-200/90 dark:border-[#3c4043] flex items-center justify-between flex-shrink-0 z-20 shadow-2xs">
         {/* Left: 3-line hamburger menu button + Branding */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Three-line button on top left-hand corner to toggle sidebar */}
           <button
             type="button"
             onClick={() => setIsSidebarOpen((prev) => !prev)}
-            className="p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center -ml-1"
+            className="p-2 text-slate-700 dark:text-[#e8eaed] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center -ml-1 google-btn-press"
             title={isSidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
             aria-label="Toggle sidebar menu"
           >
@@ -360,13 +365,13 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base text-slate-900 tracking-tight">
-                  gradeslate<span className="text-blue-600">.</span>
+                <span className="font-extrabold text-base text-slate-900 dark:text-[#e8eaed] tracking-tight">
+                  gradeslate<span className="text-blue-600 dark:text-blue-400">.</span>
                 </span>
-                <span className="text-slate-300 font-light">/</span>
-                <span className="font-extrabold text-slate-800 text-sm">Slate AI</span>
+                <span className="text-slate-300 dark:text-[#5f6368] font-light">/</span>
+                <span className="font-extrabold text-slate-800 dark:text-[#e8eaed] text-sm">Slate AI</span>
               </div>
-              <p className="text-[11px] text-slate-500 hidden sm:block">
+              <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] hidden sm:block">
                 Academic Co-Pilot & Whole Gradebook Analyzer
               </p>
             </div>
@@ -377,11 +382,11 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
         <div className="hidden md:flex items-center gap-2 max-w-sm truncate">
           <div
             onClick={() => handleStartRename(currentSession)}
-            className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 hover:bg-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer transition-colors border border-slate-200/70 group select-none"
+            className="flex items-center gap-1.5 px-3 py-1 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200/80 dark:hover:bg-[#3c4043] rounded-xl text-xs font-semibold text-slate-700 dark:text-[#e8eaed] cursor-pointer transition-colors border border-slate-200/70 dark:border-[#3c4043] group select-none google-btn-press"
             title="Click to rename this chat"
           >
             <span className="truncate max-w-[220px]">{currentSession.title}</span>
-            <Edit2 className="w-3 h-3 text-slate-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+            <Edit2 className="w-3 h-3 text-slate-400 dark:text-[#9aa0a6] group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex-shrink-0" />
           </div>
         </div>
 
@@ -390,10 +395,10 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           <button
             type="button"
             onClick={handleNewChat}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50/80 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer border border-blue-200/70"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50/80 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 rounded-xl transition-colors cursor-pointer border border-blue-200/70 dark:border-blue-800 google-btn-press"
             title="Start a new chat"
           >
-            <Plus className="w-4 h-4 text-blue-600 stroke-[2.4]" />
+            <Plus className="w-4 h-4 text-blue-600 dark:text-blue-400 stroke-[2.4]" />
             <span className="hidden sm:inline">New Chat</span>
           </button>
         </div>
@@ -404,7 +409,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
         {/* Mobile Backdrop when Sidebar is Open */}
         {isSidebarOpen && (
           <div
-            className="md:hidden fixed inset-0 top-16 bg-slate-900/40 backdrop-blur-xs z-30 animate-in fade-in duration-150"
+            className="md:hidden fixed inset-0 top-16 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs z-30 animate-in fade-in duration-150"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
@@ -415,18 +420,18 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
             isSidebarOpen
               ? 'fixed inset-y-16 left-0 z-40 w-72 shadow-2xl flex md:static md:w-72 md:shadow-none'
               : 'hidden'
-          } lg:w-80 border-r border-slate-200/90 bg-white flex-col flex-shrink-0 h-full overflow-hidden transition-all`}
+          } lg:w-80 border-r border-slate-200/90 dark:border-[#3c4043] bg-white dark:bg-[#282a2c] flex-col flex-shrink-0 h-full overflow-hidden transition-all`}
         >
           {/* Workspace Switcher Section */}
-          <div className="p-3 border-b border-slate-100 bg-slate-50/80">
+          <div className="p-3 border-b border-slate-100 dark:border-[#3c4043] bg-slate-50/80 dark:bg-[#1e1f20]/60">
             <div className="flex items-center justify-between mb-2 px-1">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-[#9aa0a6]">
                 Workspace
               </span>
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen(false)}
-                className="md:hidden p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200/60 transition-colors cursor-pointer"
+                className="md:hidden p-1 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg hover:bg-slate-200/60 dark:hover:bg-[#303134] transition-colors cursor-pointer"
                 title="Hide sidebar"
                 aria-label="Hide sidebar"
               >
@@ -445,15 +450,15 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                     onClose();
                   }
                 }}
-                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-blue-700 hover:bg-blue-50/80 transition-all cursor-pointer group"
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-[#c4c7c5] hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50/80 dark:hover:bg-blue-950/40 transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-blue-100/70 text-blue-600 rounded-lg group-hover:bg-blue-200/70 transition-colors">
+                  <div className="p-1.5 bg-blue-100/70 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-lg group-hover:bg-blue-200/70 dark:group-hover:bg-blue-900/60 transition-colors">
                     <BookOpen className="w-3.5 h-3.5 stroke-[2.2]" />
                   </div>
                   <span>Gradebook</span>
                 </div>
-                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-blue-600 bg-slate-200/60 group-hover:bg-blue-100/70 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold text-slate-400 dark:text-[#9aa0a6] group-hover:text-blue-600 dark:group-hover:text-blue-400 bg-slate-200/60 dark:bg-[#303134] group-hover:bg-blue-100/70 dark:group-hover:bg-blue-950/60 px-2 py-0.5 rounded-full">
                   {classes.length} {classes.length === 1 ? 'class' : 'classes'}
                 </span>
               </button>
@@ -468,15 +473,15 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                     onClose();
                   }
                 }}
-                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-indigo-700 hover:bg-indigo-50/80 transition-all cursor-pointer group"
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-[#c4c7c5] hover:text-indigo-700 dark:hover:text-indigo-300 hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40 transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-indigo-100/70 text-indigo-600 rounded-lg group-hover:bg-indigo-200/70 transition-colors">
+                  <div className="p-1.5 bg-indigo-100/70 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-lg group-hover:bg-indigo-200/70 dark:group-hover:bg-indigo-900/60 transition-colors">
                     <BookMarked className="w-3.5 h-3.5 stroke-[2.2]" />
                   </div>
                   <span>Notebook</span>
                 </div>
-                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-indigo-600 bg-slate-200/60 group-hover:bg-indigo-100/70 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold text-slate-400 dark:text-[#9aa0a6] group-hover:text-indigo-600 dark:group-hover:text-indigo-400 bg-slate-200/60 dark:bg-[#303134] group-hover:bg-indigo-100/70 dark:group-hover:bg-indigo-950/60 px-2 py-0.5 rounded-full">
                   {notes.length} {notes.length === 1 ? 'note' : 'notes'}
                 </span>
               </button>
@@ -491,15 +496,15 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                     onClose();
                   }
                 }}
-                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-violet-700 hover:bg-violet-50/80 transition-all cursor-pointer group"
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-[#c4c7c5] hover:text-violet-700 dark:hover:text-violet-300 hover:bg-violet-50/80 dark:hover:bg-violet-950/40 transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-violet-100/70 text-violet-600 rounded-lg group-hover:bg-violet-200/70 transition-colors">
+                  <div className="p-1.5 bg-violet-100/70 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 rounded-lg group-hover:bg-violet-200/70 dark:group-hover:bg-violet-900/60 transition-colors">
                     <BookCheck className="w-3.5 h-3.5 stroke-[2.2]" />
                   </div>
                   <span>Slab</span>
                 </div>
-                <span className="text-[10px] font-semibold text-slate-400 group-hover:text-violet-600 bg-slate-200/60 group-hover:bg-violet-100/70 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold text-slate-400 dark:text-[#9aa0a6] group-hover:text-violet-600 dark:group-hover:text-violet-400 bg-slate-200/60 dark:bg-[#303134] group-hover:bg-violet-100/70 dark:group-hover:bg-violet-950/60 px-2 py-0.5 rounded-full">
                   {slabs.length} {slabs.length === 1 ? 'set' : 'sets'}
                 </span>
               </button>
@@ -507,10 +512,10 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 transition-all cursor-pointer group"
+                className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-200/50 dark:hover:bg-[#303134] transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-slate-200/70 text-slate-600 rounded-lg group-hover:bg-slate-300/70 transition-colors">
+                  <div className="p-1.5 bg-slate-200/70 dark:bg-[#303134] text-slate-600 dark:text-[#e8eaed] rounded-lg group-hover:bg-slate-300/70 dark:group-hover:bg-[#3c4043] transition-colors">
                     <Home className="w-3.5 h-3.5 stroke-[2.2]" />
                   </div>
                   <span>Back to Workspace</span>
@@ -527,7 +532,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                 handleNewChat();
                 if (window.innerWidth < 768) setIsSidebarOpen(false);
               }}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-600 hover:from-blue-700 hover:via-indigo-700 hover:to-sky-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-600 hover:from-blue-700 hover:via-indigo-700 hover:to-sky-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer google-btn-press"
             >
               <Plus className="w-4 h-4 stroke-[2.6]" />
               <span>Start New Chat</span>
@@ -536,11 +541,11 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
 
           {/* Previous Chats Section Header */}
           <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-[#9aa0a6] flex items-center gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 text-slate-400 dark:text-[#9aa0a6]" />
               Previous Chats
             </span>
-            <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-semibold text-slate-400 dark:text-[#9aa0a6] bg-slate-100 dark:bg-[#303134] px-1.5 py-0.5 rounded-full">
               {sessions.length}
             </span>
           </div>
@@ -563,8 +568,8 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   }}
                   className={`group flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-all ${
                     isActive
-                      ? 'bg-blue-50 text-blue-900 font-bold border border-blue-200/70 shadow-2xs'
-                      : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                      ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-900 dark:text-blue-200 font-bold border border-blue-200/70 dark:border-blue-800 shadow-2xs'
+                      : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-100/80 dark:hover:bg-[#303134] hover:text-slate-900 dark:hover:text-[#e8eaed] border border-transparent'
                   }`}
                 >
                   {isEditing ? (
@@ -582,12 +587,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                           if (e.key === 'Escape') handleCancelRename();
                         }}
                         onBlur={() => handleSaveRename(session.id)}
-                        className="w-full text-xs px-2 py-1 bg-white border border-blue-500 rounded-lg text-slate-900 focus:outline-hidden shadow-2xs"
+                        className="w-full text-xs px-2 py-1 bg-white dark:bg-[#1e1f20] border border-blue-500 rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-hidden shadow-2xs"
                       />
                       <button
                         type="button"
                         onClick={() => handleSaveRename(session.id)}
-                        className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                        className="p-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-md transition-colors"
                         title="Save name"
                       >
                         <Check className="w-3.5 h-3.5" />
@@ -595,7 +600,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                       <button
                         type="button"
                         onClick={handleCancelRename}
-                        className="p-1 text-slate-400 hover:bg-slate-200 rounded-md transition-colors"
+                        className="p-1 text-slate-400 dark:text-[#9aa0a6] hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors"
                         title="Cancel"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -606,7 +611,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                       <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
                         <MessageSquare
                           className={`w-3.5 h-3.5 flex-shrink-0 ${
-                            isActive ? 'text-blue-600' : 'text-slate-400'
+                            isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-[#9aa0a6]'
                           }`}
                         />
                         <span className="truncate">{session.title}</span>
@@ -614,7 +619,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
 
                       <div className="flex items-center gap-1 flex-shrink-0">
                         {msgCount > 0 && (
-                          <span className="text-[10px] text-slate-400 group-hover:hidden">
+                          <span className="text-[10px] text-slate-400 dark:text-[#9aa0a6] group-hover:hidden">
                             {msgCount}
                           </span>
                         )}
@@ -622,7 +627,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                           type="button"
                           onClick={(e) => handleStartRename(session, e)}
                           title="Rename chat"
-                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all cursor-pointer"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 dark:text-[#9aa0a6] hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-md transition-all cursor-pointer"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -630,7 +635,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                           type="button"
                           onClick={(e) => handleDeleteSession(session.id, e)}
                           title="Delete chat"
-                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all cursor-pointer"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 dark:text-[#9aa0a6] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md transition-all cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -643,11 +648,11 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           </div>
 
           {/* Sidebar Footer */}
-          <div className="p-3 bg-slate-50/80 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="p-3 bg-slate-50/80 dark:bg-[#1e1f20]/60 border-t border-slate-200/80 dark:border-[#3c4043] flex items-center justify-between text-[11px] text-slate-400 dark:text-[#9aa0a6]">
             <button
               type="button"
               onClick={handleClearAllSessions}
-              className="text-slate-400 hover:text-rose-600 transition-colors cursor-pointer text-[11px] font-medium"
+              className="text-slate-400 dark:text-[#9aa0a6] hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer text-[11px] font-medium"
             >
               Clear all chats
             </button>
@@ -656,18 +661,18 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
         </aside>
 
         {/* Right Main Chat Canvas */}
-        <main className="flex-1 flex flex-col h-full min-w-0 bg-[#FAFBFD] overflow-hidden">
+        <main className="flex-1 flex flex-col h-full min-w-0 bg-[#FAFBFD] dark:bg-[#1e1f20] overflow-hidden">
           {/* Error Banner */}
           {errorBanner && (
-            <div className="p-3 bg-rose-50 border-b border-rose-200 text-rose-900 text-xs flex items-center justify-between flex-shrink-0 animate-in slide-in-from-top-2">
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border-b border-rose-200 dark:border-rose-900 text-rose-900 dark:text-rose-200 text-xs flex items-center justify-between flex-shrink-0 animate-in slide-in-from-top-2">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
                 <span className="leading-relaxed">{errorBanner}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setErrorBanner(null)}
-                className="text-rose-800 font-bold hover:text-rose-950 text-xs ml-2 cursor-pointer flex-shrink-0"
+                className="text-rose-800 dark:text-rose-300 font-bold hover:text-rose-950 dark:hover:text-rose-100 text-xs ml-2 cursor-pointer flex-shrink-0"
               >
                 Dismiss
               </button>
@@ -683,10 +688,10 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 text-white flex items-center justify-center mb-4 shadow-md shadow-blue-500/20">
                     <Sparkles className="w-7 h-7 stroke-[2.2]" />
                   </div>
-                  <h2 className="font-extrabold text-slate-900 text-2xl tracking-tight">
+                  <h2 className="font-extrabold text-slate-900 dark:text-[#e8eaed] text-2xl tracking-tight">
                     Meet Slate AI
                   </h2>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-2 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-2 leading-relaxed">
                     Ask me anything about your grades, university admissions, course marks, or study notes. Powered by Google Gemini with live GradeSlate intelligence.
                   </p>
                 </div>
@@ -708,7 +713,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                         className={`rounded-2xl shadow-2xs relative group leading-relaxed ${
                           msg.role === 'user'
                             ? 'bg-blue-600 text-white p-4 max-w-2xl text-xs sm:text-sm font-medium rounded-br-xs'
-                            : 'bg-white border border-slate-200/90 text-slate-800 p-5 sm:p-6 w-full max-w-3xl rounded-bl-xs'
+                            : 'bg-white dark:bg-[#282a2c] border border-slate-200/90 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] p-5 sm:p-6 w-full max-w-3xl rounded-bl-xs'
                         }`}
                       >
                         {msg.role === 'user' ? (
@@ -716,20 +721,20 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                         ) : (
                           <>
                             <MarkdownRenderer content={msg.content} />
-                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
-                              <span className="flex items-center gap-1.5 text-slate-400">
-                                <Sparkles className="w-3 h-3 text-blue-500" />
+                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 dark:border-[#3c4043] text-[11px] text-slate-400 dark:text-[#9aa0a6]">
+                              <span className="flex items-center gap-1.5 text-slate-400 dark:text-[#9aa0a6]">
+                                <Sparkles className="w-3 h-3 text-blue-500 dark:text-blue-400" />
                                 <span>Slate AI</span>
                               </span>
                               <button
                                 type="button"
                                 onClick={() => handleCopyMessage(msg.id, msg.content)}
-                                className="flex items-center gap-1 hover:text-blue-600 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-slate-100 font-semibold"
+                                className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#303134] font-semibold google-btn-press"
                               >
                                 {copiedId === msg.id ? (
                                   <>
-                                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                    <span className="text-emerald-600">Copied!</span>
+                                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                    <span className="text-emerald-600 dark:text-emerald-400">Copied!</span>
                                   </>
                                 ) : (
                                   <>
@@ -744,7 +749,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                       </div>
 
                       {msg.role === 'user' && (
-                        <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-600 flex items-center justify-center flex-shrink-0 mt-1">
+                        <div className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-[#303134] text-slate-600 dark:text-[#c4c7c5] flex items-center justify-center flex-shrink-0 mt-1">
                           <User className="w-4 h-4" />
                         </div>
                       )}
@@ -756,9 +761,9 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                       <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs animate-pulse">
                         <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
                       </div>
-                      <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-xs p-4 shadow-2xs">
-                        <div className="flex items-center gap-2.5 text-slate-600 text-xs font-medium">
-                          <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
+                      <div className="bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-2xl rounded-bl-xs p-4 shadow-2xs">
+                        <div className="flex items-center gap-2.5 text-slate-600 dark:text-[#c4c7c5] text-xs font-medium">
+                          <div className="w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-ping" />
                           <span>Slate AI is thinking...</span>
                         </div>
                       </div>
@@ -771,9 +776,9 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           </div>
 
           {/* Bottom Prompt Input Area */}
-          <div className="p-4 sm:pb-6 bg-white/95 backdrop-blur-md border-t border-slate-200/80 flex-shrink-0">
+          <div className="p-4 sm:pb-6 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-md border-t border-slate-200/80 dark:border-[#3c4043] flex-shrink-0">
             <div className="max-w-4xl w-full mx-auto">
-              <div className="relative flex items-center bg-slate-50 hover:bg-slate-100/70 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-500 border border-slate-200 rounded-2xl transition-all p-1.5 shadow-2xs">
+              <div className="relative flex items-center bg-slate-50 dark:bg-[#282a2c] hover:bg-slate-100/70 dark:hover:bg-[#282a2c] focus-within:bg-white dark:focus-within:bg-[#282a2c] focus-within:ring-2 focus-within:ring-blue-500 border border-slate-200 dark:border-[#3c4043] rounded-2xl transition-all p-1.5 shadow-2xs">
                 <textarea
                   ref={inputRef}
                   rows={2}
@@ -782,27 +787,27 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   onKeyDown={handleKeyDown}
                   placeholder="Ask Slate AI anything (e.g. 'Look at my Economics notes and create a mcq', or 'what universities can I get with my grades?')..."
                   disabled={isLoading}
-                  className="w-full resize-none pr-14 pl-3.5 py-2 text-xs sm:text-sm bg-transparent focus:outline-hidden text-slate-800 placeholder-slate-400 leading-relaxed min-h-[48px]"
+                  className="w-full resize-none pr-14 pl-3.5 py-2 text-xs sm:text-sm bg-transparent focus:outline-hidden text-slate-800 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#9aa0a6] leading-relaxed min-h-[48px]"
                 />
                 <button
                   type="button"
                   disabled={!inputPrompt.trim() || isLoading}
                   onClick={() => handleSend()}
-                  className="absolute right-3 bottom-3 p-2.5 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-30 disabled:hover:from-blue-600 disabled:hover:to-indigo-600 text-white rounded-xl transition-all cursor-pointer shadow-xs"
+                  className="absolute right-3 bottom-3 p-2.5 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-30 disabled:hover:from-blue-600 disabled:hover:to-indigo-600 text-white rounded-xl transition-all cursor-pointer shadow-xs google-btn-press"
                   aria-label="Send message"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="flex items-center justify-between gap-2 mt-2 px-1 text-[11px] text-slate-400">
+              <div className="flex items-center justify-between gap-2 mt-2 px-1 text-[11px] text-slate-400 dark:text-[#9aa0a6]">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   <span>Slate AI • Academic Co-Pilot</span>
                   <span>&bull;</span>
                   <span>Shift + Enter for new line</span>
                 </div>
-                <div className="hidden sm:block text-slate-400">
+                <div className="hidden sm:block text-slate-400 dark:text-[#9aa0a6]">
                   Google Gemini Powered
                 </div>
               </div>

@@ -16,9 +16,6 @@ import {
   loadGuestNotes,
   saveGuestNotes,
 } from './utils/notebookService';
-import { INITIAL_DEMO_CLASSES } from './utils/sampleData';
-import { INITIAL_DEMO_NOTES } from './utils/sampleNotebookData';
-import { INITIAL_DEMO_SLABS } from './utils/sampleSlabData';
 import { useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
@@ -31,7 +28,6 @@ import { TranscriptModal } from './components/TranscriptModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { AiAdvisorDrawer } from './components/AiAdvisorDrawer';
-import { Sparkles } from 'lucide-react';
 
 const SLABS_STORAGE_KEY = 'gradeslate_slabs_v1';
 
@@ -40,19 +36,29 @@ function loadLocalSlabs(): SlabItem[] {
     const saved = localStorage.getItem(SLABS_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Filter out any mock/demo slabs
+        return parsed.filter((s: SlabItem) => s && s.id !== 'slab_demo_micro_1' && !s.id.startsWith('slab_demo_'));
+      }
     }
   } catch (e) {
     console.warn('Failed to parse saved slabs', e);
   }
-  return INITIAL_DEMO_SLABS;
+  return [];
 }
+
+const TAB_INDEX_MAP: Record<'gradebook' | 'notebook' | 'slab', number> = {
+  gradebook: 0,
+  notebook: 1,
+  slab: 2,
+};
 
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
 
   // Top level active tab: Gradebook vs Notebook vs Slab
   const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook' | 'slab'>('gradebook');
+  const [slideDirection, setSlideDirection] = useState<'right' | 'left'>('right');
 
   // Gradebook classes state
   const [classes, setClasses] = useState<ClassItem[]>(() => getInitialClasses());
@@ -80,6 +86,18 @@ export const App: React.FC = () => {
 
   // Scroll ref for main content
   const mainContentRef = useRef<HTMLElement>(null);
+
+  // Handle Tab Switch with Directional Slide Transition
+  const handleTabChange = (nextTab: 'gradebook' | 'notebook' | 'slab') => {
+    if (nextTab === activeTab) return;
+    const prevIdx = TAB_INDEX_MAP[activeTab];
+    const nextIdx = TAB_INDEX_MAP[nextTab];
+    setSlideDirection(nextIdx > prevIdx ? 'right' : 'left');
+    setActiveTab(nextTab);
+    if (nextTab === 'gradebook') setSelectedClassId(null);
+    if (nextTab === 'notebook') setSelectedNoteId(null);
+    if (nextTab === 'slab') setSelectedSlabId(null);
+  };
 
   // Real-time synchronization for Classes: subscribe in Firestore
   useEffect(() => {
@@ -157,6 +175,7 @@ export const App: React.FC = () => {
       else saveGuestClasses(next);
       return next;
     });
+    setSlideDirection('right');
     setSelectedClassId(newClass.id);
     setActiveTab('gradebook');
     setIsMobileDrawerOpen(false);
@@ -181,17 +200,8 @@ export const App: React.FC = () => {
       return next;
     });
     if (selectedClassId === id) {
+      setSlideDirection('left');
       setSelectedClassId(null);
-    }
-  };
-
-  // Load demo classes
-  const handleLoadDemoData = () => {
-    setClasses(INITIAL_DEMO_CLASSES);
-    if (user) {
-      saveUserClasses(user.uid, INITIAL_DEMO_CLASSES);
-    } else {
-      saveGuestClasses(INITIAL_DEMO_CLASSES);
     }
   };
 
@@ -203,6 +213,7 @@ export const App: React.FC = () => {
       else saveGuestNotes(next);
       return next;
     });
+    setSlideDirection('right');
     setSelectedNoteId(newNote.id);
     setActiveTab('notebook');
     setIsMobileDrawerOpen(false);
@@ -225,22 +236,15 @@ export const App: React.FC = () => {
       return next;
     });
     if (selectedNoteId === id) {
+      setSlideDirection('left');
       setSelectedNoteId(null);
-    }
-  };
-
-  const handleLoadDemoNotes = () => {
-    setNotes(INITIAL_DEMO_NOTES);
-    if (user) {
-      saveUserNotes(user.uid, INITIAL_DEMO_NOTES);
-    } else {
-      saveGuestNotes(INITIAL_DEMO_NOTES);
     }
   };
 
   // Slab handlers (Interactive Flashcards & MCQ Study Sets)
   const handleAddSlab = (newSlab: SlabItem) => {
     setSlabs((prev) => [newSlab, ...prev]);
+    setSlideDirection('right');
     setSelectedSlabId(newSlab.id);
     setActiveTab('slab');
     setIsMobileDrawerOpen(false);
@@ -253,6 +257,7 @@ export const App: React.FC = () => {
   const handleDeleteSlab = (id: string) => {
     setSlabs((prev) => prev.filter((s) => s.id !== id));
     if (selectedSlabId === id) {
+      setSlideDirection('left');
       setSelectedSlabId(null);
     }
   };
@@ -265,16 +270,11 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFBFD] text-[#0F172A] flex flex-col font-sans">
-      {/* Top Header */}
+    <div className="min-h-screen bg-[#FAFBFD] dark:bg-[#1e1f20] text-[#0F172A] dark:text-[#e8eaed] flex flex-col font-sans transition-colors duration-250">
+      {/* Top Header with Sliding Taskbar Indicator & Dark Mode Toggle */}
       <Header
         activeTab={activeTab}
-        onChangeTab={(tab) => {
-          setActiveTab(tab);
-          if (tab === 'gradebook') setSelectedClassId(null);
-          if (tab === 'notebook') setSelectedNoteId(null);
-          if (tab === 'slab') setSelectedSlabId(null);
-        }}
+        onChangeTab={handleTabChange}
         classes={classes}
         noteCount={notes.length}
         slabCount={slabs.length}
@@ -285,16 +285,11 @@ export const App: React.FC = () => {
       />
 
       {/* App Body: Full width flex layout */}
-      <div className="flex-1 w-full bg-[#FAFBFD] flex overflow-hidden">
+      <div className="flex-1 w-full bg-[#FAFBFD] dark:bg-[#1e1f20] flex overflow-hidden transition-colors duration-250">
         {/* Left Sidebar (Desktop + Mobile Drawer) */}
         <Sidebar
           activeTab={activeTab}
-          onChangeTab={(tab) => {
-            setActiveTab(tab);
-            if (tab === 'gradebook') setSelectedClassId(null);
-            if (tab === 'notebook') setSelectedNoteId(null);
-            if (tab === 'slab') setSelectedSlabId(null);
-          }}
+          onChangeTab={handleTabChange}
           classes={classes}
           notes={notes}
           slabs={slabs}
@@ -302,18 +297,22 @@ export const App: React.FC = () => {
           selectedNoteId={selectedNoteId}
           selectedSlabId={selectedSlabId}
           onSelectOverview={() => {
+            setSlideDirection('left');
             setActiveTab('gradebook');
             setSelectedClassId(null);
           }}
           onSelectClass={(id) => {
+            setSlideDirection('right');
             setActiveTab('gradebook');
             setSelectedClassId(id);
           }}
           onSelectNote={(id) => {
+            setSlideDirection(id ? 'right' : 'left');
             setActiveTab('notebook');
             setSelectedNoteId(id);
           }}
           onSelectSlab={(id) => {
+            setSlideDirection(id ? 'right' : 'left');
             setActiveTab('slab');
             setSelectedSlabId(id);
           }}
@@ -334,6 +333,7 @@ export const App: React.FC = () => {
             handleAddNote(newNote);
           }}
           onCreateSlab={() => {
+            setSlideDirection('right');
             setActiveTab('slab');
             setSelectedSlabId(null);
           }}
@@ -342,52 +342,67 @@ export const App: React.FC = () => {
           onMobileClose={() => setIsMobileDrawerOpen(false)}
         />
 
-        {/* Main Content Area */}
+        {/* Main Content Area with Sliding Over Transition */}
         <main
           ref={mainContentRef}
-          className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] pb-24 md:pb-8"
+          className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] dark:bg-[#1e1f20] pb-24 md:pb-8 transition-colors duration-250"
         >
           <div className="w-full max-w-[1140px] mx-auto px-4 sm:px-8 lg:px-10 py-5 sm:py-8">
-            {activeTab === 'slab' ? (
-              <SlabView
-                slabs={slabs}
-                notes={notes}
-                selectedSlabId={selectedSlabId}
-                onSelectSlab={(id) => setSelectedSlabId(id)}
-                onAddSlab={handleAddSlab}
-                onUpdateSlab={handleUpdateSlab}
-                onDeleteSlab={handleDeleteSlab}
-              />
-            ) : activeTab === 'notebook' ? (
-              <NotebookView
-                notes={notes}
-                classes={classes}
-                selectedNoteId={selectedNoteId}
-                onSelectNote={(id) => setSelectedNoteId(id)}
-                onAddNote={handleAddNote}
-                onUpdateNote={handleUpdateNote}
-                onDeleteNote={handleDeleteNote}
-                onLoadDemoNotes={handleLoadDemoNotes}
-                onOpenSlateAi={(prompt) => handleOpenAiAdvisor(prompt)}
-              />
-            ) : activeClass ? (
-              <ClassDetail
-                classItem={activeClass}
-                onBack={() => setSelectedClassId(null)}
-                onUpdateClass={handleUpdateClass}
-                onDeleteClass={handleDeleteClass}
-                onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
-              />
-            ) : (
-              <Dashboard
-                classes={classes}
-                onSelectClass={(id) => setSelectedClassId(id)}
-                onOpenAddClass={() => setIsAddModalOpen(true)}
-                onLoadDemoData={handleLoadDemoData}
-                onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
-                onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
-              />
-            )}
+            <div
+              key={activeTab + (selectedClassId || '') + (selectedNoteId || '') + (selectedSlabId || '')}
+              className={slideDirection === 'right' ? 'animate-slide-right' : 'animate-slide-left'}
+            >
+              {activeTab === 'slab' ? (
+                <SlabView
+                  slabs={slabs}
+                  notes={notes}
+                  selectedSlabId={selectedSlabId}
+                  onSelectSlab={(id) => {
+                    setSlideDirection(id ? 'right' : 'left');
+                    setSelectedSlabId(id);
+                  }}
+                  onAddSlab={handleAddSlab}
+                  onUpdateSlab={handleUpdateSlab}
+                  onDeleteSlab={handleDeleteSlab}
+                />
+              ) : activeTab === 'notebook' ? (
+                <NotebookView
+                  notes={notes}
+                  classes={classes}
+                  selectedNoteId={selectedNoteId}
+                  onSelectNote={(id) => {
+                    setSlideDirection(id ? 'right' : 'left');
+                    setSelectedNoteId(id);
+                  }}
+                  onAddNote={handleAddNote}
+                  onUpdateNote={handleUpdateNote}
+                  onDeleteNote={handleDeleteNote}
+                  onOpenSlateAi={(prompt) => handleOpenAiAdvisor(prompt)}
+                />
+              ) : activeClass ? (
+                <ClassDetail
+                  classItem={activeClass}
+                  onBack={() => {
+                    setSlideDirection('left');
+                    setSelectedClassId(null);
+                  }}
+                  onUpdateClass={handleUpdateClass}
+                  onDeleteClass={handleDeleteClass}
+                  onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
+                />
+              ) : (
+                <Dashboard
+                  classes={classes}
+                  onSelectClass={(id) => {
+                    setSlideDirection('right');
+                    setSelectedClassId(id);
+                  }}
+                  onOpenAddClass={() => setIsAddModalOpen(true)}
+                  onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
+                  onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
+                />
+              )}
+            </div>
           </div>
         </main>
       </div>
@@ -395,17 +410,13 @@ export const App: React.FC = () => {
       {/* Mobile Bottom Navigation Bar (Docked on phones) */}
       <MobileBottomNav
         activeTab={activeTab}
-        onChangeTab={(tab) => {
-          setActiveTab(tab);
-          if (tab === 'gradebook') setSelectedClassId(null);
-          if (tab === 'notebook') setSelectedNoteId(null);
-          if (tab === 'slab') setSelectedSlabId(null);
-        }}
+        onChangeTab={handleTabChange}
         selectedClassId={selectedClassId}
         classCount={classes.length}
         noteCount={notes.length}
         slabCount={slabs.length}
         onSelectOverview={() => {
+          setSlideDirection('left');
           setActiveTab('gradebook');
           setSelectedClassId(null);
         }}
@@ -415,6 +426,7 @@ export const App: React.FC = () => {
           const newNote: NoteItem = {
             id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
             title: 'Untitled Note',
+            icon: '📝',
             content: '',
             sources: [],
             multipleChoice: [],
@@ -426,6 +438,7 @@ export const App: React.FC = () => {
           handleAddNote(newNote);
         }}
         onOpenAddSlab={() => {
+          setSlideDirection('right');
           setActiveTab('slab');
           setSelectedSlabId(null);
         }}
@@ -433,7 +446,7 @@ export const App: React.FC = () => {
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
       />
 
-      {/* Modals */}
+      {/* Modals & Drawers */}
       <AddClassModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -444,7 +457,6 @@ export const App: React.FC = () => {
         isOpen={isTranscriptModalOpen}
         onClose={() => setIsTranscriptModalOpen(false)}
         classes={classes}
-        defaultStudentName={user?.displayName || undefined}
       />
 
       <FirebaseConfigModal
@@ -452,32 +464,23 @@ export const App: React.FC = () => {
         onClose={() => setIsFirebaseConfigOpen(false)}
       />
 
-      {/* Slate AI Floating Button */}
-      <button
-        type="button"
-        onClick={() => handleOpenAiAdvisor()}
-        title="Slate AI — Gemini Academic Co-Pilot"
-        aria-label="Open Slate AI"
-        className="fixed bottom-20 md:bottom-6 right-5 md:right-7 z-40 px-3.5 py-2.5 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-700 hover:via-indigo-700 hover:to-sky-600 active:scale-95 text-white shadow-lg hover:shadow-xl shadow-blue-600/30 flex items-center gap-2 transition-all cursor-pointer group border border-white/30"
-      >
-        <Sparkles className="w-5 h-5 text-white stroke-[2.2] group-hover:scale-110 transition-transform duration-200" />
-        <span className="font-extrabold text-xs hidden sm:inline tracking-tight">Slate AI</span>
-      </button>
-
-      {/* Slate AI Drawer */}
+      {/* AI Advisor Drawer */}
       <AiAdvisorDrawer
         isOpen={isAiAdvisorOpen}
         onClose={() => setIsAiAdvisorOpen(false)}
         classes={classes}
         notes={notes}
-        slabs={slabs}
-        prefilledPrompt={prefilledAdvisorPrompt}
-        onClearPrefilledPrompt={() => setPrefilledAdvisorPrompt(undefined)}
-        onNavigate={(tab) => {
-          setActiveTab(tab);
-          if (tab === 'gradebook') setSelectedClassId(null);
-          if (tab === 'notebook') setSelectedNoteId(null);
-          if (tab === 'slab') setSelectedSlabId(null);
+        initialPrompt={prefilledAdvisorPrompt}
+        onNavigateToClass={(id: string) => {
+          setSlideDirection('right');
+          setActiveTab('gradebook');
+          setSelectedClassId(id);
+          setIsAiAdvisorOpen(false);
+        }}
+        onNavigateToNote={(id: string) => {
+          setSlideDirection('right');
+          setActiveTab('notebook');
+          setSelectedNoteId(id);
           setIsAiAdvisorOpen(false);
         }}
       />

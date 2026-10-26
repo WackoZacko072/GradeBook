@@ -24,7 +24,6 @@ interface DashboardProps {
   classes: ClassItem[];
   onSelectClass: (classId: string) => void;
   onOpenAddClass: () => void;
-  onLoadDemoData: () => void;
   onOpenFirebaseConfig?: () => void;
   onOpenAiAdvisor?: (prompt?: string) => void;
 }
@@ -33,7 +32,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   classes,
   onSelectClass,
   onOpenAddClass,
-  onLoadDemoData,
   onOpenFirebaseConfig,
   onOpenAiAdvisor: _onOpenAiAdvisor,
 }) => {
@@ -70,12 +68,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
     : null;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-fade-scale select-none">
       {/* 0. Guest Banner (if not logged in) */}
       {!user && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/80 dark:border-blue-800/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs transition-colors">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-white shadow-2xs border border-blue-200/60 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#282a2c] shadow-2xs border border-blue-200/60 dark:border-blue-800/50 flex items-center justify-center flex-shrink-0 mt-0.5">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -96,10 +94,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </svg>
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-[#e8eaed]">
                 Want your own private gradebook synced to the cloud?
               </h3>
-              <p className="text-xs text-slate-600 mt-0.5">
+              <p className="text-xs text-slate-600 dark:text-[#c4c7c5] mt-0.5">
                 Sign in with Google to create your personal account, save courses securely, and access them from any device.
               </p>
             </div>
@@ -107,7 +105,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             type="button"
             onClick={isConfigured ? signInWithGoogle : onOpenFirebaseConfig}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0 self-stretch sm:self-auto justify-center"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0 self-stretch sm:self-auto justify-center google-btn-press"
           >
             <span>Sign in with Google</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -118,15 +116,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* 1. Header Title & Top Add Class Button */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 select-none">
+          <span className="block text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-widest mb-1">
             {firstName ? `${firstName}'s Gradebook` : 'Your Personal Gradebook'}
           </span>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
             {firstName ? `Welcome back, ${firstName}.` : 'A clearer view of your grades.'}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-[#c4c7c5] mt-1">
             {classes.length === 0
-              ? 'Your gradebook is ready. Add your first class below to begin.'
+              ? 'Your gradebook is clean and ready. Add your current courses to start tracking.'
               : 'All your classes. One place to keep track.'}
           </p>
         </div>
@@ -134,7 +132,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <button
           type="button"
           onClick={onOpenAddClass}
-          className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px]"
+          className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px] google-btn-press"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Add class</span>
@@ -144,7 +142,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* 2. Hero Banner & Stat Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         {/* Large Blue Hero Card (2 cols) */}
-        <div className="lg:col-span-2 bg-gradient-to-r from-[#2052DE] via-[#2563EB] to-[#1D4ED8] text-white rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-xs min-h-[200px] sm:min-h-[220px]">
+        <div className="lg:col-span-2 bg-gradient-to-r from-[#2052DE] via-[#2563EB] to-[#1D4ED8] dark:from-[#1e3a8a] dark:via-[#2563eb] dark:to-[#1e40af] text-white rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-xs min-h-[200px] sm:min-h-[220px] google-card">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -193,35 +191,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Right Two Stacked Stat Cards (1 col) */}
         <div className="lg:col-span-1 flex flex-col sm:flex-row lg:flex-col gap-4">
           {/* Stat Card 1: Classes */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs flex items-center justify-between flex-1">
+          <div className="bg-white dark:bg-[#282a2c] rounded-2xl border border-slate-200/80 dark:border-[#3c4043] p-5 shadow-2xs flex items-center justify-between flex-1 google-card transition-colors">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100">
+              <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0 border border-blue-100 dark:border-[#8ab4f8]/30">
                 <BookOpen className="w-5 h-5 stroke-[2]" />
               </div>
               <div>
-                <div className="text-2xl font-extrabold text-slate-900 tracking-tight leading-none">
+                <div className="text-2xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight leading-none">
                   {classes.length}
                 </div>
-                <div className="text-xs text-slate-500 font-medium mt-1">Enrolled Classes</div>
+                <div className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium mt-1">Enrolled Classes</div>
               </div>
             </div>
-            <span className="text-[11px] text-slate-400 font-medium">On your radar</span>
+            <span className="text-[11px] text-slate-400 dark:text-[#80868b] font-medium">On your radar</span>
           </div>
 
           {/* Stat Card 2: Graded Items */}
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs flex items-center justify-between flex-1">
+          <div className="bg-white dark:bg-[#282a2c] rounded-2xl border border-slate-200/80 dark:border-[#3c4043] p-5 shadow-2xs flex items-center justify-between flex-1 google-card transition-colors">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100">
+              <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0 border border-blue-100 dark:border-[#8ab4f8]/30">
                 <FileText className="w-5 h-5 stroke-[2]" />
               </div>
               <div>
-                <div className="text-2xl font-extrabold text-slate-900 tracking-tight leading-none">
+                <div className="text-2xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight leading-none">
                   {totalGradedItems}
                 </div>
-                <div className="text-xs text-slate-500 font-medium mt-1">Graded items</div>
+                <div className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium mt-1">Graded items</div>
               </div>
             </div>
-            <span className="text-[11px] text-slate-400 font-medium">Every score counts</span>
+            <span className="text-[11px] text-slate-400 dark:text-[#80868b] font-medium">Every score counts</span>
           </div>
         </div>
       </div>
@@ -232,26 +230,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {classes.length > 0 && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">Your classes</h2>
-              <span className="px-2 py-0.5 text-xs font-bold bg-slate-100 text-slate-500 rounded-lg">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-[#e8eaed] tracking-tight">Your classes</h2>
+              <span className="px-2 py-0.5 text-xs font-bold bg-slate-100 dark:bg-[#353739] text-slate-600 dark:text-[#c4c7c5] rounded-lg">
                 {classes.length}
               </span>
             </div>
 
             <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-slate-400 dark:text-[#80868b] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Find a class..."
-                className="w-full pl-9 pr-8 py-1.5 text-xs bg-white border border-slate-200 rounded-xl placeholder-slate-400 text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all min-h-[36px]"
+                className="w-full pl-9 pr-8 py-1.5 text-xs bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-xl placeholder-slate-400 dark:placeholder-[#80868b] text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] focus:border-blue-600 transition-all min-h-[36px]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -260,17 +258,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         )}
 
-        {/* Classes Display */}
+        {/* Classes Content */}
         {classes.length === 0 ? (
-          /* Brand New User / Zero Classes Onboarding State */
-          <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-slate-200/90 shadow-2xs">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 border border-blue-100/80 shadow-xs">
-              <GraduationCap className="w-8 h-8 stroke-[2.2]" />
+          /* Clean Empty State without mock clutter */
+          <div className="bg-white dark:bg-[#282a2c] rounded-3xl border border-slate-200/80 dark:border-[#3c4043] p-8 sm:p-12 text-center shadow-2xs transition-colors">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center mb-4">
+              <BookOpen className="w-8 h-8 stroke-[2]" />
             </div>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
               {firstName ? `${firstName}'s Gradebook is Ready` : 'Your Gradebook is Clean & Ready'}
             </h3>
-            <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto leading-relaxed">
+            <p className="text-sm text-slate-500 dark:text-[#c4c7c5] mt-2 max-w-md mx-auto leading-relaxed">
               You start with zero classes. Add your current courses to set up custom category weights, track assignments, and calculate exactly what you need on finals.
             </p>
 
@@ -278,65 +276,58 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <button
                 type="button"
                 onClick={onOpenAddClass}
-                className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer google-btn-press"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
                 <span>Add Your First Class</span>
               </button>
-              <button
-                type="button"
-                onClick={onLoadDemoData}
-                className="w-full sm:w-auto px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-all cursor-pointer"
-              >
-                Load Sample Data Preview
-              </button>
             </div>
 
             {/* Quick 3-Step Guide */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 pt-8 border-t border-slate-100 text-left">
-              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
-                <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 pt-8 border-t border-slate-100 dark:border-[#3c4043] text-left">
+              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#303134] border border-slate-100 dark:border-[#3c4043]">
+                <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-[#8ab4f8]/20 text-blue-700 dark:text-[#8ab4f8] font-bold text-xs flex items-center justify-center mb-2">
                   1
                 </div>
-                <h4 className="text-xs font-bold text-slate-900">Add Courses</h4>
-                <p className="text-[11px] text-slate-500 mt-1">Name your classes and choose custom theme colors.</p>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">Add Courses</h4>
+                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1">Name your classes and choose custom theme colors.</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
-                <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center mb-2">
+              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#303134] border border-slate-100 dark:border-[#3c4043]">
+                <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-[#8ab4f8]/20 text-blue-700 dark:text-[#8ab4f8] font-bold text-xs flex items-center justify-center mb-2">
                   2
                 </div>
-                <h4 className="text-xs font-bold text-slate-900">Set Category Weights</h4>
-                <p className="text-[11px] text-slate-500 mt-1">Configure Homework, Exams, Quizzes to total 100%.</p>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">Set Category Weights</h4>
+                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1">Configure Homework, Exams, Quizzes to total 100%.</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-100">
-                <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center mb-2">
+              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#303134] border border-slate-100 dark:border-[#3c4043]">
+                <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-[#8ab4f8]/20 text-blue-700 dark:text-[#8ab4f8] font-bold text-xs flex items-center justify-center mb-2">
                   3
                 </div>
-                <h4 className="text-xs font-bold text-slate-900">Track & Predict</h4>
-                <p className="text-[11px] text-slate-500 mt-1">Log points or percentages and calculate your target score.</p>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">Track & Predict</h4>
+                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1">Log points or percentages and calculate your target score.</p>
               </div>
             </div>
           </div>
         ) : filteredClasses.length === 0 ? (
           /* Search Filter Empty State */
-          <div className="bg-white rounded-2xl p-10 text-center border border-slate-200/80 shadow-2xs">
-            <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+          <div className="bg-white dark:bg-[#282a2c] rounded-2xl p-10 text-center border border-slate-200/80 dark:border-[#3c4043] shadow-2xs">
+            <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center mb-3">
               <Search className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-slate-900">No classes match "{searchQuery}"</h3>
-            <p className="text-xs text-slate-500 mt-1">Try another search term or clear the filter.</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]">No classes match "{searchQuery}"</h3>
+            <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1">Try another search term or clear the filter.</p>
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer"
+              className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-lg cursor-pointer google-btn-press"
             >
               Clear filter
             </button>
           </div>
         ) : (
-          /* Class Cards Grid */
+          /* Class Cards Grid with Google Hover Lift */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredClasses.map((item) => {
               const classCalc = calculateClassAverage(item);
@@ -352,13 +343,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div
                   key={item.id}
                   onClick={() => onSelectClass(item.id)}
-                  className="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all cursor-pointer flex flex-col justify-between"
+                  className="group bg-white dark:bg-[#282a2c] rounded-2xl p-5 border border-slate-200/80 dark:border-[#3c4043] shadow-2xs hover:border-blue-300 dark:hover:border-[#8ab4f8] cursor-pointer flex flex-col justify-between google-card"
                 >
                   <div>
                     {/* Top row: Icon and settings/sliders */}
                     <div className="flex items-center justify-between">
                       <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
                         style={{
                           backgroundColor: `${accentColor}18`,
                           color: accentColor,
@@ -374,33 +365,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
                           onSelectClass(item.id);
                         }}
                         title="Configure Class"
-                        className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-700 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#353739] rounded-lg transition-colors cursor-pointer"
                       >
                         <Sliders className="w-4 h-4" />
                       </button>
                     </div>
 
                     {/* Class Name & Subtitle */}
-                    <h3 className="font-bold text-base text-slate-900 group-hover:text-blue-600 transition-colors mt-3 line-clamp-1">
+                    <h3 className="font-bold text-base text-slate-900 dark:text-[#e8eaed] group-hover:text-blue-600 dark:group-hover:text-[#8ab4f8] transition-colors mt-3 line-clamp-1">
                       {item.name}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-slate-400 dark:text-[#9aa0a6] mt-0.5">
                       {item.categories.length} {item.categories.length === 1 ? 'category' : 'categories'} • {gradedCount} graded {gradedCount === 1 ? 'item' : 'items'}
                     </p>
 
                     {/* Grade Score and Class Average label */}
                     <div className="mt-4 flex items-baseline justify-between">
-                      <div className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                      <div className="text-3xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
                         {classCalc.average.toFixed(1)}
-                        <span className="text-xl font-bold text-slate-700 ml-0.5">%</span>
+                        <span className="text-xl font-bold text-slate-700 dark:text-[#9aa0a6] ml-0.5">%</span>
                       </div>
-                      <div className="text-[10px] text-slate-400 font-medium text-right leading-tight">
+                      <div className="text-[10px] text-slate-400 dark:text-[#80868b] font-medium text-right leading-tight">
                         Class<br />average
                       </div>
                     </div>
 
                     {/* Multi-segment Category Progress Bar */}
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full flex gap-1 overflow-hidden mt-3">
+                    <div className="w-full h-1.5 bg-slate-100 dark:bg-[#353739] rounded-full flex gap-1 overflow-hidden mt-3">
                       {item.categories.map((cat, idx) => {
                         const totalCatWeights = classCalc.totalWeight > 0 ? classCalc.totalWeight : 100;
                         const share = (cat.weight / totalCatWeights) * 100;
@@ -413,7 +404,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                               backgroundColor: accentColor,
                               opacity: 0.85 - idx * 0.12,
                             }}
-                            className="h-full rounded-full transition-all"
+                            className="h-full rounded-full transition-all duration-500"
                           />
                         );
                       })}
@@ -421,18 +412,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
 
                   {/* Bottom Row */}
-                  <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400 font-medium">
+                  <div className="mt-5 pt-3 border-t border-slate-100 dark:border-[#3c4043] flex items-center justify-between text-[11px]">
+                    <span className="text-slate-400 dark:text-[#80868b] font-medium">
                       {classCalc.isWeightValid ? (
                         'Weights total 100%'
                       ) : (
-                        <span className="text-rose-600 font-bold">
+                        <span className="text-rose-600 dark:text-[#f28b82] font-bold">
                           Weights: {classCalc.totalWeight.toFixed(0)}%
                         </span>
                       )}
                     </span>
-                    <span className="text-blue-600 font-semibold group-hover:underline flex items-center gap-0.5">
-                      View class <ChevronRight className="w-3 h-3" />
+                    <span className="font-semibold text-blue-600 dark:text-[#8ab4f8] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                      Open <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
                 </div>
@@ -447,17 +438,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <button
           type="button"
           onClick={() => setShowCalculationInfo(!showCalculationInfo)}
-          className="text-xs text-slate-400 hover:text-slate-700 flex items-center gap-1.5 cursor-pointer select-none transition-colors"
+          className="text-xs text-slate-400 dark:text-[#80868b] hover:text-slate-700 dark:hover:text-[#e8eaed] flex items-center gap-1.5 cursor-pointer select-none transition-colors"
         >
           <HelpCircle className="w-3.5 h-3.5" />
           <span>How your grades are calculated</span>
-          <ChevronRight className={`w-3 h-3 transition-transform ${showCalculationInfo ? 'rotate-90' : ''}`} />
+          <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${showCalculationInfo ? 'rotate-90' : ''}`} />
         </button>
 
         {showCalculationInfo && (
-          <div className="mt-3 p-4 bg-white rounded-2xl border border-slate-200/80 shadow-2xs text-xs text-slate-600 space-y-2 animate-in fade-in duration-150">
-            <h4 className="font-bold text-slate-900">Calculation Transparency:</h4>
-            <ul className="list-disc list-inside space-y-1 text-slate-500">
+          <div className="mt-3 p-4 bg-white dark:bg-[#282a2c] rounded-2xl border border-slate-200/80 dark:border-[#3c4043] shadow-2xs text-xs text-slate-600 dark:text-[#c4c7c5] space-y-2 animate-slide-up">
+            <h4 className="font-bold text-slate-900 dark:text-[#e8eaed]">Calculation Transparency:</h4>
+            <ul className="list-disc list-inside space-y-1 text-slate-500 dark:text-[#9aa0a6]">
               <li>
                 <strong>Category Average:</strong> Each graded assessment within a category contributes equally as a percentage. Ungraded assessments are excluded from calculations.
               </li>
@@ -476,13 +467,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* 5. Minimal Footer */}
-      <footer className="pt-8 pb-4 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+      <footer className="pt-8 pb-4 border-t border-slate-200/60 dark:border-[#3c4043] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 dark:text-[#80868b]">
         <div className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-400 dark:text-[#8ab4f8]" />
           <span>Your grades. Your private space.</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <HeartHandshake className="w-3.5 h-3.5 text-slate-400" />
+          <HeartHandshake className="w-3.5 h-3.5 text-slate-400 dark:text-[#f28b82]" />
           <span>Keep going. You've got this.</span>
         </div>
       </footer>

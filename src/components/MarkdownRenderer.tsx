@@ -9,14 +9,14 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
   const blocks = splitIntoBlocks(content);
 
   return (
-    <div className="space-y-2.5 text-xs sm:text-[13px] text-slate-800 leading-relaxed overflow-hidden">
+    <div className="space-y-2.5 text-xs sm:text-[13px] text-slate-800 dark:text-[#e8eaed] leading-relaxed overflow-hidden">
       {blocks.map((block, index) => {
         // Display Math Block ($$...$$ or \[...\])
         if (block.type === 'mathblock') {
           return (
             <div
               key={index}
-              className="my-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/90 overflow-x-auto text-center shadow-2xs"
+              className="my-3 p-3 bg-slate-50/80 dark:bg-[#1e1f20] rounded-xl border border-slate-200/90 dark:border-[#3c4043] overflow-x-auto text-center shadow-2xs"
             >
               <LatexRenderer content={block.content} block />
             </div>
@@ -28,7 +28,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <h3
                 key={index}
-                className="text-sm sm:text-base font-extrabold text-slate-900 mt-3.5 mb-1.5 border-b border-slate-200 pb-1"
+                className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-[#e8eaed] mt-3.5 mb-1.5 border-b border-slate-200 dark:border-[#3c4043] pb-1"
               >
                 {renderInline(block.content)}
               </h3>
@@ -38,7 +38,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <h4
                 key={index}
-                className="text-xs sm:text-sm font-extrabold text-blue-700 mt-3 mb-1"
+                className="text-xs sm:text-sm font-extrabold text-blue-700 dark:text-blue-400 mt-3 mb-1"
               >
                 {renderInline(block.content)}
               </h4>
@@ -48,7 +48,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <h5
                 key={index}
-                className="text-xs sm:text-sm font-bold text-slate-900 mt-2.5 mb-1"
+                className="text-xs sm:text-sm font-bold text-slate-900 dark:text-[#e8eaed] mt-2.5 mb-1"
               >
                 {renderInline(block.content)}
               </h5>
@@ -58,7 +58,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <h6
               key={index}
-              className="text-xs font-bold text-slate-800 mt-2 mb-0.5"
+              className="text-xs font-bold text-slate-800 dark:text-[#e8eaed] mt-2 mb-0.5"
             >
               {renderInline(block.content)}
             </h6>
@@ -69,22 +69,22 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           const headers = block.headers || [];
           const rows = block.rows || [];
           return (
-            <div key={index} className="my-2.5 overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+            <div key={index} className="my-2.5 overflow-x-auto rounded-xl border border-slate-200 dark:border-[#3c4043] shadow-2xs">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-100/80 border-b border-slate-200">
+                  <tr className="bg-slate-100/80 dark:bg-[#1e1f20] border-b border-slate-200 dark:border-[#3c4043]">
                     {headers.map((h, i) => (
-                      <th key={i} className="px-3 py-2 font-bold text-slate-700">
+                      <th key={i} className="px-3 py-2 font-bold text-slate-700 dark:text-[#e8eaed]">
                         {renderInline(h)}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
+                <tbody className="divide-y divide-slate-100 dark:divide-[#3c4043] bg-white dark:bg-[#282a2c]">
                   {rows.map((row, rIndex) => (
-                    <tr key={rIndex} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={rIndex} className="hover:bg-slate-50/80 dark:hover:bg-[#303134] transition-colors">
                       {row.map((cell, cIndex) => (
-                        <td key={cIndex} className="px-3 py-1.5 text-slate-700">
+                        <td key={cIndex} className="px-3 py-1.5 text-slate-700 dark:text-[#c4c7c5]">
                           {renderInline(cell)}
                         </td>
                       ))}
@@ -107,17 +107,17 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                 if (isChecked || isUnchecked) {
                   const todoText = item.replace(/^\[[ xX]\]\s*/, '');
                   return (
-                    <li key={i} className="flex items-start gap-2.5 text-slate-700">
+                    <li key={i} className="flex items-start gap-2.5 text-slate-700 dark:text-[#c4c7c5]">
                       <span
                         className={`w-4 h-4 rounded-md mt-0.5 flex items-center justify-center flex-shrink-0 border text-[11px] font-bold ${
                           isChecked
                             ? 'bg-blue-600 border-blue-600 text-white'
-                            : 'border-slate-300 bg-white shadow-2xs'
+                            : 'border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#1e1f20] shadow-2xs'
                         }`}
                       >
                         {isChecked ? '✓' : ''}
                       </span>
-                      <span className={isChecked ? 'line-through text-slate-400' : ''}>
+                      <span className={isChecked ? 'line-through text-slate-400 dark:text-[#9aa0a6]' : ''}>
                         {renderInline(todoText)}
                       </span>
                     </li>
@@ -125,7 +125,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                 }
 
                 return (
-                  <li key={i} className="flex items-start gap-2 text-slate-700">
+                  <li key={i} className="flex items-start gap-2 text-slate-700 dark:text-[#c4c7c5]">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
                     <span>{renderInline(item)}</span>
                   </li>
@@ -144,7 +144,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <div
                 key={index}
-                className="my-3 p-3.5 bg-amber-50/80 border border-amber-200/90 text-amber-950 rounded-xl text-xs sm:text-[13px] shadow-2xs leading-relaxed"
+                className="my-3 p-3.5 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 rounded-xl text-xs sm:text-[13px] shadow-2xs leading-relaxed"
               >
                 {renderInline(block.content)}
               </div>
@@ -155,7 +155,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <div
                 key={index}
-                className="my-3 p-3.5 bg-rose-50/80 border border-rose-200/90 text-rose-950 rounded-xl text-xs sm:text-[13px] shadow-2xs leading-relaxed"
+                className="my-3 p-3.5 bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/90 dark:border-rose-900/60 text-rose-950 dark:text-rose-200 rounded-xl text-xs sm:text-[13px] shadow-2xs leading-relaxed"
               >
                 {renderInline(block.content)}
               </div>
@@ -165,7 +165,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <div
               key={index}
-              className="my-2.5 p-3 bg-blue-50/70 border-l-4 border-blue-600 text-blue-950 rounded-r-xl text-xs sm:text-[13px] shadow-2xs"
+              className="my-2.5 p-3 bg-blue-50/70 dark:bg-blue-950/40 border-l-4 border-blue-600 dark:border-blue-400 text-blue-950 dark:text-blue-200 rounded-r-xl text-xs sm:text-[13px] shadow-2xs"
             >
               {renderInline(block.content)}
             </div>
@@ -177,7 +177,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <div
                 key={index}
-                className="my-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/90 overflow-x-auto text-center shadow-2xs"
+                className="my-3 p-3 bg-slate-50/80 dark:bg-[#1e1f20] rounded-xl border border-slate-200/90 dark:border-[#3c4043] overflow-x-auto text-center shadow-2xs"
               >
                 <LatexRenderer content={block.content} block />
               </div>
@@ -186,7 +186,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <pre
               key={index}
-              className="my-2 p-3 bg-slate-900 text-slate-100 rounded-xl font-mono text-[11px] overflow-x-auto"
+              className="my-2 p-3 bg-slate-900 dark:bg-[#1e1f20] text-slate-100 rounded-xl font-mono text-[11px] overflow-x-auto border border-transparent dark:border-[#3c4043]"
             >
               <code>{block.content}</code>
             </pre>
@@ -195,7 +195,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
 
         // Paragraph
         return (
-          <p key={index} className="text-slate-700">
+          <p key={index} className="text-slate-700 dark:text-[#e8eaed]">
             {renderInline(block.content)}
           </p>
         );
@@ -483,26 +483,26 @@ function renderFormattingOnly(text: string): React.ReactNode {
       parts.push(
         <code
           key={keyIndex++}
-          className="px-1.5 py-0.5 bg-slate-100 text-blue-700 font-mono text-[11px] rounded-md border border-slate-200"
+          className="px-1.5 py-0.5 bg-slate-100 dark:bg-[#1e1f20] text-blue-700 dark:text-blue-400 font-mono text-[11px] rounded-md border border-slate-200 dark:border-[#3c4043]"
         >
           {best.content}
         </code>
       );
     } else if (best.type === 'boldItalic') {
       parts.push(
-        <strong key={keyIndex++} className="font-extrabold italic text-slate-900">
+        <strong key={keyIndex++} className="font-extrabold italic text-slate-900 dark:text-white">
           {best.content}
         </strong>
       );
     } else if (best.type === 'bold') {
       parts.push(
-        <strong key={keyIndex++} className="font-bold text-slate-900">
+        <strong key={keyIndex++} className="font-bold text-slate-900 dark:text-white">
           {best.content}
         </strong>
       );
     } else if (best.type === 'italic') {
       parts.push(
-        <em key={keyIndex++} className="italic text-slate-800">
+        <em key={keyIndex++} className="italic text-slate-800 dark:text-[#e8eaed]">
           {best.content}
         </em>
       );

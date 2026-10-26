@@ -14,8 +14,11 @@ import {
   User,
   BookMarked,
   BookCheck,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   subscribeToSyncStatus,
   getSyncStatus,
@@ -47,11 +50,38 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileDrawer,
 }) => {
   const { user, isConfigured, signInWithGoogle, logout, authError } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatusInfo>(() => getSyncStatus());
   const [isForceSyncing, setIsForceSyncing] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Dynamic sliding indicator for Top Taskbar
+  const navRef = useRef<HTMLElement>(null);
+  const gradebookTabRef = useRef<HTMLButtonElement>(null);
+  const notebookTabRef = useRef<HTMLButtonElement>(null);
+  const slabTabRef = useRef<HTMLButtonElement>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 90 });
+
+  // Update sliding indicator whenever active tab or item counts change
+  useEffect(() => {
+    const tabMap = {
+      gradebook: gradebookTabRef.current,
+      notebook: notebookTabRef.current,
+      slab: slabTabRef.current,
+    };
+    const activeEl = tabMap[activeTab];
+    const navEl = navRef.current;
+    if (activeEl && navEl) {
+      const activeRect = activeEl.getBoundingClientRect();
+      const navRect = navEl.getBoundingClientRect();
+      setIndicatorStyle({
+        left: activeRect.left - navRect.left,
+        width: activeRect.width,
+      });
+    }
+  }, [activeTab, noteCount, slabCount]);
 
   // Subscribe to live sync status from gradebookService
   useEffect(() => {
@@ -87,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-slate-200/80 transition-all">
+    <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-[#3c4043] transition-colors duration-250">
       <div className="relative w-full px-3 sm:px-6 h-16 flex items-center justify-between">
         {/* Left: Mobile Menu Toggle + Logo */}
         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 z-20">
@@ -95,105 +125,141 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onOpenMobileDrawer}
-            className="md:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer min-h-[42px] min-w-[42px] flex items-center justify-center -ml-1"
-            aria-label="Open classes menu"
+            className="md:hidden p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#353739] rounded-xl transition-colors cursor-pointer min-h-[42px] min-w-[42px] flex items-center justify-center -ml-1 google-btn-press"
+            aria-label="Open navigation menu"
           >
             <Menu className="w-5 h-5" />
           </button>
 
           <div
             onClick={() => onChangeTab('gradebook')}
-            className="flex items-center gap-2 cursor-pointer select-none"
+            className="flex items-center gap-2 cursor-pointer select-none group"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs flex-shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 flex items-center justify-center text-white shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
               <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.2]" />
             </div>
-            <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight hidden xs:inline">
-              gradeslate<span className="text-blue-600">.</span>
+            <span className="font-extrabold text-lg sm:text-xl text-slate-900 dark:text-[#e8eaed] tracking-tight hidden xs:inline transition-colors">
+              gradeslate<span className="text-blue-600 dark:text-[#8ab4f8]">.</span>
             </span>
           </div>
         </div>
 
-        {/* Center: Primary Task Bar (Gradebook, Notebook & Slab) */}
-        <nav className="absolute left-1/2 -translate-x-1/2 flex items-center p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 shadow-2xs z-10">
+        {/* Center: Primary Task Bar with Smooth Sliding Pill Indicator */}
+        <nav
+          ref={navRef}
+          aria-label="Main taskbar tabs"
+          className="absolute left-1/2 -translate-x-1/2 flex items-center p-1 bg-slate-100/90 dark:bg-[#282a2c] rounded-xl border border-slate-200/80 dark:border-[#3c4043] shadow-2xs z-10 select-none"
+        >
+          {/* Google Material 3 Animated Sliding Indicator */}
+          <div
+            className="absolute top-1 bottom-1 rounded-lg bg-white dark:bg-[#353739] shadow-xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
+            style={{
+              left: `${indicatorStyle.left}px`,
+              width: `${indicatorStyle.width}px`,
+            }}
+          />
+
+          {/* Gradebook Tab */}
           <button
+            ref={gradebookTabRef}
             type="button"
             onClick={() => onChangeTab('gradebook')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            className={`relative z-10 flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer ${
               activeTab === 'gradebook'
-                ? 'bg-white text-blue-700 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'text-blue-700 dark:text-[#8ab4f8]'
+                : 'text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed]'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5 text-blue-600 stroke-[2.2]" />
+            <BookOpen className="w-3.5 h-3.5 stroke-[2.2]" />
             <span>Gradebook</span>
           </button>
+
+          {/* Notebook Tab */}
           <button
+            ref={notebookTabRef}
             type="button"
             onClick={() => onChangeTab('notebook')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            className={`relative z-10 flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer ${
               activeTab === 'notebook'
-                ? 'bg-white text-indigo-700 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'text-indigo-700 dark:text-[#c58af9]'
+                : 'text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed]'
             }`}
           >
-            <BookMarked className="w-3.5 h-3.5 text-indigo-600 stroke-[2.2]" />
+            <BookMarked className="w-3.5 h-3.5 stroke-[2.2]" />
             <span>Notebook</span>
             {noteCount > 0 && (
-              <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-indigo-100 text-indigo-700 text-[10px] font-extrabold rounded-full">
+              <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-indigo-100 dark:bg-purple-900/40 text-indigo-700 dark:text-purple-300 text-[10px] font-extrabold rounded-full">
                 {noteCount}
               </span>
             )}
           </button>
+
+          {/* Slab Tab */}
           <button
+            ref={slabTabRef}
             type="button"
             onClick={() => onChangeTab('slab')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+            className={`relative z-10 flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer ${
               activeTab === 'slab'
-                ? 'bg-white text-violet-700 shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'text-violet-700 dark:text-[#c58af9]'
+                : 'text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed]'
             }`}
           >
-            <BookCheck className="w-3.5 h-3.5 text-violet-600 stroke-[2.2]" />
+            <BookCheck className="w-3.5 h-3.5 stroke-[2.2]" />
             <span>Slab</span>
             {slabCount > 0 && (
-              <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-violet-100 text-violet-700 text-[10px] font-extrabold rounded-full">
+              <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-violet-100 dark:bg-purple-900/40 text-violet-700 dark:text-purple-300 text-[10px] font-extrabold rounded-full">
                 {slabCount}
               </span>
             )}
           </button>
         </nav>
 
-        {/* Right: User Authentication, Sync Status & Profile Menu */}
+        {/* Right: Theme Toggle, User Authentication, Sync Status & Profile Menu */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 z-20">
+          {/* Google Dark Mode / Light Mode Switcher */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 hover:bg-slate-200/80 dark:bg-[#282a2c] dark:hover:bg-[#353739] rounded-xl transition-all cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center border border-slate-200 dark:border-[#3c4043] shadow-2xs google-btn-press"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-label="Toggle dark mode theme"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400 rotate-0 transition-transform duration-300 hover:rotate-45" />
+            ) : (
+              <Moon className="w-4 h-4 text-slate-700 transition-transform duration-300 hover:-rotate-12" />
+            )}
+          </button>
+
           {user ? (
             <>
               {syncStatus.state === 'syncing' ? (
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-medium">
-                  <RefreshCw className="w-3 h-3 text-amber-600 animate-spin" />
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-300 rounded-full text-xs font-medium">
+                  <RefreshCw className="w-3 h-3 text-amber-600 dark:text-amber-400 animate-spin" />
                   <span className="hidden sm:inline">Syncing...</span>
                 </div>
               ) : syncStatus.state === 'error' ? (
                 <button
                   type="button"
                   onClick={onOpenFirebaseConfig}
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-rose-50 border border-rose-300 text-rose-700 hover:bg-rose-100 rounded-full text-xs font-semibold cursor-pointer animate-pulse transition-all"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-full text-xs font-semibold cursor-pointer animate-pulse transition-all"
                   title={syncStatus.errorMessage || 'Cloud sync error'}
                 >
-                  <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                   <span className="hidden sm:inline">Sync Error - Fix</span>
                   <span className="sm:hidden">Sync Error</span>
                 </button>
               ) : (
-                <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200/70 text-emerald-700 rounded-full text-xs font-medium">
+                <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Cloud Synced</span>
                 </div>
               )}
             </>
           ) : (
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200/70 text-slate-600 rounded-full text-xs font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-[#282a2c] border border-slate-200/70 dark:border-[#3c4043] text-slate-600 dark:text-[#9aa0a6] rounded-full text-xs font-medium">
+              <ShieldCheck className="w-3.5 h-3.5 text-slate-400 dark:text-[#8ab4f8]" />
               <span>Private & Secure</span>
             </div>
           )}
@@ -203,7 +269,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center gap-2 p-1 sm:pl-2 sm:pr-2.5 bg-slate-100 hover:bg-slate-200/80 rounded-full transition-all cursor-pointer border border-slate-200 min-h-[38px]"
+              className="flex items-center gap-2 p-1 sm:pl-2 sm:pr-2.5 bg-slate-100 hover:bg-slate-200/80 dark:bg-[#282a2c] dark:hover:bg-[#353739] rounded-full transition-all cursor-pointer border border-slate-200 dark:border-[#3c4043] min-h-[38px] google-btn-press"
               aria-label="Profile and account menu"
             >
               {user ? (
@@ -211,7 +277,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <img
                     src={user.photoURL}
                     alt={user.displayName || 'User'}
-                    className="w-7 h-7 rounded-full object-cover border border-slate-300"
+                    className="w-7 h-7 rounded-full object-cover border border-slate-300 dark:border-slate-600"
                   />
                 ) : (
                   <div className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
@@ -219,11 +285,11 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 )
               ) : (
-                <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-[#353739] text-slate-600 dark:text-slate-300 flex items-center justify-center">
                   <User className="w-4 h-4" />
                 </div>
               )}
-              <span className="text-xs font-semibold text-slate-800 max-w-[80px] sm:max-w-[100px] truncate hidden sm:inline">
+              <span className="text-xs font-semibold text-slate-800 dark:text-[#e8eaed] max-w-[80px] sm:max-w-[100px] truncate hidden sm:inline">
                 {user ? (user.displayName?.split(' ')[0] || user.email?.split('@')[0]) : 'Profile'}
               </span>
               {user && (
@@ -242,22 +308,22 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* User / Profile Dropdown */}
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-72 max-w-[88vw] bg-white rounded-2xl shadow-xl border border-slate-200/90 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="text-xs font-bold text-slate-900 truncate">
+              <div className="absolute right-0 mt-2 w-72 max-w-[88vw] bg-white dark:bg-[#282a2c] rounded-2xl shadow-xl border border-slate-200/90 dark:border-[#3c4043] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-[#3c4043]">
+                  <p className="text-xs font-bold text-slate-900 dark:text-[#e8eaed] truncate">
                     {user ? (user.displayName || 'Gradebook User') : 'Guest Student'}
                   </p>
-                  <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] truncate mt-0.5">
                     {user ? user.email : 'Local Storage Mode'}
                   </p>
                   {user ? (
-                    <div className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <div className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full w-fit">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                       <span>Signed in with Google</span>
                     </div>
                   ) : (
-                    <div className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full w-fit">
-                      <ShieldCheck className="w-3 h-3 text-slate-500" />
+                    <div className="mt-2 flex items-center gap-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-[#353739] px-2 py-0.5 rounded-full w-fit">
+                      <ShieldCheck className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                       <span>Private & Offline</span>
                     </div>
                   )}
@@ -271,9 +337,9 @@ export const Header: React.FC<HeaderProps> = ({
                       setIsUserMenuOpen(false);
                       onOpenTranscript();
                     }}
-                    className="w-full text-left px-4 py-2.5 text-xs text-slate-800 hover:bg-slate-50 flex items-center gap-2 cursor-pointer min-h-[40px] font-semibold"
+                    className="w-full text-left px-4 py-2.5 text-xs text-slate-800 dark:text-[#e8eaed] hover:bg-slate-50 dark:hover:bg-[#353739] flex items-center gap-2 cursor-pointer min-h-[40px] font-semibold transition-colors"
                   >
-                    <FileText className="w-4 h-4 text-blue-600" />
+                    <FileText className="w-4 h-4 text-blue-600 dark:text-[#8ab4f8]" />
                     <span>Official Academic Transcript (PDF)</span>
                   </button>
 
@@ -283,14 +349,14 @@ export const Header: React.FC<HeaderProps> = ({
                       type="button"
                       disabled={isForceSyncing}
                       onClick={handleForceSync}
-                      className="w-full text-left px-4 py-2.5 text-xs text-blue-700 hover:bg-blue-50/80 flex items-center justify-between cursor-pointer min-h-[40px] transition-colors"
+                      className="w-full text-left px-4 py-2.5 text-xs text-blue-700 dark:text-[#8ab4f8] hover:bg-blue-50/80 dark:hover:bg-[#353739] flex items-center justify-between cursor-pointer min-h-[40px] transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        <CloudUpload className={`w-4 h-4 text-blue-600 ${isForceSyncing ? 'animate-bounce' : ''}`} />
+                        <CloudUpload className={`w-4 h-4 text-blue-600 dark:text-[#8ab4f8] ${isForceSyncing ? 'animate-bounce' : ''}`} />
                         <span className="font-semibold">{isForceSyncing ? 'Syncing...' : 'Sync to Cloud Now'}</span>
                       </div>
                       {syncFeedback && (
-                        <span className="text-[10px] text-emerald-600 font-bold ml-2 truncate max-w-[100px]">
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold ml-2 truncate max-w-[100px]">
                           {syncFeedback}
                         </span>
                       )}
@@ -307,7 +373,7 @@ export const Header: React.FC<HeaderProps> = ({
                           onOpenFirebaseConfig();
                         }
                       }}
-                      className="w-full text-left px-4 py-2.5 text-xs text-blue-700 hover:bg-blue-50/80 flex items-center gap-2 cursor-pointer min-h-[40px] font-semibold"
+                      className="w-full text-left px-4 py-2.5 text-xs text-blue-700 dark:text-[#8ab4f8] hover:bg-blue-50/80 dark:hover:bg-[#353739] flex items-center gap-2 cursor-pointer min-h-[40px] font-semibold transition-colors"
                     >
                       <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                         <path
@@ -337,24 +403,24 @@ export const Header: React.FC<HeaderProps> = ({
                       setIsUserMenuOpen(false);
                       onOpenFirebaseConfig();
                     }}
-                    className="w-full text-left px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer min-h-[40px]"
+                    className="w-full text-left px-4 py-2.5 text-xs text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-50 dark:hover:bg-[#353739] flex items-center gap-2 cursor-pointer min-h-[40px] transition-colors"
                   >
-                    <Settings className="w-4 h-4 text-slate-400" />
+                    <Settings className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                     <span>Firebase & Rules Settings</span>
                   </button>
                 </div>
 
                 {user && (
-                  <div className="border-t border-slate-100 pt-1 mt-1">
+                  <div className="border-t border-slate-100 dark:border-[#3c4043] pt-1 mt-1">
                     <button
                       type="button"
                       onClick={() => {
                         setIsUserMenuOpen(false);
                         logout();
                       }}
-                      className="w-full text-left px-4 py-2.5 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-semibold cursor-pointer min-h-[40px]"
+                      className="w-full text-left px-4 py-2.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2 font-semibold cursor-pointer min-h-[40px] transition-colors"
                     >
-                      <LogOut className="w-4 h-4 text-rose-500" />
+                      <LogOut className="w-4 h-4 text-rose-500 dark:text-rose-400" />
                       <span>Sign Out</span>
                     </button>
                   </div>
@@ -367,9 +433,9 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Sync Warning Banner if Firestore returned an error */}
       {user && syncStatus.state === 'error' && syncStatus.errorMessage && (
-        <div className="bg-amber-50 border-t border-amber-200 px-4 py-2 text-xs text-amber-900 flex items-center justify-between">
+        <div className="bg-amber-50 dark:bg-amber-950/50 border-t border-amber-200 dark:border-amber-900/60 px-4 py-2 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <span className="font-medium">
               {syncStatus.errorMessage.includes('Permission Denied')
                 ? 'Firestore Security Rules are blocking sync across devices.'
@@ -379,7 +445,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onOpenFirebaseConfig}
-            className="ml-3 px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg cursor-pointer flex-shrink-0 text-[11px]"
+            className="ml-3 px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg cursor-pointer flex-shrink-0 text-[11px] google-btn-press"
           >
             View Rules & Fix
           </button>
@@ -388,12 +454,12 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Auth Error Banner */}
       {authError && (
-        <div className="bg-rose-50 border-t border-rose-200 px-4 py-2 text-xs text-rose-700 flex items-center justify-between">
+        <div className="bg-rose-50 dark:bg-rose-950/50 border-t border-rose-200 dark:border-rose-900/60 px-4 py-2 text-xs text-rose-700 dark:text-rose-200 flex items-center justify-between">
           <span className="line-clamp-2">{authError}</span>
           <button
             type="button"
             onClick={onOpenFirebaseConfig}
-            className="underline font-bold hover:text-rose-900 cursor-pointer ml-3 flex-shrink-0"
+            className="underline font-bold hover:text-rose-900 dark:hover:text-rose-100 cursor-pointer ml-3 flex-shrink-0"
           >
             Check Settings
           </button>

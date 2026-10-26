@@ -376,34 +376,32 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
 
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
-
-  // Find assigned class name
   const currentClass = classes.find((c) => c.id === selectedClassId);
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-fade-scale">
       {/* Top Navigation & Status Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/90">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/90 dark:border-[#3c4043]">
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-semibold rounded-xl transition-all cursor-pointer min-h-[36px]"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200/80 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] text-xs font-semibold rounded-xl transition-all cursor-pointer min-h-[36px] google-btn-press"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>All Notes</span>
           </button>
 
           {/* Real-time Save Indicator */}
-          <div className="flex items-center gap-1 text-[11px] text-slate-400 pl-1">
+          <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-[#9aa0a6] pl-1">
             {saveStatus === 'saving' ? (
-              <span className="flex items-center gap-1 text-amber-600 font-medium animate-pulse">
+              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium animate-pulse">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                 Saving...
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 Saved
               </span>
             )}
@@ -421,7 +419,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 onOpenSlateAi(`Look at my ${effectiveSubject} notes and create a mcq`);
               }}
               title="Create MCQs or Ask Slate AI about this note"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer min-h-[36px]"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer min-h-[36px] google-btn-press"
             >
               <Sparkles className="w-3.5 h-3.5 text-white stroke-[2.2]" />
               <span>Ask Slate AI</span>
@@ -432,7 +430,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
             type="button"
             onClick={() => setIsDeleteModalOpen(true)}
             title="Delete this note"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-semibold transition-all cursor-pointer min-h-[36px]"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-slate-500 dark:text-[#9aa0a6] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl text-xs font-semibold transition-all cursor-pointer min-h-[36px] google-btn-press"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Delete</span>
@@ -441,7 +439,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
       </div>
 
       {/* Notion Page Header Canvas */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-7 shadow-2xs space-y-4">
+      <div className="bg-white dark:bg-[#282a2c] border border-slate-200/90 dark:border-[#3c4043] rounded-2xl p-5 sm:p-7 shadow-2xs space-y-4">
         {/* Icon & Title Row */}
         <div className="flex items-start gap-3">
           {/* Notion Emoji / Icon Picker */}
@@ -450,19 +448,19 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               type="button"
               onClick={() => setIsIconPickerOpen(!isIconPickerOpen)}
               title="Change note icon"
-              className="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-slate-200/80 flex items-center justify-center text-2xl transition-all cursor-pointer select-none border border-slate-200/80"
+              className="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-[#1e1f20] hover:bg-slate-200/80 dark:hover:bg-[#303134] flex items-center justify-center text-2xl transition-all cursor-pointer select-none border border-slate-200/80 dark:border-[#3c4043] google-btn-press"
             >
               {icon}
             </button>
 
             {isIconPickerOpen && (
-              <div className="absolute top-13 left-0 z-30 p-2.5 bg-white border border-slate-200 rounded-2xl shadow-xl flex gap-1.5 flex-wrap w-48 animate-in zoom-in-95 duration-150">
+              <div className="absolute top-13 left-0 z-30 p-2.5 bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-2xl shadow-xl flex gap-1.5 flex-wrap w-48 animate-in zoom-in-95 duration-150">
                 {NOTE_ICONS.map((emoji) => (
                   <button
                     key={emoji}
                     type="button"
                     onClick={() => handleSelectIcon(emoji)}
-                    className="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-lg cursor-pointer transition-colors"
+                    className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-[#303134] flex items-center justify-center text-lg cursor-pointer transition-colors"
                   >
                     {emoji}
                   </button>
@@ -479,23 +477,23 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               onChange={(e) => handleTitleChange(e.target.value)}
               onBlur={handleTitleBlur}
               placeholder="Untitled Note..."
-              className="w-full text-2xl sm:text-3xl font-extrabold text-slate-900 bg-transparent border-none outline-hidden tracking-tight placeholder-slate-300 focus:ring-0 leading-tight"
+              className="w-full text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#e8eaed] bg-transparent border-none outline-hidden tracking-tight placeholder-slate-300 dark:placeholder-[#5f6368] focus:ring-0 leading-tight"
             />
           </div>
         </div>
 
         {/* Notion Database Properties Bar */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 border-t border-slate-100 dark:border-[#3c4043] text-xs text-slate-600 dark:text-[#c4c7c5]">
           {/* Property 1: Class Tag Selector */}
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-400 flex items-center gap-1">
-              <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+            <span className="font-semibold text-slate-400 dark:text-[#9aa0a6] flex items-center gap-1">
+              <BookOpen className="w-3.5 h-3.5 text-slate-400 dark:text-[#9aa0a6]" />
               Class:
             </span>
             <select
               value={selectedClassId}
               onChange={(e) => handleClassChange(e.target.value)}
-              className="bg-slate-100 hover:bg-slate-200/80 text-slate-800 font-bold px-2.5 py-1 rounded-lg border border-slate-200/80 cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+              className="bg-slate-100 dark:bg-[#1e1f20] hover:bg-slate-200/80 dark:hover:bg-[#303134] text-slate-800 dark:text-[#e8eaed] font-bold px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-[#3c4043] cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-blue-500"
             >
               <option value="">General (No Class)</option>
               {classes.map((cls) => (
@@ -510,10 +508,10 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
           <button
             type="button"
             onClick={() => setShowSourcesPanel(!showSourcesPanel)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold border transition-colors cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold border transition-colors cursor-pointer google-btn-press ${
               (note.sources?.length || 0) > 0 || showSourcesPanel
-                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                : 'bg-slate-100 text-slate-600 border-slate-200/80 hover:bg-slate-200/80'
+                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-[#8ab4f8] border-blue-200 dark:border-blue-800/40'
+                : 'bg-slate-100 dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] border-slate-200/80 dark:border-[#3c4043] hover:bg-slate-200/80 dark:hover:bg-[#303134]'
             }`}
           >
             <Paperclip className="w-3.5 h-3.5" />
@@ -526,7 +524,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
           </button>
 
           {/* Property 3: Word Count & Read Time */}
-          <div className="flex items-center gap-2 text-slate-400 text-[11px] hidden md:flex">
+          <div className="flex items-center gap-2 text-slate-400 dark:text-[#9aa0a6] text-[11px] hidden md:flex">
             <span className="flex items-center gap-1">
               <FileText className="w-3 h-3" />
               {wordCount.toLocaleString()} words
@@ -543,7 +541,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
             <button
               type="button"
               onClick={() => onOpenSlateAi(`Look at my ${currentClass.name} notes and create a mcq`)}
-              className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold hover:underline flex items-center gap-1 ml-auto cursor-pointer"
+              className="text-[11px] text-blue-600 dark:text-[#8ab4f8] hover:text-blue-800 dark:hover:text-blue-300 font-semibold hover:underline flex items-center gap-1 ml-auto cursor-pointer"
             >
               <Sparkles className="w-3 h-3" />
               Create MCQs for {currentClass.name}
@@ -553,7 +551,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
 
         {/* Collapsible Class & Note File Uploads Panel */}
         {showSourcesPanel && (
-          <div className="pt-3 border-t border-slate-100 animate-in slide-in-from-top-2 duration-150">
+          <div className="pt-3 border-t border-slate-100 dark:border-[#3c4043] animate-in slide-in-from-top-2 duration-150">
             <SourcesSection
               sources={note.sources || []}
               onUpdateSources={handleUpdateSources}
@@ -564,19 +562,19 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
 
       {/* Notion-Style Full-Width Canvas */}
       <div className="w-full space-y-4">
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
+        <div className="bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-2xl shadow-2xs overflow-hidden flex flex-col">
           {/* Sticky Notion Formatting & View Mode Toolbar */}
-          <div className="px-3.5 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2 flex-wrap">
+          <div className="px-3.5 py-2 bg-slate-50 dark:bg-[#242526] border-b border-slate-200 dark:border-[#3c4043] flex items-center justify-between gap-2 flex-wrap">
             {/* Left Toolbar: View Mode Switches */}
-            <div className="flex items-center p-0.5 bg-slate-200/80 rounded-lg">
+            <div className="flex items-center p-0.5 bg-slate-200/80 dark:bg-[#1e1f20] rounded-lg">
               <button
                 type="button"
                 onClick={() => setViewMode('write')}
                 title="Focused note-taking mode"
-                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer google-btn-press ${
                   viewMode === 'write'
-                    ? 'bg-white text-blue-700 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-[#303134] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
+                    : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
               >
                 <Edit3 className="w-3.5 h-3.5" />
@@ -586,10 +584,10 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 type="button"
                 onClick={() => setViewMode('split')}
                 title="Side-by-side live formatted preview"
-                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer google-btn-press ${
                   viewMode === 'split'
-                    ? 'bg-white text-blue-700 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-[#303134] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
+                    : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
               >
                 <Columns className="w-3.5 h-3.5" />
@@ -599,10 +597,10 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 type="button"
                 onClick={() => setViewMode('preview')}
                 title="Formatted interactive preview"
-                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer google-btn-press ${
                   viewMode === 'preview'
-                    ? 'bg-white text-blue-700 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-[#303134] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
+                    : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
               >
                 <Eye className="w-3.5 h-3.5" />
@@ -612,13 +610,13 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
 
             {/* Middle Toolbar: Notion Formatting Buttons (Available in write & split) */}
             {viewMode !== 'preview' && (
-              <div className="flex items-center gap-1 text-slate-600 flex-wrap">
+              <div className="flex items-center gap-1 text-slate-600 dark:text-[#c4c7c5] flex-wrap">
                 {/* Headings */}
                 <button
                   type="button"
                   onClick={() => handleInsertSnippet('# ', '', 'Heading 1')}
                   title="Heading 1 (# )"
-                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
                   H1
                 </button>
@@ -626,7 +624,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('## ', '', 'Heading 2')}
                   title="Heading 2 (## )"
-                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
                   H2
                 </button>
@@ -634,19 +632,19 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('### ', '', 'Heading 3')}
                   title="Heading 3 (### )"
-                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer text-xs font-bold"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
                   H3
                 </button>
 
-                <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
+                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#3c4043] mx-0.5" />
 
                 {/* Bold, Italic, Strikethrough, Code */}
                 <button
                   type="button"
                   onClick={() => handleInsertSnippet('**', '**', 'bold text')}
                   title="Bold (**text**)"
-                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
                 >
                   <Bold className="w-3.5 h-3.5" />
                 </button>
@@ -654,7 +652,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('*', '*', 'italic text')}
                   title="Italic (*text*)"
-                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
                 >
                   <Italic className="w-3.5 h-3.5" />
                 </button>
@@ -662,19 +660,19 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('`', '`', 'code')}
                   title="Inline Code (`code`)"
-                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
                 >
                   <Code className="w-3.5 h-3.5" />
                 </button>
 
-                <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
+                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#3c4043] mx-0.5" />
 
                 {/* Bullet list, Numbered list, Todo Checklist */}
                 <button
                   type="button"
                   onClick={() => handleInsertSnippet('- ', '', 'Bullet point')}
                   title="Bullet List (- )"
-                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
                 >
                   <List className="w-3.5 h-3.5" />
                 </button>
@@ -682,7 +680,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('1. ', '', 'Numbered point')}
                   title="Numbered List (1. )"
-                  className="p-1 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
                 >
                   <ListOrdered className="w-3.5 h-3.5" />
                 </button>
@@ -690,12 +688,12 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('- [ ] ', '', 'Checklist task')}
                   title="Notion Checklist (- [ ] )"
-                  className="p-1 hover:bg-blue-100 text-blue-700 rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-blue-100 dark:hover:bg-blue-950/40 text-blue-700 dark:text-[#8ab4f8] rounded-md transition-colors cursor-pointer"
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
                 </button>
 
-                <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
+                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#3c4043] mx-0.5" />
 
                 {/* Notion Callout & LaTeX */}
                 <button
@@ -704,7 +702,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                     handleInsertSnippet('> 💡 **Key Concept**: ', '\n', 'Important definition or takeaway')
                   }
                   title="Notion Callout Box (> 💡 )"
-                  className="p-1 hover:bg-amber-100 text-amber-700 rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-amber-100 dark:hover:bg-amber-950/40 text-amber-700 dark:text-amber-400 rounded-md transition-colors cursor-pointer"
                 >
                   <Lightbulb className="w-3.5 h-3.5" />
                 </button>
@@ -712,7 +710,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('$$', '$$', 'E = mc^2')}
                   title="KaTeX Math Formula ($$formula$$)"
-                  className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md text-[11px] font-bold border border-blue-200 cursor-pointer"
+                  className="flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-[#8ab4f8] hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-md text-[11px] font-bold border border-blue-200 dark:border-blue-800/40 cursor-pointer"
                 >
                   <Sigma className="w-3 h-3" />
                   <span>$Math$</span>
@@ -725,46 +723,46 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               <button
                 type="button"
                 onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 rounded-md transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-200/70 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer google-btn-press"
               >
-                <LayoutTemplate className="w-3.5 h-3.5 text-blue-600" />
+                <LayoutTemplate className="w-3.5 h-3.5 text-blue-600 dark:text-[#8ab4f8]" />
                 <span className="hidden sm:inline">Templates</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
 
               {isTemplatesOpen && (
-                <div className="absolute right-0 top-8 z-30 w-56 p-1.5 bg-white border border-slate-200 rounded-xl shadow-xl space-y-1 animate-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-8 z-30 w-56 p-1.5 bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-xl shadow-xl space-y-1 animate-in zoom-in-95 duration-150">
                   <button
                     type="button"
                     onClick={() => handleInsertTemplate('lecture')}
-                    className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
+                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#303134] rounded-lg text-xs transition-colors cursor-pointer"
                   >
-                    <div className="font-bold text-slate-800">📚 Lecture Notes</div>
-                    <div className="text-[10px] text-slate-400">Objectives, notes & key takeaways</div>
+                    <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📚 Lecture Notes</div>
+                    <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Objectives, notes & key takeaways</div>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleInsertTemplate('cornell')}
-                    className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
+                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#303134] rounded-lg text-xs transition-colors cursor-pointer"
                   >
-                    <div className="font-bold text-slate-800">⚖️ Cornell Method</div>
-                    <div className="text-[10px] text-slate-400">Cues, derivations & summary</div>
+                    <div className="font-bold text-slate-800 dark:text-[#e8eaed]">⚖️ Cornell Method</div>
+                    <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Cues, derivations & summary</div>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleInsertTemplate('exam')}
-                    className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
+                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#303134] rounded-lg text-xs transition-colors cursor-pointer"
                   >
-                    <div className="font-bold text-slate-800">📈 Exam Prep & Formulas</div>
-                    <div className="text-[10px] text-slate-400">Formulas, common traps & checklist</div>
+                    <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📈 Exam Prep & Formulas</div>
+                    <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Formulas, common traps & checklist</div>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleInsertTemplate('analysis')}
-                    className="w-full text-left p-2 hover:bg-blue-50 rounded-lg text-xs transition-colors cursor-pointer"
+                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#303134] rounded-lg text-xs transition-colors cursor-pointer"
                   >
-                    <div className="font-bold text-slate-800">📊 Analytical & Case Notes</div>
-                    <div className="text-[10px] text-slate-400">Market dynamics & equations</div>
+                    <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📊 Analytical & Case Notes</div>
+                    <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Market dynamics & equations</div>
                   </button>
                 </div>
               )}
@@ -783,11 +781,11 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 onBlur={handleContentBlur}
                 onKeyDown={handleKeyDown}
                 placeholder="Type your notes naturally... Hit Enter on bullets or checkboxes (- [ ]) for automatic continuation, or write formulas like $E=mc^2$ or $$\text{PED}=\frac{\%\Delta Q}{\%\Delta P}$$."
-                className="w-full flex-1 text-sm sm:text-base font-sans text-slate-800 placeholder-slate-400 focus:outline-hidden resize-y min-h-[420px] leading-relaxed"
+                className="w-full flex-1 text-sm sm:text-base font-sans text-slate-800 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] focus:outline-hidden resize-y min-h-[420px] leading-relaxed bg-transparent"
               />
             </div>
           ) : viewMode === 'split' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 min-h-[460px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-[#3c4043] min-h-[460px]">
               {/* Left Split: Editor */}
               <div className="p-4 sm:p-5 flex flex-col">
                 <textarea
@@ -798,24 +796,24 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   onBlur={handleContentBlur}
                   onKeyDown={handleKeyDown}
                   placeholder="Type notes on left, see live render on right..."
-                  className="w-full flex-1 text-xs sm:text-sm font-mono text-slate-800 placeholder-slate-400 focus:outline-hidden resize-none min-h-[420px] leading-relaxed"
+                  className="w-full flex-1 text-xs sm:text-sm font-mono text-slate-800 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] focus:outline-hidden resize-none min-h-[420px] leading-relaxed bg-transparent"
                 />
               </div>
               {/* Right Split: Live KaTeX & Markdown Rendering */}
-              <div className="p-4 sm:p-6 overflow-y-auto bg-[#FAFBFD] min-h-[420px]">
+              <div className="p-4 sm:p-6 overflow-y-auto bg-[#FAFBFD] dark:bg-[#1e1f20] min-h-[420px]">
                 {content.trim() ? (
                   <MarkdownRenderer content={content} />
                 ) : (
-                  <p className="text-xs text-slate-400 italic">Live preview will appear here...</p>
+                  <p className="text-xs text-slate-400 dark:text-[#9aa0a6] italic">Live preview will appear here...</p>
                 )}
               </div>
             </div>
           ) : (
-            <div className="p-6 sm:p-8 min-h-[460px] overflow-y-auto bg-[#FAFBFD]">
+            <div className="p-6 sm:p-8 min-h-[460px] overflow-y-auto bg-[#FAFBFD] dark:bg-[#1e1f20]">
               {content.trim() ? (
                 <MarkdownRenderer content={content} />
               ) : (
-                <p className="text-xs text-slate-400 italic">
+                <p className="text-xs text-slate-400 dark:text-[#9aa0a6] italic">
                   Nothing typed yet. Switch back to Write mode to take notes.
                 </p>
               )}
@@ -823,7 +821,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
           )}
 
           {/* Bottom Editor Bar */}
-          <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="px-4 py-2 bg-slate-50 dark:bg-[#242526] border-t border-slate-100 dark:border-[#3c4043] flex items-center justify-between text-[11px] text-slate-400 dark:text-[#9aa0a6]">
             <span className="flex items-center gap-1.5">
               <span>Tab = Indent</span>
               <span>&bull;</span>
@@ -840,22 +838,22 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs"
+            className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-2xs"
             onClick={() => setIsDeleteModalOpen(false)}
           />
-          <div className="relative bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 z-10 animate-in zoom-in-95 duration-150">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
+          <div className="relative bg-white dark:bg-[#282a2c] rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 dark:border-[#3c4043] z-10 animate-fade-scale">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
               <Trash2 className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-extrabold text-slate-900">Delete this note?</h3>
-            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-              Are you sure you want to delete <span className="font-bold text-slate-800">"{note.title}"</span>? This will permanently remove its notes and attached class files.
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">Delete this note?</h3>
+            <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1.5 leading-relaxed">
+              Are you sure you want to delete <span className="font-bold text-slate-800 dark:text-[#e8eaed]">"{note.title}"</span>? This will permanently remove its notes and attached class files.
             </p>
             <div className="mt-5 flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={() => setIsDeleteModalOpen(false)}
-                className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl cursor-pointer google-btn-press"
               >
                 Cancel
               </button>
@@ -865,7 +863,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   onDeleteNote(note.id);
                   onBack();
                 }}
-                className="px-4 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs cursor-pointer"
+                className="px-4 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs cursor-pointer google-btn-press"
               >
                 Delete Note
               </button>

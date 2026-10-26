@@ -96,20 +96,20 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="manage-weights-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 p-6 transform transition-all animate-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-xl bg-white dark:bg-[#282a2c] rounded-2xl shadow-xl border border-slate-100 dark:border-[#3c4043] p-6 transform transition-all animate-fade-scale max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#3c4043] flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+            <div className="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-xl">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="manage-weights-title" className="text-lg font-bold text-slate-900">
+              <h2 id="manage-weights-title" className="text-lg font-bold text-slate-900 dark:text-[#e8eaed]">
                 Configure Categories & Weights
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">
                 Category weights must total exactly 100%
               </p>
             </div>
@@ -118,7 +118,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer google-btn-press"
           >
             <X className="w-5 h-5" />
           </button>
@@ -130,15 +130,15 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
           <div
             className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs font-semibold ${
               isValid
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : 'bg-rose-50 text-rose-800 border-rose-200'
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40'
+                : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/40'
             }`}
           >
             <div className="flex items-center gap-2">
               {isValid ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
               ) : (
-                <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
               )}
               <span>
                 {isValid
@@ -152,14 +152,14 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             <button
               type="button"
               onClick={handleEqualize}
-              className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors cursor-pointer"
+              className="px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-[#e8eaed] bg-white dark:bg-[#1e1f20] hover:bg-slate-50 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043] rounded-lg transition-colors cursor-pointer google-btn-press"
             >
               Split Equally
             </button>
           </div>
 
           {validationError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl flex items-center gap-2">
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{validationError}</span>
             </div>
@@ -170,15 +170,15 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             {draftCategories.map((cat, idx) => (
               <div
                 key={cat.id}
-                className="flex items-center gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl"
               >
                 {/* Reorder Buttons */}
-                <div className="flex flex-col gap-0.5 text-slate-400">
+                <div className="flex flex-col gap-0.5 text-slate-400 dark:text-[#9aa0a6]">
                   <button
                     type="button"
                     disabled={idx === 0}
                     onClick={() => handleMoveCategory(idx, 'up')}
-                    className="p-0.5 hover:text-slate-800 disabled:opacity-20 cursor-pointer"
+                    className="p-0.5 hover:text-slate-800 dark:hover:text-[#e8eaed] disabled:opacity-20 cursor-pointer"
                   >
                     <ArrowUp className="w-3 h-3" />
                   </button>
@@ -186,7 +186,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
                     type="button"
                     disabled={idx === draftCategories.length - 1}
                     onClick={() => handleMoveCategory(idx, 'down')}
-                    className="p-0.5 hover:text-slate-800 disabled:opacity-20 cursor-pointer"
+                    className="p-0.5 hover:text-slate-800 dark:hover:text-[#e8eaed] disabled:opacity-20 cursor-pointer"
                   >
                     <ArrowDown className="w-3 h-3" />
                   </button>
@@ -198,7 +198,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
                   value={cat.name}
                   onChange={(e) => handleUpdateName(cat.id, e.target.value)}
                   placeholder="Category Name"
-                  className="flex-1 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"
+                  className="flex-1 px-3 py-2 text-sm bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"
                 />
 
                 {/* Weight Input */}
@@ -210,9 +210,9 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
                     step="any"
                     value={cat.weight}
                     onChange={(e) => handleUpdateWeight(cat.id, e.target.value)}
-                    className="w-full pl-2.5 pr-7 py-2 text-sm font-bold text-right bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"
+                    className="w-full pl-2.5 pr-7 py-2 text-sm font-bold text-right bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"
                   />
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-[#9aa0a6] pointer-events-none">
                     %
                   </span>
                 </div>
@@ -222,7 +222,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
                   type="button"
                   onClick={() => handleDeleteCategory(cat.id)}
                   title="Remove category"
-                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
+                  className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg cursor-pointer google-btn-press"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -234,7 +234,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
           <button
             type="button"
             onClick={handleAddCategory}
-            className="w-full py-2.5 text-xs font-semibold text-blue-600 bg-blue-50/80 hover:bg-blue-100 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px]"
+            className="w-full py-2.5 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] google-btn-press"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Add New Category</span>
@@ -242,15 +242,15 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 flex-shrink-0">
-          <span className="text-xs text-slate-400">
+        <div className="pt-4 border-t border-slate-100 dark:border-[#3c4043] flex flex-col-reverse sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+          <span className="text-xs text-slate-400 dark:text-[#9aa0a6]">
             Changes only apply once weights total 100%.
           </span>
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 sm:flex-initial px-4 py-2.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer min-h-[44px]"
+              className="flex-1 sm:flex-initial px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-[#c4c7c5] bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
             >
               Cancel
             </button>
@@ -258,7 +258,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
               type="button"
               disabled={!isValid}
               onClick={handleSave}
-              className="flex-1 sm:flex-initial px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm shadow-blue-500/20 cursor-pointer min-h-[44px]"
+              className="flex-1 sm:flex-initial px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm shadow-blue-500/20 cursor-pointer min-h-[44px] google-btn-press"
             >
               Save Configuration
             </button>

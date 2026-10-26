@@ -154,19 +154,19 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="add-class-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-100 p-6 transform transition-all animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+      <div className="w-full max-w-lg bg-white dark:bg-[#282a2c] rounded-2xl shadow-xl border border-slate-100 dark:border-[#3c4043] p-6 transform transition-all animate-fade-scale max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#3c4043]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+            <div className="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-xl">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="add-class-title" className="text-lg font-bold text-slate-900">
+              <h2 id="add-class-title" className="text-lg font-bold text-slate-900 dark:text-[#e8eaed]">
                 Add New Class
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">
                 Configure course name and weighted grading categories
               </p>
             </div>
@@ -175,7 +175,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer google-btn-press"
           >
             <X className="w-5 h-5" />
           </button>
@@ -184,7 +184,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
         <form onSubmit={handleSubmit} className="mt-5 space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="sm:col-span-3">
-              <label htmlFor="class-name-input" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+              <label htmlFor="class-name-input" className="block text-xs font-semibold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider mb-2">
                 Class Name
               </label>
               <input
@@ -195,11 +195,11 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
                 placeholder="e.g. Pre-Calculus 12"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
               />
             </div>
             <div>
-              <label htmlFor="class-credits-input" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2" title="Credit hours for GPA calculation">
+              <label htmlFor="class-credits-input" className="block text-xs font-semibold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider mb-2" title="Credit hours for GPA calculation">
                 Credits
               </label>
               <input
@@ -210,13 +210,13 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 step="0.5"
                 value={credits}
                 onChange={(e) => setCredits(parseFloat(e.target.value) || 3)}
-                className="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
+                className="w-full px-3 py-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
               />
             </div>
           </div>
 
           <div>
-            <span className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            <span className="block text-xs font-semibold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider mb-2">
               Quick Course Suggestions
             </span>
             <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
@@ -225,7 +225,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                   key={preset}
                   type="button"
                   onClick={() => setClassName(preset)}
-                  className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 transition-colors cursor-pointer border border-slate-200/60"
+                  className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 dark:bg-[#1e1f20] hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-[#8ab4f8] text-slate-600 dark:text-[#c4c7c5] transition-colors cursor-pointer border border-slate-200/60 dark:border-[#3c4043] google-btn-press"
                 >
                   {preset}
                 </button>
@@ -234,24 +234,24 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
           </div>
 
           <div>
-            <span className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            <span className="block text-xs font-semibold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider mb-2">
               Initial Category Setup
             </span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => setTemplate('standard')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
                   template === 'standard'
-                    ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-600'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                    ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
+                    : 'border-slate-200 dark:border-[#3c4043] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#1e1f20]'
                 }`}
               >
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-[#8ab4f8]" />
                   Standard
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 leading-tight">
+                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1 leading-tight">
                   40% / 30% / 15% / 15%
                 </p>
               </button>
@@ -259,16 +259,16 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
               <button
                 type="button"
                 onClick={() => setTemplate('simple')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
                   template === 'simple'
-                    ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-600'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                    ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
+                    : 'border-slate-200 dark:border-[#3c4043] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#1e1f20]'
                 }`}
               >
-                <div className="text-xs font-bold text-slate-900">
+                <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
                   Simple
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 leading-tight">
+                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1 leading-tight">
                   70% / 30%
                 </p>
               </button>
@@ -276,16 +276,16 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
               <button
                 type="button"
                 onClick={() => setTemplate('custom')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
                   template === 'custom'
-                    ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-600'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                    ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
+                    : 'border-slate-200 dark:border-[#3c4043] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#1e1f20]'
                 }`}
               >
-                <div className="text-xs font-bold text-slate-900">
+                <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
                   Custom
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 leading-tight">
+                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1 leading-tight">
                   Set own weights
                 </p>
               </button>
@@ -293,16 +293,16 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
               <button
                 type="button"
                 onClick={() => setTemplate('empty')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
                   template === 'empty'
-                    ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-600'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
+                    ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
+                    : 'border-slate-200 dark:border-[#3c4043] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#1e1f20]'
                 }`}
               >
-                <div className="text-xs font-bold text-slate-900">
+                <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
                   Blank
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 leading-tight">
+                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1 leading-tight">
                   Start from scratch
                 </p>
               </button>
@@ -311,16 +311,16 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
 
           {/* Custom Categories Setup when template === 'custom' */}
           {template === 'custom' && (
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+            <div className="p-4 bg-slate-50 dark:bg-[#1e1f20] rounded-xl border border-slate-200 dark:border-[#3c4043] space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700">Custom Categories</span>
-                <span className={`text-xs font-bold ${isCustomValid ? 'text-emerald-600' : 'text-rose-600'}`}>
+                <span className="text-xs font-bold text-slate-700 dark:text-[#e8eaed]">Custom Categories</span>
+                <span className={`text-xs font-bold ${isCustomValid ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                   Total: {customTotal.toFixed(1)}% {isCustomValid ? '✓ (100%)' : '⚠️ (Must = 100%)'}
                 </span>
               </div>
 
               {!isCustomValid && (
-                <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs flex items-center gap-1.5">
+                <div className="p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-lg text-rose-700 dark:text-rose-300 text-xs flex items-center gap-1.5">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>
                     Category weights must total exactly 100% (currently {customTotal.toFixed(1)}% —{' '}
@@ -332,13 +332,13 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {customCategories.map((cat, idx) => (
                   <div key={cat.id} className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400 font-semibold w-4">{idx + 1}.</span>
+                    <span className="text-xs text-slate-400 dark:text-[#9aa0a6] font-semibold w-4">{idx + 1}.</span>
                     <input
                       type="text"
                       value={cat.name}
                       onChange={(e) => handleUpdateCustomCategory(cat.id, { name: e.target.value })}
                       placeholder="Category name"
-                      className="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
+                      className="flex-1 px-3 py-1.5 text-xs bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
                     />
                     <div className="relative w-20">
                       <input
@@ -348,15 +348,15 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                         step="any"
                         value={cat.weight}
                         onChange={(e) => handleUpdateCustomCategory(cat.id, { weight: parseFloat(e.target.value) || 0 })}
-                        className="w-full pr-5 pl-2 py-1.5 text-xs font-bold text-right bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
+                        className="w-full pr-5 pl-2 py-1.5 text-xs font-bold text-right bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
                       />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold pointer-events-none">%</span>
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-[#9aa0a6] font-bold pointer-events-none">%</span>
                     </div>
                     {customCategories.length > 1 && (
                       <button
                         type="button"
                         onClick={() => handleDeleteCustomCategory(cat.id)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-md"
+                        className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-rose-600 dark:hover:text-rose-400 rounded-md google-btn-press"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -368,7 +368,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
               <button
                 type="button"
                 onClick={handleAddCustomCategory}
-                className="w-full py-2 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-2 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors flex items-center justify-center gap-1.5 google-btn-press"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Category</span>
@@ -380,14 +380,14 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer min-h-[44px]"
+              className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-[#c4c7c5] bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!isFormValid}
-              className="w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm shadow-blue-500/20 cursor-pointer min-h-[44px]"
+              className="w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm shadow-blue-500/20 cursor-pointer min-h-[44px] google-btn-press"
             >
               Create Class
             </button>

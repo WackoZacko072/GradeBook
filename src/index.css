@@ -1,13 +1,159 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
+  :root {
+    --bg-app: #FAFBFD;
+    --bg-surface: #FFFFFF;
+    --bg-surface-elevated: #F1F5F9;
+    --bg-surface-hover: #E2E8F0;
+    --border-subtle: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+    --google-blue: #2563EB;
+    --google-blue-soft: #EFF6FF;
+    --header-bg: rgba(255, 255, 255, 0.92);
+    --taskbar-bg: #F1F5F9;
+    --taskbar-indicator: #FFFFFF;
+  }
+
+  /* Google-Style Dark Mode: Soft Slate Charcoal Grey (never pure harsh black) */
+  html.dark {
+    --bg-app: #1e1f20;            /* Google signature slate charcoal */
+    --bg-surface: #282a2c;        /* Google surface container */
+    --bg-surface-elevated: #303134; /* Google elevated container */
+    --bg-surface-hover: #353739;   /* Google interactive hover */
+    --border-subtle: #3c4043;      /* Google subtle borders */
+    --border-strong: #444746;      /* Google strong borders */
+    --text-primary: #e8eaed;      /* Google primary crisp text */
+    --text-secondary: #c4c7c5;    /* Google secondary body text */
+    --text-muted: #80868b;        /* Google muted timestamp/hints */
+    --google-blue: #8ab4f8;       /* Google dark mode blue */
+    --google-blue-soft: rgba(138, 180, 248, 0.14);
+    --header-bg: rgba(30, 31, 32, 0.92);
+    --taskbar-bg: #242526;
+    --taskbar-indicator: #333537;
+  }
+
   body {
-    background-color: #F8FAFC;
-    color: #0F172A;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
     padding: 0;
+    transition: background-color 0.25s cubic-bezier(0.2, 0, 0, 1), color 0.25s cubic-bezier(0.2, 0, 0, 1);
   }
+}
+
+/* ========================================================================= */
+/* Google Material 3 Animations & Motion Curves                              */
+/* ========================================================================= */
+
+@keyframes googleSlideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes googleSlideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes googleFadeScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.975);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes googleSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-right {
+  animation: googleSlideInRight 0.32s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.animate-slide-left {
+  animation: googleSlideInLeft 0.32s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.animate-fade-scale {
+  animation: googleFadeScale 0.28s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.animate-slide-up {
+  animation: googleSlideUp 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+/* Smooth Interactive Card Hover Physics */
+.google-card {
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s cubic-bezier(0.2, 0, 0, 1), border-color 0.25s ease;
+}
+
+.google-card:hover {
+  transform: translateY(-2.5px);
+}
+
+.google-btn-press {
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.google-btn-press:active {
+  transform: scale(0.965);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(120, 125, 130, 0.4);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 155, 160, 0.7);
 }

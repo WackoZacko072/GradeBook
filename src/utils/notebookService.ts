@@ -1,10 +1,16 @@
 import { doc, setDoc, onSnapshot, type Unsubscribe } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { NoteItem } from '../types/notebook';
-import { INITIAL_DEMO_NOTES } from './sampleNotebookData';
 
 const GUEST_NOTES_KEY = 'gradebook_notebook_guest_v1';
 const USER_CACHE_PREFIX = 'gradebook_notebook_cache_user_';
+
+/**
+ * Filter out mock demo notes so users start with a clean workspace
+ */
+function filterOutMockNotes(notes: NoteItem[]): NoteItem[] {
+  return notes.filter((n) => n && n.id !== 'note_demo_calc_physics' && !n.id.startsWith('note_demo_'));
+}
 
 /**
  * Strips undefined properties so Firestore accepts the JSON object
@@ -21,12 +27,18 @@ export function loadGuestNotes(): NoteItem[] {
     const raw = localStorage.getItem(GUEST_NOTES_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) {
+        const cleaned = filterOutMockNotes(parsed);
+        if (cleaned.length !== parsed.length) {
+          saveGuestNotes(cleaned);
+        }
+        return cleaned;
+      }
     }
   } catch (err) {
     console.error('Error loading guest notes:', err);
   }
-  return INITIAL_DEMO_NOTES;
+  return [];
 }
 
 /**
@@ -49,7 +61,9 @@ export function getInitialNotes(userId?: string | null): NoteItem[] {
       const userRaw = localStorage.getItem(USER_CACHE_PREFIX + userId);
       if (userRaw) {
         const parsed = JSON.parse(userRaw);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return filterOutMockNotes(parsed);
+        }
       }
     } catch {
       // ignore
@@ -60,13 +74,15 @@ export function getInitialNotes(userId?: string | null): NoteItem[] {
     const guestRaw = localStorage.getItem(GUEST_NOTES_KEY);
     if (guestRaw) {
       const parsed = JSON.parse(guestRaw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) {
+        return filterOutMockNotes(parsed);
+      }
     }
   } catch {
     // ignore
   }
 
-  return INITIAL_DEMO_NOTES;
+  return [];
 }
 
 /**
@@ -111,7 +127,7 @@ export function subscribeToUserNotes(
     if (cached) {
       const parsed = JSON.parse(cached);
       if (Array.isArray(parsed)) {
-        onNotesReceived(parsed);
+        onNotesReceived(filterOutMockNotes(parsed));
       }
     } else {
       const initial = getInitialNotes(userId);
@@ -133,32 +149,16 @@ export function subscribeToUserNotes(
       if (snapshot.exists()) {
         const data = snapshot.data();
         const cloudNotes = Array.isArray(data.notes) ? (data.notes as NoteItem[]) : [];
-        if (cloudNotes.length > 0) {
-          try {
-            localStorage.setItem(cacheKey, JSON.stringify(cloudNotes));
-          } catch {
-            // ignore
-          }
-          onNotesReceived(cloudNotes);
-        } else {
-          // Cloud has empty notes, check local
-          const local = getInitialNotes(userId);
-          if (local.length > 0) {
-            await saveUserNotes(userId, local);
-            onNotesReceived(local);
-          } else {
-            onNotesReceived([]);
-          }
+        const cleaned = filterOutMockNotes(cloudNotes);
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(cleaned));
+        } catch {
+          // ignore
         }
+        onNotesReceived(cleaned);
       } else {
-        // Document does not exist yet, initialize with demo notes
-        const initial = getInitialNotes(userId);
-        if (initial.length > 0) {
-          await saveUserNotes(userId, initial);
-          onNotesReceived(initial);
-        } else {
-          onNotesReceived([]);
-        }
+        // Document does not exist yet: initialize with empty list (no mock notes)
+        onNotesReceived([]);
       }
     },
     (err) => {
