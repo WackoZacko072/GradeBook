@@ -125,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </button>
 
-            {/* Slab Tab Button */}
+            {/* Office Tab Button (renamed from Slab) */}
             <button
               type="button"
               onClick={() => {
@@ -141,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <BookCheck className="w-4 h-4 text-violet-600 dark:text-[#c58af9]" />
-                <span>Slab</span>
+                <span>Office</span>
               </div>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
@@ -154,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </button>
 
-            {/* Slate AI Quick Action Button */}
+            {/* Gemini Quick Action Button (renamed from Slate AI) */}
             <button
               type="button"
               onClick={() => {
@@ -167,18 +167,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xs">
                   <Sparkles className="w-3 h-3 text-white stroke-[2.2]" />
                 </div>
-                <span className="group-hover:text-blue-700 dark:group-hover:text-[#8ab4f8] font-bold">Slate AI</span>
+                <span className="group-hover:text-blue-700 dark:group-hover:text-[#8ab4f8] font-bold">Gemini</span>
               </div>
             </button>
           </div>
         </div>
 
-        {/* Dynamic section: If Slab active -> Your Slabs. If Gradebook active -> Your Classes. If Notebook active -> Your Notes */}
+        {/* Dynamic section: If Office active -> Your Office Sets. If Gradebook active -> Your Classes. If Notebook active -> Your Notes */}
         {activeTab === 'slab' ? (
           <div>
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider">
-                Your Slabs
+                Your Office Sets
               </span>
               <button
                 type="button"
@@ -187,8 +187,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onMobileClose?.();
                 }}
                 className="p-1 text-violet-600 dark:text-[#c58af9] hover:bg-violet-50 dark:hover:bg-[#353739] rounded-lg transition-colors cursor-pointer google-btn-press"
-                title="Create new Slab set"
-                aria-label="Create new Slab set"
+                title="Create new Office set"
+                aria-label="Create new Office set"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -391,12 +391,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           {/* Drawer Header */}
           <div className="flex items-center justify-between pb-4 mb-2 border-b border-slate-200/80 dark:border-[#3c4043]">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-xs">
-                <BookOpen className="w-4 h-4 stroke-[2.2]" />
-              </div>
-              <span className="font-extrabold text-lg text-slate-900 dark:text-[#e8eaed] tracking-tight">
-                gradeslate<span className="text-blue-600 dark:text-[#8ab4f8]">.</span>
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/gemini-gradebook-logo.png"
+                alt="Gemini Gradebook"
+                className="w-8 h-8 object-contain flex-shrink-0"
+              />
+              <span className="font-bold text-base text-slate-900 dark:text-[#e8eaed] tracking-tight">
+                Gemini Gradebook
               </span>
             </div>
             <button

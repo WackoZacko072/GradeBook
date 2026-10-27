@@ -149,7 +149,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight flex items-center gap-2">
-                <span>Create New Slab Set</span>
+                <span>Create New Office Set</span>
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-violet-100 dark:bg-violet-950/50 text-violet-700 dark:text-[#c58af9] px-2 py-0.5 rounded-full">
                   Gemini Powered
                 </span>
@@ -523,7 +523,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             ) : (
               <>
                 <Sparkles className="w-4 h-4 stroke-[2.2]" />
-                <span>Generate Slab Set</span>
+                <span>Generate Office Set</span>
                 <ChevronRight className="w-4 h-4" />
               </>
             )}

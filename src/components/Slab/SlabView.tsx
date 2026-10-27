@@ -828,7 +828,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-2xs">
               <BookCheck className="w-4 h-4 stroke-[2.4]" />
             </div>
-            <span>Slab</span>
+            <span>Office</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-1">
             Interactive Flashcards & MCQ Question Banks generated from your notes and uploaded files.
@@ -842,7 +842,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
           className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-700 hover:via-purple-700 hover:to-indigo-700 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-violet-500/25 transition-all cursor-pointer self-start sm:self-auto google-btn-press"
         >
           <Plus className="w-4 h-4 stroke-[2.6]" />
-          <span>New Slab Set</span>
+          <span>New Office Set</span>
         </button>
       </div>
 
@@ -941,7 +941,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
             <BookCheck className="w-7 h-7 stroke-[2.2]" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-slate-800 dark:text-[#e8eaed]">No Slab sets found</h3>
+            <h3 className="text-base font-extrabold text-slate-800 dark:text-[#e8eaed]">No study sets found</h3>
             <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1 max-w-sm mx-auto">
               {searchQuery
                 ? 'No study sets match your search query.'

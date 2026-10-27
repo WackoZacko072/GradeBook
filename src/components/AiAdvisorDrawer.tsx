@@ -374,18 +374,20 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           <div
             onClick={onClose}
             className="flex items-center gap-2.5 select-none cursor-pointer"
-            title="Return to GradeSlate Workspace"
+            title="Return to Gemini Gradebook Workspace"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-xs flex-shrink-0">
-              <Sparkles className="w-4 h-4 text-white stroke-[2.4]" />
-            </div>
+            <img
+              src="/gemini-gradebook-logo.png"
+              alt="Gemini Gradebook"
+              className="w-8 h-8 object-contain flex-shrink-0"
+            />
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base text-slate-900 dark:text-[#e8eaed] tracking-tight">
-                  gradeslate<span className="text-blue-600 dark:text-blue-400">.</span>
+                <span className="font-bold text-base text-slate-900 dark:text-[#e8eaed] tracking-tight">
+                  Gemini Gradebook
                 </span>
                 <span className="text-slate-300 dark:text-[#5f6368] font-light">/</span>
-                <span className="font-extrabold text-slate-800 dark:text-[#e8eaed] text-sm">Slate AI</span>
+                <span className="font-extrabold text-blue-600 dark:text-[#8ab4f8] text-sm">Gemini</span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] hidden sm:block">
                 Academic Co-Pilot & Whole Gradebook Analyzer
@@ -705,10 +707,10 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                     <Sparkles className="w-7 h-7 stroke-[2.2]" />
                   </div>
                   <h2 className="font-extrabold text-slate-900 dark:text-[#e8eaed] text-2xl tracking-tight">
-                    Meet Slate AI
+                    Meet Gemini
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-2 leading-relaxed">
-                    Ask me anything about your grades, university admissions, course marks, or study notes. Powered by Google Gemini with live GradeSlate intelligence.
+                    Ask me anything about your grades, university admissions, course marks, or study sources. Powered by Google Gemini with live Gradebook intelligence.
                   </p>
                 </div>
               ) : (
@@ -740,7 +742,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                             <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 dark:border-[#3c4043] text-[11px] text-slate-400 dark:text-[#9aa0a6]">
                               <span className="flex items-center gap-1.5 text-slate-400 dark:text-[#9aa0a6]">
                                 <Sparkles className="w-3 h-3 text-blue-500 dark:text-blue-400" />
-                                <span>Slate AI</span>
+                                <span>Gemini</span>
                               </span>
                               <button
                                 type="button"
@@ -794,7 +796,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                       <div className="bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-2xl rounded-bl-xs p-4 shadow-2xs">
                         <div className="flex items-center gap-2.5 text-slate-600 dark:text-[#c4c7c5] text-xs font-medium">
                           <div className="w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-ping" />
-                          <span>Slate AI is thinking...</span>
+                          <span>Gemini is thinking...</span>
                         </div>
                       </div>
                     </div>
@@ -815,7 +817,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   value={inputPrompt}
                   onChange={(e) => setInputPrompt(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask Slate AI anything (e.g. 'Look at my Economics notes and create a mcq', or 'what universities can I get with my grades?')..."
+                  placeholder="Ask Gemini anything (e.g. 'Look at my Economics sources and create a quiz', or 'what universities can I get with my grades?')..."
                   disabled={isLoading}
                   className="w-full resize-none pr-14 pl-3.5 py-2 text-xs sm:text-sm bg-transparent focus:outline-hidden text-slate-800 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#9aa0a6] leading-relaxed min-h-[48px]"
                 />
@@ -833,7 +835,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
               <div className="flex items-center justify-between gap-2 mt-2 px-1 text-[11px] text-slate-400 dark:text-[#9aa0a6]">
                 <div className="flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                  <span>Slate AI • Academic Co-Pilot</span>
+                  <span>Gemini • Academic Co-Pilot</span>
                   <span>&bull;</span>
                   <span>Shift + Enter for new line</span>
                 </div>
