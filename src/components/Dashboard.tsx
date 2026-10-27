@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   Search,
   Plus,
@@ -73,7 +73,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {!user && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/80 dark:border-blue-800/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs transition-colors">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#282a2c] shadow-2xs border border-blue-200/60 dark:border-blue-800/50 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#18191b] shadow-2xs border border-blue-200/60 dark:border-blue-800/50 flex items-center justify-center flex-shrink-0 mt-0.5">
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
@@ -116,7 +116,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* 1. Header Title & Top Add Class Button */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex items-start gap-3.5 sm:gap-4">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-white via-slate-50 to-blue-50/40 dark:from-[#282a2c] dark:via-[#282a2c] dark:to-[#353739] border border-slate-200/90 dark:border-[#3c4043] p-2 sm:p-2.5 flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/10">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-white via-slate-50 to-blue-50/40 dark:from-[#18191b] dark:via-[#18191b] dark:to-[#26282a] border border-slate-200/90 dark:border-[#26282a] p-2 sm:p-2.5 flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/10">
             <img
               src="/gemini-gradebook-logo.png"
               alt="Gemini Gradebook"
@@ -200,7 +200,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Right Two Stacked Stat Cards (1 col) */}
         <div className="lg:col-span-1 flex flex-col sm:flex-row lg:flex-col gap-4">
           {/* Stat Card 1: Classes */}
-          <div className="bg-white dark:bg-[#282a2c] rounded-2xl border border-slate-200/80 dark:border-[#3c4043] p-5 shadow-2xs flex items-center justify-between flex-1 google-card transition-colors">
+          <div className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] p-5 shadow-2xs flex items-center justify-between flex-1 google-card transition-colors">
             <div className="flex items-center gap-3.5">
               <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0 border border-blue-100 dark:border-[#8ab4f8]/30">
                 <BookOpen className="w-5 h-5 stroke-[2]" />
@@ -216,7 +216,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           {/* Stat Card 2: Graded Items */}
-          <div className="bg-white dark:bg-[#282a2c] rounded-2xl border border-slate-200/80 dark:border-[#3c4043] p-5 shadow-2xs flex items-center justify-between flex-1 google-card transition-colors">
+          <div className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] p-5 shadow-2xs flex items-center justify-between flex-1 google-card transition-colors">
             <div className="flex items-center gap-3.5">
               <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0 border border-blue-100 dark:border-[#8ab4f8]/30">
                 <FileText className="w-5 h-5 stroke-[2]" />
@@ -240,7 +240,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-slate-900 dark:text-[#e8eaed] tracking-tight">Your classes</h2>
-              <span className="px-2 py-0.5 text-xs font-bold bg-slate-100 dark:bg-[#353739] text-slate-600 dark:text-[#c4c7c5] rounded-lg">
+              <span className="px-2 py-0.5 text-xs font-bold bg-slate-100 dark:bg-[#26282a] text-slate-600 dark:text-[#c4c7c5] rounded-lg">
                 {classes.length}
               </span>
             </div>
@@ -252,7 +252,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Find a class..."
-                className="w-full pl-9 pr-8 py-1.5 text-xs bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-xl placeholder-slate-400 dark:placeholder-[#80868b] text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] focus:border-blue-600 transition-all min-h-[36px]"
+                className="w-full pl-9 pr-8 py-1.5 text-xs bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-xl placeholder-slate-400 dark:placeholder-[#80868b] text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] focus:border-blue-600 transition-all min-h-[36px]"
               />
               {searchQuery && (
                 <button
@@ -270,7 +270,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Classes Content */}
         {classes.length === 0 ? (
           /* Clean Empty State without mock clutter */
-          <div className="bg-white dark:bg-[#282a2c] rounded-3xl border border-slate-200/80 dark:border-[#3c4043] p-8 sm:p-12 text-center shadow-2xs transition-colors">
+          <div className="bg-white dark:bg-[#18191b] rounded-3xl border border-slate-200/80 dark:border-[#26282a] p-8 sm:p-12 text-center shadow-2xs transition-colors">
             <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center mb-4">
               <BookOpen className="w-8 h-8 stroke-[2]" />
             </div>
@@ -293,8 +293,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Quick 3-Step Guide */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 pt-8 border-t border-slate-100 dark:border-[#3c4043] text-left">
-              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#303134] border border-slate-100 dark:border-[#3c4043]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 pt-8 border-t border-slate-100 dark:border-[#26282a] text-left">
+              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#202123] border border-slate-100 dark:border-[#26282a]">
                 <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-[#8ab4f8]/20 text-blue-700 dark:text-[#8ab4f8] font-bold text-xs flex items-center justify-center mb-2">
                   1
                 </div>
@@ -302,7 +302,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1">Name your classes and choose custom theme colors.</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#303134] border border-slate-100 dark:border-[#3c4043]">
+              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#202123] border border-slate-100 dark:border-[#26282a]">
                 <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-[#8ab4f8]/20 text-blue-700 dark:text-[#8ab4f8] font-bold text-xs flex items-center justify-center mb-2">
                   2
                 </div>
@@ -310,7 +310,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1">Configure Homework, Exams, Quizzes to total 100%.</p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#303134] border border-slate-100 dark:border-[#3c4043]">
+              <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#202123] border border-slate-100 dark:border-[#26282a]">
                 <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-[#8ab4f8]/20 text-blue-700 dark:text-[#8ab4f8] font-bold text-xs flex items-center justify-center mb-2">
                   3
                 </div>
@@ -321,7 +321,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         ) : filteredClasses.length === 0 ? (
           /* Search Filter Empty State */
-          <div className="bg-white dark:bg-[#282a2c] rounded-2xl p-10 text-center border border-slate-200/80 dark:border-[#3c4043] shadow-2xs">
+          <div className="bg-white dark:bg-[#18191b] rounded-2xl p-10 text-center border border-slate-200/80 dark:border-[#26282a] shadow-2xs">
             <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center mb-3">
               <Search className="w-6 h-6" />
             </div>
@@ -352,7 +352,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div
                   key={item.id}
                   onClick={() => onSelectClass(item.id)}
-                  className="group bg-white dark:bg-[#282a2c] rounded-2xl p-5 border border-slate-200/80 dark:border-[#3c4043] shadow-2xs hover:border-blue-300 dark:hover:border-[#8ab4f8] cursor-pointer flex flex-col justify-between google-card"
+                  className="group bg-white dark:bg-[#18191b] rounded-2xl p-5 border border-slate-200/80 dark:border-[#26282a] shadow-2xs hover:border-blue-300 dark:hover:border-[#8ab4f8] cursor-pointer flex flex-col justify-between google-card"
                 >
                   <div>
                     {/* Top row: Icon and settings/sliders */}
@@ -374,7 +374,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                           onSelectClass(item.id);
                         }}
                         title="Configure Class"
-                        className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-700 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#353739] rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-700 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#26282a] rounded-lg transition-colors cursor-pointer"
                       >
                         <Sliders className="w-4 h-4" />
                       </button>
@@ -400,7 +400,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     </div>
 
                     {/* Multi-segment Category Progress Bar */}
-                    <div className="w-full h-1.5 bg-slate-100 dark:bg-[#353739] rounded-full flex gap-1 overflow-hidden mt-3">
+                    <div className="w-full h-1.5 bg-slate-100 dark:bg-[#26282a] rounded-full flex gap-1 overflow-hidden mt-3">
                       {item.categories.map((cat, idx) => {
                         const totalCatWeights = classCalc.totalWeight > 0 ? classCalc.totalWeight : 100;
                         const share = (cat.weight / totalCatWeights) * 100;
@@ -421,7 +421,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
 
                   {/* Bottom Row */}
-                  <div className="mt-5 pt-3 border-t border-slate-100 dark:border-[#3c4043] flex items-center justify-between text-[11px]">
+                  <div className="mt-5 pt-3 border-t border-slate-100 dark:border-[#26282a] flex items-center justify-between text-[11px]">
                     <span className="text-slate-400 dark:text-[#80868b] font-medium">
                       {classCalc.isWeightValid ? (
                         'Weights total 100%'
@@ -455,7 +455,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </button>
 
         {showCalculationInfo && (
-          <div className="mt-3 p-4 bg-white dark:bg-[#282a2c] rounded-2xl border border-slate-200/80 dark:border-[#3c4043] shadow-2xs text-xs text-slate-600 dark:text-[#c4c7c5] space-y-2 animate-slide-up">
+          <div className="mt-3 p-4 bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] shadow-2xs text-xs text-slate-600 dark:text-[#c4c7c5] space-y-2 animate-slide-up">
             <h4 className="font-bold text-slate-900 dark:text-[#e8eaed]">Calculation Transparency:</h4>
             <ul className="list-disc list-inside space-y-1 text-slate-500 dark:text-[#9aa0a6]">
               <li>
@@ -476,7 +476,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* 5. Minimal Footer */}
-      <footer className="pt-8 pb-4 border-t border-slate-200/60 dark:border-[#3c4043] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 dark:text-[#80868b]">
+      <footer className="pt-8 pb-4 border-t border-slate-200/60 dark:border-[#26282a] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 dark:text-[#80868b]">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-slate-400 dark:text-[#8ab4f8]" />
           <span>Your grades. Your private space.</span>

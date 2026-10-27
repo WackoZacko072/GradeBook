@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import {
   Upload,
   FileText,
@@ -223,7 +223,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {activeClassId === null ? (
         <div className="space-y-6">
           {/* Header Banner */}
-          <div className="bg-white dark:bg-[#282a2c] rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-[#3c4043] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-white dark:bg-[#18191b] rounded-3xl p-6 sm:p-8 border border-slate-200/90 dark:border-[#26282a] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1.5 max-w-xl">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-blue-950/40 px-2.5 py-0.5 rounded-full border border-blue-200/60 dark:border-blue-900/40">
@@ -253,7 +253,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
 
           {/* Grid of Class Cards */}
           {classes.length === 0 && unassignedCount === 0 ? (
-            <div className="bg-white dark:bg-[#282a2c] rounded-3xl p-10 sm:p-14 border border-dashed border-slate-200 dark:border-[#3c4043] text-center space-y-4">
+            <div className="bg-white dark:bg-[#18191b] rounded-3xl p-10 sm:p-14 border border-dashed border-slate-200 dark:border-[#26282a] text-center space-y-4">
               <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center mx-auto">
                 <BookOpen className="w-8 h-8 stroke-[2.2]" />
               </div>
@@ -293,20 +293,20 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                       setActiveClassId(cls.id);
                       setSearchQuery('');
                     }}
-                    className="bg-white dark:bg-[#282a2c] rounded-3xl p-6 border border-slate-200/90 dark:border-[#3c4043] shadow-xs hover:shadow-md hover:border-blue-300 dark:hover:border-[#5f6368] transition-all cursor-pointer group flex flex-col justify-between space-y-4 google-card"
+                    className="bg-white dark:bg-[#18191b] rounded-3xl p-6 border border-slate-200/90 dark:border-[#26282a] shadow-xs hover:shadow-md hover:border-blue-300 dark:hover:border-[#5f6368] transition-all cursor-pointer group flex flex-col justify-between space-y-4 google-card"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
                           <span
-                            className="w-3.5 h-3.5 rounded-full ring-2 ring-white dark:ring-[#282a2c] shadow-xs flex-shrink-0"
+                            className="w-3.5 h-3.5 rounded-full ring-2 ring-white dark:ring-[#18191b] shadow-xs flex-shrink-0"
                             style={{ backgroundColor: cls.color || '#2563EB' }}
                           />
                           <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-[#9aa0a6]">
                             Class Notebook
                           </span>
                         </div>
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#353739] text-slate-600 dark:text-[#c4c7c5]">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#26282a] text-slate-600 dark:text-[#c4c7c5]">
                           {count} {count === 1 ? 'source' : 'sources'}
                         </span>
                       </div>
@@ -323,7 +323,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 dark:border-[#3c4043] flex items-center justify-between text-xs">
+                    <div className="pt-3 border-t border-slate-100 dark:border-[#26282a] flex items-center justify-between text-xs">
                       <span className="text-slate-500 dark:text-[#9aa0a6] font-medium text-[11px]">
                         {totalWords.toLocaleString()} total words
                       </span>
@@ -343,7 +343,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                     setActiveClassId('unassigned');
                     setSearchQuery('');
                   }}
-                  className="bg-white dark:bg-[#282a2c] rounded-3xl p-6 border border-dashed border-slate-300 dark:border-[#3c4043] shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-4 google-card"
+                  className="bg-white dark:bg-[#18191b] rounded-3xl p-6 border border-dashed border-slate-300 dark:border-[#26282a] shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-4 google-card"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -353,7 +353,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                           Unassigned
                         </span>
                       </div>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#353739] text-slate-600 dark:text-[#c4c7c5]">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#26282a] text-slate-600 dark:text-[#c4c7c5]">
                         {unassignedCount} {unassignedCount === 1 ? 'source' : 'sources'}
                       </span>
                     </div>
@@ -368,7 +368,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 dark:border-[#3c4043] flex items-center justify-between text-xs">
+                  <div className="pt-3 border-t border-slate-100 dark:border-[#26282a] flex items-center justify-between text-xs">
                     <span className="text-slate-500 dark:text-[#9aa0a6] font-medium text-[11px]">
                       View general sources
                     </span>
@@ -388,7 +388,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
         /* =================================================================== */
         <div className="space-y-6">
           {/* Top Bar with Back Button & Class Info */}
-          <div className="bg-white dark:bg-[#282a2c] rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-[#3c4043] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div className="bg-white dark:bg-[#18191b] rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-[#26282a] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5">
             <div className="space-y-2">
               <button
                 type="button"
@@ -401,7 +401,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
 
               <div className="flex items-center gap-3">
                 <span
-                  className="w-4 h-4 rounded-full ring-2 ring-white dark:ring-[#282a2c] shadow-xs flex-shrink-0"
+                  className="w-4 h-4 rounded-full ring-2 ring-white dark:ring-[#18191b] shadow-xs flex-shrink-0"
                   style={{ backgroundColor: activeClass?.color || '#2563EB' }}
                 />
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
@@ -429,7 +429,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
               <button
                 type="button"
                 onClick={() => setIsCreateNoteModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-[#e8eaed] bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] border border-slate-200 dark:border-[#3c4043] transition-all cursor-pointer google-btn-press"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 dark:text-[#e8eaed] bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] border border-slate-200 dark:border-[#26282a] transition-all cursor-pointer google-btn-press"
               >
                 <FilePlus className="w-4 h-4" />
                 <span>Create Note</span>
@@ -446,14 +446,14 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search sources in this notebook..."
-                className="w-full pl-9 pr-3.5 py-2 text-xs bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-xl text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-3.5 py-2 text-xs bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-xl text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               />
             </div>
           )}
 
           {/* Minimalist Sources Grid */}
           {classSources.length === 0 ? (
-            <div className="bg-white dark:bg-[#282a2c] rounded-3xl p-10 sm:p-14 border border-dashed border-slate-200 dark:border-[#3c4043] text-center space-y-4">
+            <div className="bg-white dark:bg-[#18191b] rounded-3xl p-10 sm:p-14 border border-dashed border-slate-200 dark:border-[#26282a] text-center space-y-4">
               <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center mx-auto">
                 <Upload className="w-8 h-8 stroke-[2.2]" />
               </div>
@@ -477,7 +477,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsCreateNoteModalOpen(true)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] text-xs font-bold transition-all border border-slate-200 dark:border-[#3c4043] flex items-center gap-2 cursor-pointer google-btn-press"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] text-slate-700 dark:text-[#e8eaed] text-xs font-bold transition-all border border-slate-200 dark:border-[#26282a] flex items-center gap-2 cursor-pointer google-btn-press"
                 >
                   <FilePlus className="w-4 h-4" />
                   <span>Create Note</span>
@@ -493,7 +493,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                 return (
                   <div
                     key={source.id}
-                    className="bg-white dark:bg-[#282a2c] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-[#3c4043] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between space-y-3 group google-card"
+                    className="bg-white dark:bg-[#18191b] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-[#26282a] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between space-y-3 group google-card"
                   >
                     {/* Top: Icon + Title + Delete */}
                     <div className="flex items-start justify-between gap-3">
@@ -531,7 +531,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                     </div>
 
                     {/* Small text: view extracted content */}
-                    <div className="pt-2 border-t border-slate-100 dark:border-[#3c4043]">
+                    <div className="pt-2 border-t border-slate-100 dark:border-[#26282a]">
                       <button
                         type="button"
                         onClick={() => setPreviewingSource(source)}
@@ -553,8 +553,8 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* ===================================================================== */}
       {isCreateNoteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#282a2c] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/80 dark:border-[#3c4043] overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
-            <div className="p-5 border-b border-slate-100 dark:border-[#3c4043] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526]">
+          <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
+            <div className="p-5 border-b border-slate-100 dark:border-[#26282a] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526]">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center">
                   <FilePlus className="w-4 h-4 stroke-[2.2]" />
@@ -589,7 +589,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                   value={noteTitle}
                   onChange={(e) => setNoteTitle(e.target.value)}
                   placeholder="e.g. Lecture 3: Key Formulas & Mechanisms"
-                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl focus:bg-white dark:focus:bg-[#1e1f20] focus:outline-hidden focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-[#e8eaed]"
+                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl focus:bg-white dark:focus:bg-[#0f0f10] focus:outline-hidden focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-[#e8eaed]"
                 />
               </div>
 
@@ -603,7 +603,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
                   placeholder="Type notes or paste copied text, lecture transcripts, study summaries, or textbook sections here..."
-                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl focus:bg-white dark:focus:bg-[#1e1f20] focus:outline-hidden focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-[#e8eaed] leading-relaxed font-mono"
+                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl focus:bg-white dark:focus:bg-[#0f0f10] focus:outline-hidden focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-[#e8eaed] leading-relaxed font-mono"
                 />
               </div>
 
@@ -611,7 +611,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsCreateNoteModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -632,7 +632,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* ===================================================================== */}
       {isAddClassModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#282a2c] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/80 dark:border-[#3c4043] p-5 space-y-4 animate-fade-scale">
+          <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] p-5 space-y-4 animate-fade-scale">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">
                 Create Class
@@ -658,7 +658,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                   value={newClassName}
                   onChange={(e) => setNewClassName(e.target.value)}
                   placeholder="e.g. ECON 101, MATH 200, BIOL 111"
-                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -706,8 +706,8 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* ===================================================================== */}
       {previewingSource && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#282a2c] rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200/80 dark:border-[#3c4043] overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
-            <div className="p-5 border-b border-slate-100 dark:border-[#3c4043] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526]">
+          <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
+            <div className="p-5 border-b border-slate-100 dark:border-[#26282a] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526]">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed] truncate max-w-md">
                   {previewingSource.name}
@@ -723,7 +723,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                 <button
                   type="button"
                   onClick={handleCopyPreview}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-[#353739] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-[#26282a] hover:bg-slate-200 dark:hover:bg-[#26282a] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
                   {copiedPreview ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedPreview ? 'Copied!' : 'Copy Text'}</span>
@@ -743,14 +743,14 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
               {previewingSource.content}
             </div>
 
-            <div className="p-4 border-t border-slate-100 dark:border-[#3c4043] bg-slate-50/70 dark:bg-[#242526] flex items-center justify-between">
+            <div className="p-4 border-t border-slate-100 dark:border-[#26282a] bg-slate-50/70 dark:bg-[#242526] flex items-center justify-between">
               <span className="text-xs text-slate-400 dark:text-[#9aa0a6]">
                 Added {new Date(previewingSource.addedAt).toLocaleDateString()}
               </span>
               <button
                 type="button"
                 onClick={() => setPreviewingSource(null)}
-                className="px-4 py-1.5 bg-slate-200 dark:bg-[#303134] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-bold cursor-pointer"
+                className="px-4 py-1.5 bg-slate-200 dark:bg-[#202123] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-bold cursor-pointer"
               >
                 Close
               </button>
@@ -764,7 +764,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* ===================================================================== */}
       {sourceToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#282a2c] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/80 dark:border-[#3c4043] p-5 space-y-4 animate-fade-scale text-center">
+          <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] p-5 space-y-4 animate-fade-scale text-center">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6 stroke-[2.2]" />
             </div>
@@ -780,7 +780,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
               <button
                 type="button"
                 onClick={() => setSourceToDelete(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>

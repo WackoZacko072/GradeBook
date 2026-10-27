@@ -20,22 +20,22 @@
     --taskbar-indicator: #FFFFFF;
   }
 
-  /* Google-Style Dark Mode: Soft Slate Charcoal Grey (never pure harsh black) */
+  /* Google-Style Dark Mode: Sleek Deep Charcoal Dark Grey (sampled R=15 G=15 B=15) */
   html.dark {
-    --bg-app: #1e1f20;            /* Google signature slate charcoal */
-    --bg-surface: #282a2c;        /* Google surface container */
-    --bg-surface-elevated: #303134; /* Google elevated container */
-    --bg-surface-hover: #353739;   /* Google interactive hover */
-    --border-subtle: #3c4043;      /* Google subtle borders */
-    --border-strong: #444746;      /* Google strong borders */
-    --text-primary: #e8eaed;      /* Google primary crisp text */
+    --bg-app: #0f0f10;            /* Google signature deep charcoal dark */
+    --bg-surface: #18191b;        /* Google dark surface container */
+    --bg-surface-elevated: #202123; /* Google dark elevated container */
+    --bg-surface-hover: #26282a;   /* Google interactive hover */
+    --border-subtle: #26282a;      /* Google subtle borders */
+    --border-strong: #383a3d;      /* Google strong borders */
+    --text-primary: #f8f9fa;      /* Google primary luminous crisp text */
     --text-secondary: #c4c7c5;    /* Google secondary body text */
-    --text-muted: #80868b;        /* Google muted timestamp/hints */
+    --text-muted: #8e9196;        /* Google muted timestamp/hints */
     --google-blue: #8ab4f8;       /* Google dark mode blue */
     --google-blue-soft: rgba(138, 180, 248, 0.14);
-    --header-bg: rgba(30, 31, 32, 0.92);
-    --taskbar-bg: #242526;
-    --taskbar-indicator: #333537;
+    --header-bg: rgba(15, 15, 16, 0.95);
+    --taskbar-bg: #18191b;
+    --taskbar-indicator: #26282a;
   }
 
   body {

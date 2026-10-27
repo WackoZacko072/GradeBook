@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   X,
   Sparkles,
@@ -128,9 +128,9 @@ service cloud.firestore {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-[#282a2c] rounded-2xl shadow-2xl border border-slate-200/80 dark:border-[#3c4043] w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-white dark:bg-[#18191b] rounded-2xl shadow-2xl border border-slate-200/80 dark:border-[#26282a] w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-[#3c4043] flex items-center justify-between bg-slate-50/70 dark:bg-[#1e1f20]/60">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-[#26282a] flex items-center justify-between bg-slate-50/70 dark:bg-[#0f0f10]/60">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/20 dark:border-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <Database className="w-5 h-5" />
@@ -143,14 +143,14 @@ service cloud.firestore {
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-lg transition-colors cursor-pointer google-btn-press"
+            className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer google-btn-press"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-slate-200 dark:border-[#3c4043] px-6 pt-2 bg-slate-50/40 dark:bg-[#1e1f20]/40 gap-4">
+        <div className="flex border-b border-slate-200 dark:border-[#26282a] px-6 pt-2 bg-slate-50/40 dark:bg-[#0f0f10]/40 gap-4">
           <button
             type="button"
             onClick={() => setActiveTab('rules')}
@@ -178,7 +178,7 @@ service cloud.firestore {
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-white dark:bg-[#282a2c]">
+        <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-white dark:bg-[#18191b]">
           {activeTab === 'rules' ? (
             <div className="space-y-4">
               <div className="p-3.5 bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/40 rounded-xl text-blue-900 dark:text-blue-200 text-xs leading-relaxed">
@@ -193,7 +193,7 @@ service cloud.firestore {
               <div className="space-y-2">
                 <p className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">Step 1: Copy this rule into your Firebase Console</p>
                 <div className="relative">
-                  <pre className="p-3.5 bg-slate-900 dark:bg-[#1e1f20] text-slate-100 rounded-xl text-[11px] font-mono overflow-x-auto leading-relaxed border border-slate-800 dark:border-[#3c4043]">
+                  <pre className="p-3.5 bg-slate-900 dark:bg-[#0f0f10] text-slate-100 rounded-xl text-[11px] font-mono overflow-x-auto leading-relaxed border border-slate-800 dark:border-[#26282a]">
                     {FIRESTORE_RULES_SNIPPET}
                   </pre>
                   <button
@@ -222,7 +222,7 @@ service cloud.firestore {
                   href={consoleRulesUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-800 dark:text-[#e8eaed] font-bold text-xs rounded-xl border border-slate-200 dark:border-[#3c4043] transition-colors google-btn-press"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] text-slate-800 dark:text-[#e8eaed] font-bold text-xs rounded-xl border border-slate-200 dark:border-[#26282a] transition-colors google-btn-press"
                 >
                   <span>Open Firebase Console Rules Tab</span>
                   <ExternalLink className="w-3.5 h-3.5 text-slate-500 dark:text-[#9aa0a6]" />
@@ -230,7 +230,7 @@ service cloud.firestore {
               </div>
 
               {/* Connection Test Section */}
-              <div className="border-t border-slate-100 dark:border-[#3c4043] pt-3 space-y-2">
+              <div className="border-t border-slate-100 dark:border-[#26282a] pt-3 space-y-2">
                 <p className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">Step 3: Test Cloud Firestore Connection</p>
                 <button
                   type="button"
@@ -291,12 +291,12 @@ service cloud.firestore {
                   placeholder={`const firebaseConfig = {\n  apiKey: "AIzaSy...",\n  projectId: "your-project",\n  ...\n};`}
                   value={rawJson}
                   onChange={(e) => handlePasteConfig(e.target.value)}
-                  className="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                  className="w-full font-mono text-xs p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                 />
                 {parseError && <p className="text-xs text-rose-500 mt-1">{parseError}</p>}
               </div>
 
-              <div className="border-t border-slate-100 dark:border-[#3c4043] pt-3">
+              <div className="border-t border-slate-100 dark:border-[#26282a] pt-3">
                 <h4 className="text-xs font-bold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider mb-3">Individual Keys:</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
@@ -306,7 +306,7 @@ service cloud.firestore {
                       value={apiKey}
                       onChange={(e) => setApiKey(e.target.value)}
                       placeholder="AIzaSy..."
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
                     />
                   </div>
 
@@ -317,7 +317,7 @@ service cloud.firestore {
                       value={authDomain}
                       onChange={(e) => setAuthDomain(e.target.value)}
                       placeholder="project-id.firebaseapp.com"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
                     />
                   </div>
 
@@ -328,7 +328,7 @@ service cloud.firestore {
                       value={projectId}
                       onChange={(e) => setProjectId(e.target.value)}
                       placeholder="gradebook-cbd26"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
                     />
                   </div>
 
@@ -339,7 +339,7 @@ service cloud.firestore {
                       value={storageBucket}
                       onChange={(e) => setStorageBucket(e.target.value)}
                       placeholder="project-id.appspot.com"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
                     />
                   </div>
 
@@ -350,7 +350,7 @@ service cloud.firestore {
                       value={messagingSenderId}
                       onChange={(e) => setMessagingSenderId(e.target.value)}
                       placeholder="1234567890"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
                     />
                   </div>
 
@@ -361,7 +361,7 @@ service cloud.firestore {
                       value={appId}
                       onChange={(e) => setAppId(e.target.value)}
                       placeholder="1:123456:web:abcd123"
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-xs"
                     />
                   </div>
                 </div>
@@ -371,7 +371,7 @@ service cloud.firestore {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-slate-50 dark:bg-[#1e1f20]/60 border-t border-slate-100 dark:border-[#3c4043] flex items-center justify-between">
+        <div className="px-6 py-4 bg-slate-50 dark:bg-[#0f0f10]/60 border-t border-slate-100 dark:border-[#26282a] flex items-center justify-between">
           {configured ? (
             <button
               type="button"
@@ -388,7 +388,7 @@ service cloud.firestore {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#303134] rounded-xl transition-all cursor-pointer google-btn-press"
+              className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#202123] rounded-xl transition-all cursor-pointer google-btn-press"
             >
               Close
             </button>

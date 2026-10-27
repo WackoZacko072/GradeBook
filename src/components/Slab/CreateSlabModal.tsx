@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   X,
   Sparkles,
@@ -140,9 +140,9 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-[#282a2c] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/80 dark:border-[#3c4043] flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[88vh] min-h-0 my-auto animate-fade-scale overflow-hidden">
+      <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[88vh] min-h-0 my-auto animate-fade-scale overflow-hidden">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-[#3c4043] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526] flex-shrink-0">
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-[#26282a] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526] flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-xs">
               <BookCheck className="w-5 h-5 stroke-[2.2]" />
@@ -163,7 +163,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             type="button"
             disabled={isGenerating}
             onClick={onClose}
-            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer google-btn-press"
+            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer google-btn-press"
           >
             <X className="w-5 h-5" />
           </button>
@@ -191,7 +191,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
               onChange={(e) => handlePromptChange(e.target.value)}
               disabled={isGenerating}
               placeholder="e.g. Look at my Biology sources and create flashcards on cellular respiration and ATP..."
-              className="w-full text-xs sm:text-sm p-3.5 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-2xl focus:bg-white dark:focus:bg-[#1e1f20] focus:outline-hidden focus:ring-2 focus:ring-violet-500 transition-all text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] leading-relaxed shadow-2xs"
+              className="w-full text-xs sm:text-sm p-3.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-2xl focus:bg-white dark:focus:bg-[#0f0f10] focus:outline-hidden focus:ring-2 focus:ring-violet-500 transition-all text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] leading-relaxed shadow-2xs"
             />
 
             {/* Prompt suggestion chips */}
@@ -202,7 +202,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                   type="button"
                   disabled={isGenerating}
                   onClick={() => handlePromptChange(sug)}
-                  className="text-[11px] px-2.5 py-1 bg-slate-100 dark:bg-[#303134] hover:bg-violet-50 dark:hover:bg-violet-950/40 text-slate-600 dark:text-[#c4c7c5] hover:text-violet-700 dark:hover:text-[#c58af9] rounded-lg transition-colors cursor-pointer border border-slate-200/60 dark:border-[#3c4043] font-medium truncate max-w-full google-btn-press"
+                  className="text-[11px] px-2.5 py-1 bg-slate-100 dark:bg-[#202123] hover:bg-violet-50 dark:hover:bg-violet-950/40 text-slate-600 dark:text-[#c4c7c5] hover:text-violet-700 dark:hover:text-[#c58af9] rounded-lg transition-colors cursor-pointer border border-slate-200/60 dark:border-[#26282a] font-medium truncate max-w-full google-btn-press"
                 >
                   {sug}
                 </button>
@@ -223,7 +223,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer google-btn-press ${
                   slabType === 'flashcards'
                     ? 'bg-violet-50/80 dark:bg-violet-950/40 border-violet-500 text-violet-800 dark:text-[#c58af9] ring-2 ring-violet-500/20 shadow-2xs'
-                    : 'bg-white dark:bg-[#1e1f20] border-slate-200 dark:border-[#3c4043] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-50 dark:hover:bg-[#303134]'
+                    : 'bg-white dark:bg-[#0f0f10] border-slate-200 dark:border-[#26282a] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-50 dark:hover:bg-[#202123]'
                 }`}
               >
                 <div className="w-8 h-8 rounded-xl bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-[#c58af9] flex items-center justify-center mb-1.5">
@@ -240,7 +240,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer google-btn-press ${
                   slabType === 'mcq'
                     ? 'bg-violet-50/80 dark:bg-violet-950/40 border-violet-500 text-violet-800 dark:text-[#c58af9] ring-2 ring-violet-500/20 shadow-2xs'
-                    : 'bg-white dark:bg-[#1e1f20] border-slate-200 dark:border-[#3c4043] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-50 dark:hover:bg-[#303134]'
+                    : 'bg-white dark:bg-[#0f0f10] border-slate-200 dark:border-[#26282a] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-50 dark:hover:bg-[#202123]'
                 }`}
               >
                 <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-[#c58af9] flex items-center justify-center mb-1.5">
@@ -257,7 +257,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all cursor-pointer google-btn-press ${
                   slabType === 'both'
                     ? 'bg-violet-50/80 dark:bg-violet-950/40 border-violet-500 text-violet-800 dark:text-[#c58af9] ring-2 ring-violet-500/20 shadow-2xs'
-                    : 'bg-white dark:bg-[#1e1f20] border-slate-200 dark:border-[#3c4043] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-50 dark:hover:bg-[#303134]'
+                    : 'bg-white dark:bg-[#0f0f10] border-slate-200 dark:border-[#26282a] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-50 dark:hover:bg-[#202123]'
                 }`}
               >
                 <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-[#c58af9] flex items-center justify-center mb-1.5">
@@ -295,7 +295,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                     className={`py-2 px-2.5 rounded-xl border text-center transition-all cursor-pointer google-btn-press ${
                       isSelected
                         ? 'bg-violet-600 text-white border-violet-600 shadow-2xs font-extrabold'
-                        : 'bg-white dark:bg-[#1e1f20] text-slate-700 dark:text-[#c4c7c5] border-slate-200 dark:border-[#3c4043] hover:bg-slate-50 dark:hover:bg-[#303134]'
+                        : 'bg-white dark:bg-[#0f0f10] text-slate-700 dark:text-[#c4c7c5] border-slate-200 dark:border-[#26282a] hover:bg-slate-50 dark:hover:bg-[#202123]'
                     }`}
                   >
                     <div className="text-xs font-bold">{q.label}</div>
@@ -338,7 +338,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                     className={`py-2 px-2.5 rounded-xl border text-center transition-all cursor-pointer google-btn-press ${
                       isSelected
                         ? 'bg-violet-600 text-white border-violet-600 shadow-2xs font-extrabold'
-                        : 'bg-white dark:bg-[#1e1f20] text-slate-700 dark:text-[#c4c7c5] border-slate-200 dark:border-[#3c4043] hover:bg-slate-50 dark:hover:bg-[#303134]'
+                        : 'bg-white dark:bg-[#0f0f10] text-slate-700 dark:text-[#c4c7c5] border-slate-200 dark:border-[#26282a] hover:bg-slate-50 dark:hover:bg-[#202123]'
                     }`}
                   >
                     <div className="text-xs font-bold">{d.label}</div>
@@ -369,7 +369,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
                     selectedClassNotebook === 'all'
                       ? 'bg-violet-600 text-white shadow-2xs'
-                      : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+                      : 'bg-white dark:bg-[#0f0f10] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] border border-slate-200 dark:border-[#26282a]'
                   }`}
                 >
                   <span>All Classes</span>
@@ -377,7 +377,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                     className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                       selectedClassNotebook === 'all'
                         ? 'bg-white/20 text-white'
-                        : 'bg-slate-100 dark:bg-[#353739]'
+                        : 'bg-slate-100 dark:bg-[#26282a]'
                     }`}
                   >
                     {sources.length}
@@ -396,7 +396,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
                         isSelected
                           ? 'bg-violet-600 text-white shadow-2xs'
-                          : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+                          : 'bg-white dark:bg-[#0f0f10] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] border border-slate-200 dark:border-[#26282a]'
                       }`}
                     >
                       <span
@@ -406,7 +406,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                       <span className="truncate max-w-[120px]">{cls.name}</span>
                       <span
                         className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                          isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#353739]'
+                          isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#26282a]'
                         }`}
                       >
                         {count}
@@ -435,7 +435,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             </div>
 
             {useAllSources ? (
-              <div className="p-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200/80 dark:border-[#3c4043] rounded-2xl flex items-center justify-between text-xs text-slate-600 dark:text-[#c4c7c5]">
+              <div className="p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200/80 dark:border-[#26282a] rounded-2xl flex items-center justify-between text-xs text-slate-600 dark:text-[#c4c7c5]">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-violet-600 dark:text-[#c58af9] flex-shrink-0" />
                   <span>
@@ -449,7 +449,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 </span>
               </div>
             ) : (
-              <div className="border border-slate-200 dark:border-[#3c4043] rounded-2xl p-2.5 max-h-40 overflow-y-auto space-y-1.5 bg-slate-50 dark:bg-[#1e1f20]">
+              <div className="border border-slate-200 dark:border-[#26282a] rounded-2xl p-2.5 max-h-40 overflow-y-auto space-y-1.5 bg-slate-50 dark:bg-[#0f0f10]">
                 {availableSources.length === 0 ? (
                   <p className="text-xs text-slate-400 dark:text-[#9aa0a6] p-2 text-center">
                     {selectedClassEntity
@@ -466,7 +466,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                         className={`flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer transition-colors ${
                           isChecked
                             ? 'bg-violet-100/70 dark:bg-violet-950/50 text-violet-900 dark:text-[#c58af9] font-semibold'
-                            : 'hover:bg-slate-100 dark:hover:bg-[#303134] text-slate-700 dark:text-[#c4c7c5]'
+                            : 'hover:bg-slate-100 dark:hover:bg-[#202123] text-slate-700 dark:text-[#c4c7c5]'
                         }`}
                       >
                         <div className="flex items-center gap-2 truncate">
@@ -475,7 +475,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                           </span>
                           <span className="truncate">{s.name}</span>
                           {s.className && (
-                            <span className="text-[10px] bg-slate-200/80 dark:bg-[#303134] text-slate-600 dark:text-[#9aa0a6] px-1.5 py-0.2 rounded-md">
+                            <span className="text-[10px] bg-slate-200/80 dark:bg-[#202123] text-slate-600 dark:text-[#9aa0a6] px-1.5 py-0.2 rounded-md">
                               {s.className}
                             </span>
                           )}
@@ -484,7 +484,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                           className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 ${
                             isChecked
                               ? 'bg-violet-600 border-violet-600 text-white'
-                              : 'border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#282a2c]'
+                              : 'border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#18191b]'
                           }`}
                         >
                           {isChecked && <Check className="w-3 h-3 stroke-[2.8]" />}
@@ -499,12 +499,12 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
         </form>
 
         {/* Footer Actions */}
-        <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-[#3c4043] bg-slate-50/70 dark:bg-[#242526] flex items-center justify-between gap-3 flex-shrink-0">
+        <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-[#26282a] bg-slate-50/70 dark:bg-[#242526] flex items-center justify-between gap-3 flex-shrink-0">
           <button
             type="button"
             disabled={isGenerating}
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer google-btn-press"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer google-btn-press"
           >
             Cancel
           </button>

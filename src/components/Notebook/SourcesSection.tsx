@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import {
   Paperclip,
   Upload,
@@ -156,7 +156,7 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
           <button
             type="button"
             onClick={() => setIsPasteModalOpen(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-semibold transition-all cursor-pointer google-btn-press"
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-semibold transition-all cursor-pointer google-btn-press"
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Paste Text</span>
@@ -166,7 +166,7 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
 
       {/* Sources List */}
       {sources.length === 0 ? (
-        <div className="py-4 px-3 text-center bg-slate-50/70 dark:bg-[#1e1f20] border border-dashed border-slate-200 dark:border-[#3c4043] rounded-xl text-xs text-slate-500 dark:text-[#9aa0a6]">
+        <div className="py-4 px-3 text-center bg-slate-50/70 dark:bg-[#0f0f10] border border-dashed border-slate-200 dark:border-[#26282a] rounded-xl text-xs text-slate-500 dark:text-[#9aa0a6]">
           <span>No external sources attached yet. The AI will generate questions strictly from your typed note above.</span>
         </div>
       ) : (
@@ -174,7 +174,7 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
           {sources.map((src) => (
             <div
               key={src.id}
-              className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-[#1e1f20] hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 border border-slate-200/80 dark:border-[#3c4043] rounded-xl text-xs group transition-colors"
+              className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-[#0f0f10] hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 border border-slate-200/80 dark:border-[#26282a] rounded-xl text-xs group transition-colors"
             >
               <div className="flex items-center gap-2 truncate pr-2">
                 <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
@@ -218,7 +218,7 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
             className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-2xs"
             onClick={() => setIsPasteModalOpen(false)}
           />
-          <div className="relative bg-white dark:bg-[#282a2c] rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-200 dark:border-[#3c4043] z-10 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-scale">
+          <div className="relative bg-white dark:bg-[#18191b] rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-200 dark:border-[#26282a] z-10 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-scale">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">Add Text Source</h3>
               <button
@@ -240,7 +240,7 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
                   value={pasteTitle}
                   onChange={(e) => setPasteTitle(e.target.value)}
                   placeholder="e.g. Chapter 4 Reading Excerpt, Lecture 2 Slides..."
-                  className="w-full p-2.5 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden"
+                  className="w-full p-2.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden"
                 />
               </div>
 
@@ -254,15 +254,15 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
                   value={pasteContent}
                   onChange={(e) => setPasteContent(e.target.value)}
                   placeholder="Paste lecture notes, study guide text, textbook definitions..."
-                  className="w-full p-2.5 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] text-slate-900 dark:text-[#e8eaed] rounded-xl text-xs font-mono focus:outline-hidden"
+                  className="w-full p-2.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl text-xs font-mono focus:outline-hidden"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#3c4043]">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#26282a]">
                 <button
                   type="button"
                   onClick={() => setIsPasteModalOpen(false)}
-                  className="px-3.5 py-2 text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl font-semibold cursor-pointer google-btn-press"
+                  className="px-3.5 py-2 text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl font-semibold cursor-pointer google-btn-press"
                 >
                   Cancel
                 </button>
@@ -285,8 +285,8 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
             className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-2xs"
             onClick={() => setViewingSource(null)}
           />
-          <div className="relative bg-white dark:bg-[#282a2c] rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-slate-200 dark:border-[#3c4043] z-10 space-y-3 max-h-[85vh] flex flex-col animate-fade-scale">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-[#3c4043] flex-shrink-0">
+          <div className="relative bg-white dark:bg-[#18191b] rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-slate-200 dark:border-[#26282a] z-10 space-y-3 max-h-[85vh] flex flex-col animate-fade-scale">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-[#26282a] flex-shrink-0">
               <div className="flex items-center gap-2 truncate">
                 <FileCode className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 <h3 className="font-extrabold text-slate-900 dark:text-[#e8eaed] text-sm truncate">
@@ -302,16 +302,16 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#1e1f20] p-4 rounded-xl border border-slate-200/80 dark:border-[#3c4043] text-xs font-mono text-slate-700 dark:text-[#c4c7c5] whitespace-pre-wrap leading-relaxed">
+            <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#0f0f10] p-4 rounded-xl border border-slate-200/80 dark:border-[#26282a] text-xs font-mono text-slate-700 dark:text-[#c4c7c5] whitespace-pre-wrap leading-relaxed">
               {viewingSource.content}
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#3c4043] flex-shrink-0 text-xs text-slate-400 dark:text-[#9aa0a6]">
+            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#26282a] flex-shrink-0 text-xs text-slate-400 dark:text-[#9aa0a6]">
               <span>{viewingSource.content.length.toLocaleString()} characters &bull; {viewingSource.fileSize}</span>
               <button
                 type="button"
                 onClick={() => setViewingSource(null)}
-                className="px-3 py-1.5 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] font-bold rounded-lg cursor-pointer google-btn-press"
+                className="px-3 py-1.5 bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] text-slate-700 dark:text-[#e8eaed] font-bold rounded-lg cursor-pointer google-btn-press"
               >
                 Close
               </button>

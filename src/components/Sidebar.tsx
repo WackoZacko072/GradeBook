@@ -78,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] google-btn-press ${
                 activeTab === 'gradebook' && selectedClassId === null
                   ? 'bg-[#EBF2FE] dark:bg-[#8ab4f8]/15 text-[#2563EB] dark:text-[#8ab4f8] shadow-2xs font-bold'
-                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739]'
+                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -88,8 +88,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
                   activeTab === 'gradebook' && selectedClassId === null
-                    ? 'bg-blue-600 dark:bg-[#8ab4f8] text-white dark:text-[#1e1f20]'
-                    : 'bg-slate-200 dark:bg-[#353739] text-slate-600 dark:text-[#9aa0a6]'
+                    ? 'bg-blue-600 dark:bg-[#8ab4f8] text-white dark:text-[#0f0f10]'
+                    : 'bg-slate-200 dark:bg-[#202123] text-slate-600 dark:text-[#9aa0a6]'
                 }`}
               >
                 {classes.length}
@@ -107,7 +107,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] google-btn-press ${
                 activeTab === 'notebook' && selectedNoteId === null
                   ? 'bg-[#EEF2FF] dark:bg-[#c58af9]/15 text-[#4F46E5] dark:text-[#c58af9] shadow-2xs font-bold'
-                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739]'
+                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -117,8 +117,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
                   activeTab === 'notebook' && selectedNoteId === null
-                    ? 'bg-indigo-600 dark:bg-[#c58af9] text-white dark:text-[#1e1f20]'
-                    : 'bg-slate-200 dark:bg-[#353739] text-slate-600 dark:text-[#9aa0a6]'
+                    ? 'bg-indigo-600 dark:bg-[#c58af9] text-white dark:text-[#0f0f10]'
+                    : 'bg-slate-200 dark:bg-[#202123] text-slate-600 dark:text-[#9aa0a6]'
                 }`}
               >
                 {sources.length}
@@ -136,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] google-btn-press ${
                 activeTab === 'slab' && selectedSlabId === null
                   ? 'bg-violet-50 dark:bg-[#c58af9]/15 text-violet-700 dark:text-[#c58af9] shadow-2xs font-bold'
-                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739]'
+                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -146,8 +146,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
                   activeTab === 'slab' && selectedSlabId === null
-                    ? 'bg-violet-600 dark:bg-[#c58af9] text-white dark:text-[#1e1f20]'
-                    : 'bg-slate-200 dark:bg-[#353739] text-slate-600 dark:text-[#9aa0a6]'
+                    ? 'bg-violet-600 dark:bg-[#c58af9] text-white dark:text-[#0f0f10]'
+                    : 'bg-slate-200 dark:bg-[#202123] text-slate-600 dark:text-[#9aa0a6]'
                 }`}
               >
                 {slabs.length}
@@ -161,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onOpenSlateAi?.();
                 onMobileClose?.();
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739] group google-btn-press"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] group google-btn-press"
             >
               <div className="flex items-center gap-2.5">
                 <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xs">
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onCreateSlab?.();
                   onMobileClose?.();
                 }}
-                className="p-1 text-violet-600 dark:text-[#c58af9] hover:bg-violet-50 dark:hover:bg-[#353739] rounded-lg transition-colors cursor-pointer google-btn-press"
+                className="p-1 text-violet-600 dark:text-[#c58af9] hover:bg-violet-50 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer google-btn-press"
                 title="Create new Office set"
                 aria-label="Create new Office set"
               >
@@ -222,8 +222,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] google-btn-press ${
                         isSelected
-                          ? 'bg-white dark:bg-[#353739] text-violet-700 dark:text-[#c58af9] font-semibold shadow-2xs border border-slate-200/80 dark:border-[#444746]'
-                          : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739] font-medium'
+                          ? 'bg-white dark:bg-[#202123] text-violet-700 dark:text-[#c58af9] font-semibold shadow-2xs border border-slate-200/80 dark:border-[#26282a]'
+                          : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] font-medium'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
@@ -252,7 +252,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onMobileClose?.();
                 }}
                 title="Add New Class"
-                className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/80 dark:hover:bg-[#353739] rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center google-btn-press"
+                className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/80 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center google-btn-press"
               >
                 <Plus className="w-4 h-4 stroke-[2.5]" />
               </button>
@@ -260,7 +260,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
               {classes.length === 0 ? (
-                <div className="px-3 py-3 text-center bg-slate-100/60 dark:bg-[#282a2c] rounded-xl border border-dashed border-slate-200 dark:border-[#3c4043]">
+                <div className="px-3 py-3 text-center bg-slate-100/60 dark:bg-[#18191b] rounded-xl border border-dashed border-slate-200 dark:border-[#26282a]">
                   <p className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">No classes yet</p>
                   <button
                     type="button"
@@ -289,8 +289,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] google-btn-press ${
                         isSelected
-                          ? 'bg-white dark:bg-[#353739] text-blue-700 dark:text-[#8ab4f8] font-semibold shadow-2xs border border-slate-200/80 dark:border-[#444746]'
-                          : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739] font-medium'
+                          ? 'bg-white dark:bg-[#202123] text-blue-700 dark:text-[#8ab4f8] font-semibold shadow-2xs border border-slate-200/80 dark:border-[#26282a]'
+                          : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] font-medium'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
@@ -320,7 +320,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
               {sources.length === 0 ? (
-                <div className="px-3 py-3 text-center bg-slate-100/60 dark:bg-[#282a2c] rounded-xl border border-dashed border-slate-200 dark:border-[#3c4043]">
+                <div className="px-3 py-3 text-center bg-slate-100/60 dark:bg-[#18191b] rounded-xl border border-dashed border-slate-200 dark:border-[#26282a]">
                   <p className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">No sources uploaded yet</p>
                   <p className="text-[11px] text-slate-400 dark:text-[#80868b] mt-1">Upload PDFs or paste lecture notes</p>
                 </div>
@@ -329,7 +329,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   return (
                     <div
                       key={s.id}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739]"
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]"
                     >
                       <div className="flex items-center gap-2.5 truncate">
                         <FileText className="w-4 h-4 text-indigo-500 dark:text-[#c58af9] flex-shrink-0" />
@@ -350,7 +350,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Bottom Inspiration Tag */}
-      <div className="pt-4 border-t border-slate-200/60 dark:border-[#3c4043] flex items-center gap-2.5 px-2">
+      <div className="pt-4 border-t border-slate-200/60 dark:border-[#26282a] flex items-center gap-2.5 px-2">
         <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0 border border-blue-100 dark:border-[#8ab4f8]/30">
           <Calculator className="w-4 h-4" />
         </div>
@@ -365,7 +365,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {/* 1. Desktop Persistent Sidebar */}
-      <aside className="hidden md:flex w-64 bg-[#FAFBFD] dark:bg-[#1e1f20] flex-col justify-between p-4 flex-shrink-0 min-h-[calc(100vh-65px)] transition-colors duration-250">
+      <aside className="hidden md:flex w-64 bg-[#FAFBFD] dark:bg-[#0f0f10] flex-col justify-between p-4 flex-shrink-0 min-h-[calc(100vh-65px)] transition-colors duration-250">
         {content}
       </aside>
 
@@ -385,12 +385,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Drawer Panel */}
         <div
-          className={`fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-[#FAFBFD] dark:bg-[#282a2c] shadow-2xl flex flex-col justify-between p-5 transform transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] z-10 border-r border-slate-200/80 dark:border-[#3c4043] ${
+          className={`fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-[#FAFBFD] dark:bg-[#18191b] shadow-2xl flex flex-col justify-between p-5 transform transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] z-10 border-r border-slate-200/80 dark:border-[#26282a] ${
             isMobileOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
           {/* Drawer Header */}
-          <div className="flex items-center justify-between pb-4 mb-2 border-b border-slate-200/80 dark:border-[#3c4043]">
+          <div className="flex items-center justify-between pb-4 mb-2 border-b border-slate-200/80 dark:border-[#26282a]">
             <div className="flex items-center gap-2.5">
               <img
                 src="/gemini-gradebook-logo.png"
@@ -404,7 +404,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               type="button"
               onClick={onMobileClose}
-              className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#353739] rounded-xl transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center google-btn-press"
+              className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center google-btn-press"
               aria-label="Close navigation drawer"
             >
               <X className="w-5 h-5" />

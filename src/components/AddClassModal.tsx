@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { X, BookOpen, Sparkles, Plus, Trash2, AlertCircle } from 'lucide-react';
 import type { ClassItem, Category } from '../types/grade';
 import { roundTo } from '../utils/gradeCalculations';
@@ -156,8 +156,8 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
       aria-labelledby="add-class-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-lg bg-white dark:bg-[#282a2c] rounded-2xl shadow-xl border border-slate-100 dark:border-[#3c4043] p-6 transform transition-all animate-fade-scale max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#3c4043]">
+      <div className="w-full max-w-lg bg-white dark:bg-[#18191b] rounded-2xl shadow-xl border border-slate-100 dark:border-[#26282a] p-6 transform transition-all animate-fade-scale max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#26282a]">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-xl">
               <BookOpen className="w-5 h-5" />
@@ -175,7 +175,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer google-btn-press"
+            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer google-btn-press"
           >
             <X className="w-5 h-5" />
           </button>
@@ -195,7 +195,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
                 placeholder="e.g. Pre-Calculus 12"
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
               />
             </div>
             <div>
@@ -210,7 +210,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 step="0.5"
                 value={credits}
                 onChange={(e) => setCredits(parseFloat(e.target.value) || 3)}
-                className="w-full px-3 py-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
+                className="w-full px-3 py-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm min-h-[44px]"
               />
             </div>
           </div>
@@ -225,7 +225,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                   key={preset}
                   type="button"
                   onClick={() => setClassName(preset)}
-                  className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 dark:bg-[#1e1f20] hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-[#8ab4f8] text-slate-600 dark:text-[#c4c7c5] transition-colors cursor-pointer border border-slate-200/60 dark:border-[#3c4043] google-btn-press"
+                  className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 dark:bg-[#0f0f10] hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-[#8ab4f8] text-slate-600 dark:text-[#c4c7c5] transition-colors cursor-pointer border border-slate-200/60 dark:border-[#26282a] google-btn-press"
                 >
                   {preset}
                 </button>
@@ -244,7 +244,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
                   template === 'standard'
                     ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
-                    : 'border-slate-200 dark:border-[#3c4043] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#1e1f20]'
+                    : 'border-slate-200 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#0f0f10]'
                 }`}
               >
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
@@ -262,7 +262,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
                   template === 'simple'
                     ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
-                    : 'border-slate-200 dark:border-[#3c4043] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#1e1f20]'
+                    : 'border-slate-200 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#0f0f10]'
                 }`}
               >
                 <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
@@ -279,7 +279,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
                   template === 'custom'
                     ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
-                    : 'border-slate-200 dark:border-[#3c4043] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#1e1f20]'
+                    : 'border-slate-200 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#0f0f10]'
                 }`}
               >
                 <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
@@ -296,7 +296,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
                   template === 'empty'
                     ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
-                    : 'border-slate-200 dark:border-[#3c4043] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#1e1f20]'
+                    : 'border-slate-200 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#0f0f10]'
                 }`}
               >
                 <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
@@ -311,7 +311,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
 
           {/* Custom Categories Setup when template === 'custom' */}
           {template === 'custom' && (
-            <div className="p-4 bg-slate-50 dark:bg-[#1e1f20] rounded-xl border border-slate-200 dark:border-[#3c4043] space-y-3">
+            <div className="p-4 bg-slate-50 dark:bg-[#0f0f10] rounded-xl border border-slate-200 dark:border-[#26282a] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-700 dark:text-[#e8eaed]">Custom Categories</span>
                 <span className={`text-xs font-bold ${isCustomValid ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
@@ -338,7 +338,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                       value={cat.name}
                       onChange={(e) => handleUpdateCustomCategory(cat.id, { name: e.target.value })}
                       placeholder="Category name"
-                      className="flex-1 px-3 py-1.5 text-xs bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
+                      className="flex-1 px-3 py-1.5 text-xs bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
                     />
                     <div className="relative w-20">
                       <input
@@ -348,7 +348,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                         step="any"
                         value={cat.weight}
                         onChange={(e) => handleUpdateCustomCategory(cat.id, { weight: parseFloat(e.target.value) || 0 })}
-                        className="w-full pr-5 pl-2 py-1.5 text-xs font-bold text-right bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
+                        className="w-full pr-5 pl-2 py-1.5 text-xs font-bold text-right bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
                       />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-[#9aa0a6] font-bold pointer-events-none">%</span>
                     </div>
@@ -380,7 +380,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-[#c4c7c5] bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
+              className="w-full sm:w-auto px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-[#c4c7c5] bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
             >
               Cancel
             </button>

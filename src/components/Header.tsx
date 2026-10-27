@@ -114,20 +114,23 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FAFBFD]/95 dark:bg-[#1e1f20]/95 backdrop-blur-md transition-colors duration-250">
+    <header className="sticky top-0 z-30 bg-[#FAFBFD]/95 dark:bg-[#0f0f10]/95 backdrop-blur-md transition-colors duration-250">
       <div className="relative w-full px-3 sm:px-6 h-16 flex items-center justify-between">
-        {/* Left: Gemini Gradebook Branding (Matches Google Notebook branding) */}
+        {/* Left: Gemini Gradebook Branding (Matches Google Notebook branding layout) */}
         <div
           onClick={() => onChangeTab('gradebook')}
-          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none flex-shrink-0 z-20 group"
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none flex-shrink-0 z-20 group"
           title="Gemini Gradebook"
         >
           <img
             src="/gemini-gradebook-logo.png"
             alt="Gemini Gradebook"
-            className="w-7 h-7 sm:w-8 sm:h-8 object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
+            className="w-7 h-7 sm:w-[30px] sm:h-[30px] object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
           />
-          <span className="text-[18px] sm:text-[20px] font-medium tracking-tight text-slate-900 dark:text-white font-sans antialiased">
+          <span
+            className="text-[19px] sm:text-[21px] font-medium tracking-tight text-slate-900 dark:text-[#f8f9fa] antialiased select-none"
+            style={{ fontFamily: "'Google Sans', 'Google Sans Text', sans-serif" }}
+          >
             Gemini Gradebook
           </span>
         </div>
@@ -136,11 +139,11 @@ export const Header: React.FC<HeaderProps> = ({
         <nav
           ref={navRef}
           aria-label="Main taskbar tabs"
-          className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center p-1 bg-slate-100/90 dark:bg-[#282a2c] rounded-xl border border-slate-200/80 dark:border-[#3c4043] shadow-2xs z-10 select-none"
+          className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center p-1 bg-slate-100/90 dark:bg-[#18191b] rounded-xl border border-slate-200/80 dark:border-[#26282a] shadow-2xs z-10 select-none"
         >
           {/* Google Material 3 Animated Sliding Indicator */}
           <div
-            className="absolute top-1 bottom-1 rounded-lg bg-white dark:bg-[#353739] shadow-xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
+            className="absolute top-1 bottom-1 rounded-lg bg-white dark:bg-[#26282a] shadow-xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
             style={{
               left: `${indicatorStyle.left}px`,
               width: `${indicatorStyle.width}px`,
@@ -209,7 +212,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center justify-center p-0.5 rounded-full hover:ring-3 hover:ring-slate-200 dark:hover:ring-[#3c4043] focus:outline-hidden focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer google-btn-press"
+              className="flex items-center justify-center p-0.5 rounded-full hover:ring-3 hover:ring-slate-200 dark:hover:ring-[#26282a] focus:outline-hidden focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer google-btn-press"
               aria-label="Google Account"
               title={user ? (user.displayName || user.email || 'Google Account') : 'Google Account / Profile'}
             >
@@ -218,7 +221,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <img
                     src={user.photoURL}
                     alt={user.displayName || 'Google Account'}
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-slate-200 dark:border-[#3c4043]"
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-slate-200 dark:border-[#26282a]"
                   />
                 ) : (
                   <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center shadow-xs">
@@ -226,7 +229,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 )
               ) : (
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 dark:bg-[#303134] text-slate-600 dark:text-[#e8eaed] flex items-center justify-center border border-slate-200 dark:border-[#3c4043]">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 dark:bg-[#202123] text-slate-600 dark:text-[#e8eaed] flex items-center justify-center border border-slate-200 dark:border-[#26282a]">
                   <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 dark:text-[#9aa0a6]" />
                 </div>
               )}
@@ -234,15 +237,15 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Google Account Popover Menu */}
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-white dark:bg-[#282a2c] rounded-3xl shadow-2xl border border-slate-200/90 dark:border-[#3c4043] py-4 px-4 z-50 animate-fade-scale">
+              <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-white dark:bg-[#18191b] rounded-3xl shadow-2xl border border-slate-200/90 dark:border-[#26282a] py-4 px-4 z-50 animate-fade-scale">
                 {/* Centered Google User Card */}
-                <div className="flex flex-col items-center text-center pb-4 border-b border-slate-100 dark:border-[#3c4043]">
+                <div className="flex flex-col items-center text-center pb-4 border-b border-slate-100 dark:border-[#26282a]">
                   {user ? (
                     user.photoURL ? (
                       <img
                         src={user.photoURL}
                         alt={user.displayName || 'User'}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-slate-200 dark:border-[#5f6368] shadow-xs mb-2"
+                        className="w-16 h-16 rounded-full object-cover border-2 border-slate-200 dark:border-[#383a3d] shadow-xs mb-2"
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-blue-600 text-white font-bold text-2xl flex items-center justify-center shadow-xs mb-2">
@@ -250,7 +253,7 @@ export const Header: React.FC<HeaderProps> = ({
                       </div>
                     )
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-[#303134] text-slate-600 dark:text-slate-300 flex items-center justify-center border border-slate-200 dark:border-[#3c4043] mb-2">
+                    <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-[#202123] text-slate-600 dark:text-slate-300 flex items-center justify-center border border-slate-200 dark:border-[#26282a] mb-2">
                       <User className="w-8 h-8 text-slate-400 dark:text-[#9aa0a6]" />
                     </div>
                   )}
@@ -262,7 +265,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {user ? user.email : 'Local offline storage'}
                   </p>
 
-                  <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-[#353739] text-slate-700 dark:text-[#c4c7c5] border border-slate-200/80 dark:border-[#444746]">
+                  <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-[#202123] text-slate-700 dark:text-[#c4c7c5] border border-slate-200/80 dark:border-[#26282a]">
                     {user ? (
                       <>
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
@@ -286,7 +289,7 @@ export const Header: React.FC<HeaderProps> = ({
                       setIsUserMenuOpen(false);
                       onOpenTranscript();
                     }}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-800 dark:text-[#e8eaed] hover:bg-slate-100/80 dark:hover:bg-[#353739] rounded-2xl flex items-center gap-3 cursor-pointer font-medium transition-colors google-btn-press"
+                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-800 dark:text-[#e8eaed] hover:bg-slate-100/80 dark:hover:bg-[#202123] rounded-2xl flex items-center gap-3 cursor-pointer font-medium transition-colors google-btn-press"
                   >
                     <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0">
                       <FileText className="w-4 h-4" />
@@ -303,7 +306,7 @@ export const Header: React.FC<HeaderProps> = ({
                       type="button"
                       disabled={isForceSyncing}
                       onClick={handleForceSync}
-                      className="w-full text-left px-3.5 py-2.5 text-xs text-slate-800 dark:text-[#e8eaed] hover:bg-slate-100/80 dark:hover:bg-[#353739] rounded-2xl flex items-center justify-between cursor-pointer font-medium transition-colors google-btn-press"
+                      className="w-full text-left px-3.5 py-2.5 text-xs text-slate-800 dark:text-[#e8eaed] hover:bg-slate-100/80 dark:hover:bg-[#202123] rounded-2xl flex items-center justify-between cursor-pointer font-medium transition-colors google-btn-press"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
@@ -334,7 +337,7 @@ export const Header: React.FC<HeaderProps> = ({
                           onOpenFirebaseConfig();
                         }
                       }}
-                      className="w-full text-left px-3.5 py-2.5 text-xs text-blue-700 dark:text-[#8ab4f8] hover:bg-blue-50/80 dark:hover:bg-[#353739] rounded-2xl flex items-center gap-3 cursor-pointer font-bold transition-colors google-btn-press"
+                      className="w-full text-left px-3.5 py-2.5 text-xs text-blue-700 dark:text-[#8ab4f8] hover:bg-blue-50/80 dark:hover:bg-[#202123] rounded-2xl flex items-center gap-3 cursor-pointer font-bold transition-colors google-btn-press"
                     >
                       <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center flex-shrink-0">
                         <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -370,9 +373,9 @@ export const Header: React.FC<HeaderProps> = ({
                       setIsUserMenuOpen(false);
                       onOpenFirebaseConfig();
                     }}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-100/80 dark:hover:bg-[#353739] rounded-2xl flex items-center gap-3 cursor-pointer transition-colors google-btn-press"
+                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-100/80 dark:hover:bg-[#202123] rounded-2xl flex items-center gap-3 cursor-pointer transition-colors google-btn-press"
                   >
-                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#353739] text-slate-500 dark:text-[#9aa0a6] flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#202123] text-slate-500 dark:text-[#9aa0a6] flex items-center justify-center flex-shrink-0">
                       <Settings className="w-4 h-4" />
                     </div>
                     <div>
@@ -382,7 +385,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </button>
 
                   {/* Appearance Toggle */}
-                  <div className="px-3.5 py-2.5 rounded-2xl bg-slate-50 dark:bg-[#1e1f20] border border-slate-200/60 dark:border-[#3c4043] flex items-center justify-between">
+                  <div className="px-3.5 py-2.5 rounded-2xl bg-slate-50 dark:bg-[#121314] border border-slate-200/60 dark:border-[#26282a] flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       {theme === 'dark' ? (
                         <Moon className="w-4 h-4 text-purple-400" />
@@ -399,7 +402,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       type="button"
                       onClick={toggleTheme}
-                      className="px-2.5 py-1 text-xs font-bold rounded-xl bg-white dark:bg-[#353739] text-slate-700 dark:text-[#e8eaed] border border-slate-200 dark:border-[#444746] shadow-2xs hover:bg-slate-100 dark:hover:bg-[#444746] transition-all cursor-pointer google-btn-press"
+                      className="px-2.5 py-1 text-xs font-bold rounded-xl bg-white dark:bg-[#202123] text-slate-700 dark:text-[#e8eaed] border border-slate-200 dark:border-[#26282a] shadow-2xs hover:bg-slate-100 dark:hover:bg-[#26282a] transition-all cursor-pointer google-btn-press"
                     >
                       {theme === 'dark' ? 'Light' : 'Dark'}
                     </button>
@@ -408,7 +411,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {/* Sign Out Button (Google Style) */}
                 {user && (
-                  <div className="pt-2 border-t border-slate-100 dark:border-[#3c4043] mt-2">
+                  <div className="pt-2 border-t border-slate-100 dark:border-[#26282a] mt-2">
                     <button
                       type="button"
                       onClick={() => {

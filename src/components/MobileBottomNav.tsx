@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BookOpen, Sparkles, BookMarked, BookCheck } from 'lucide-react';
 
 interface MobileBottomNavProps {
@@ -29,7 +29,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-md border-t border-slate-200/90 dark:border-[#3c4043] shadow-lg px-3 py-2 flex items-center justify-around pb-[max(0.6rem,env(safe-area-inset-bottom))]"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0f0f10]/95 backdrop-blur-md border-t border-slate-200/90 dark:border-[#26282a] shadow-lg px-3 py-2 flex items-center justify-around pb-[max(0.6rem,env(safe-area-inset-bottom))]"
     >
       {/* 1. Gradebook Tab */}
       <button
@@ -71,7 +71,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         >
           <BookMarked className="w-5 h-5 stroke-[2.2]" />
           {noteCount > 0 && (
-            <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[8px] font-extrabold bg-indigo-600 dark:bg-[#c58af9] text-white dark:text-[#1e1f20] rounded-full leading-tight">
+            <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[8px] font-extrabold bg-indigo-600 dark:bg-[#c58af9] text-white dark:text-[#0f0f10] rounded-full leading-tight">
               {noteCount}
             </span>
           )}
@@ -96,7 +96,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         >
           <BookCheck className="w-5 h-5 stroke-[2.2]" />
           {slabCount > 0 && (
-            <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[8px] font-extrabold bg-violet-600 dark:bg-[#c58af9] text-white dark:text-[#1e1f20] rounded-full leading-tight">
+            <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[8px] font-extrabold bg-violet-600 dark:bg-[#c58af9] text-white dark:text-[#0f0f10] rounded-full leading-tight">
               {slabCount}
             </span>
           )}

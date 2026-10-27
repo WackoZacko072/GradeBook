@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   BookCheck,
   Plus,
@@ -256,12 +256,12 @@ export const SlabView: React.FC<SlabViewProps> = ({
     return (
       <div className="space-y-6 animate-fade-scale">
         {/* Top Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#3c4043]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-[#26282a]">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => onSelectSlab(null)}
-              className="p-2 text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold google-btn-press"
+              className="p-2 text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold google-btn-press"
               title="Back to all Office study sets"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -280,7 +280,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                     if (e.key === 'Escape') setEditingSlabId(null);
                   }}
                   autoFocus
-                  className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-[#e8eaed] px-2 py-1 bg-white dark:bg-[#1e1f20] border border-violet-500 rounded-xl focus:outline-hidden shadow-2xs"
+                  className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-[#e8eaed] px-2 py-1 bg-white dark:bg-[#0f0f10] border border-violet-500 rounded-xl focus:outline-hidden shadow-2xs"
                 />
                 <button
                   type="button"
@@ -292,7 +292,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditingSlabId(null)}
-                  className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-lg transition-colors cursor-pointer google-btn-press"
+                  className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer google-btn-press"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -316,7 +316,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
 
           {/* Mode Switcher Tabs (if has both) */}
           {hasFlashcards && hasMcqs && (
-            <div className="flex items-center p-1 bg-slate-100 dark:bg-[#1e1f20] rounded-xl border border-slate-200/80 dark:border-[#3c4043] self-start sm:self-auto shadow-inner">
+            <div className="flex items-center p-1 bg-slate-100 dark:bg-[#0f0f10] rounded-xl border border-slate-200/80 dark:border-[#26282a] self-start sm:self-auto shadow-inner">
               <button
                 type="button"
                 onClick={() => {
@@ -325,7 +325,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer google-btn-press ${
                   studyMode === 'flashcards'
-                    ? 'bg-white dark:bg-[#303134] text-violet-700 dark:text-[#c58af9] shadow-2xs font-extrabold'
+                    ? 'bg-white dark:bg-[#202123] text-violet-700 dark:text-[#c58af9] shadow-2xs font-extrabold'
                     : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
               >
@@ -337,7 +337,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 onClick={() => setStudyMode('mcq')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer google-btn-press ${
                   studyMode === 'mcq'
-                    ? 'bg-white dark:bg-[#303134] text-violet-700 dark:text-[#c58af9] shadow-2xs font-extrabold'
+                    ? 'bg-white dark:bg-[#202123] text-violet-700 dark:text-[#c58af9] shadow-2xs font-extrabold'
                     : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
               >
@@ -355,7 +355,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
           <div className="max-w-2xl mx-auto space-y-5 animate-fade-scale">
             {isDeckCompleted ? (
               /* Deck Review Complete Screen */
-              <div className="bg-white dark:bg-[#282a2c] rounded-3xl p-8 border border-slate-200/90 dark:border-[#3c4043] text-center shadow-lg space-y-6 animate-fade-scale">
+              <div className="bg-white dark:bg-[#18191b] rounded-3xl p-8 border border-slate-200/90 dark:border-[#26282a] text-center shadow-lg space-y-6 animate-fade-scale">
                 <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center mx-auto shadow-md shadow-violet-500/20">
                   <Award className="w-8 h-8 stroke-[2.2]" />
                 </div>
@@ -427,7 +427,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                       setIsCardFlipped(false);
                       setIsDeckCompleted(false);
                     }}
-                    className="px-4 py-2.5 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-bold transition-all border border-slate-200 dark:border-[#3c4043] flex items-center gap-2 cursor-pointer google-btn-press"
+                    className="px-4 py-2.5 bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-bold transition-all border border-slate-200 dark:border-[#26282a] flex items-center gap-2 cursor-pointer google-btn-press"
                   >
                     <Shuffle className="w-4 h-4" />
                     <span>Shuffle & Restart</span>
@@ -469,7 +469,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full h-1.5 bg-slate-200/80 dark:bg-[#353739] rounded-full overflow-hidden">
+                <div className="w-full h-1.5 bg-slate-200/80 dark:bg-[#26282a] rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-[#c58af9] dark:to-[#8ab4f8] transition-all duration-300"
                     style={{ width: `${totalCards > 0 ? ((currentCardIndex + 1) / totalCards) * 100 : 0}%` }}
@@ -489,8 +489,8 @@ export const SlabView: React.FC<SlabViewProps> = ({
                           : 'animate-card-enter'
                       } ${
                         isCardFlipped
-                          ? 'bg-white dark:bg-[#282a2c] text-slate-900 dark:text-[#e8eaed] border-2 border-violet-400/80 dark:border-violet-500/50 shadow-violet-500/10'
-                          : 'bg-white dark:bg-[#282a2c] text-slate-900 dark:text-[#e8eaed] border border-slate-200/90 dark:border-[#3c4043]'
+                          ? 'bg-white dark:bg-[#18191b] text-slate-900 dark:text-[#e8eaed] border-2 border-violet-400/80 dark:border-violet-500/50 shadow-violet-500/10'
+                          : 'bg-white dark:bg-[#18191b] text-slate-900 dark:text-[#e8eaed] border border-slate-200/90 dark:border-[#26282a]'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-4">
@@ -498,7 +498,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                           className={`text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full ${
                             isCardFlipped
                               ? 'bg-violet-100 dark:bg-violet-950/60 text-violet-800 dark:text-[#c58af9] border border-violet-200/60 dark:border-violet-800/40'
-                              : 'bg-slate-100 dark:bg-[#353739] text-slate-700 dark:text-[#c4c7c5]'
+                              : 'bg-slate-100 dark:bg-[#26282a] text-slate-700 dark:text-[#c4c7c5]'
                           }`}
                         >
                           {isCardFlipped ? 'Answer / Explanation' : 'Front / Concept'}
@@ -535,7 +535,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="p-8 text-center bg-white dark:bg-[#282a2c] rounded-3xl border border-slate-200 dark:border-[#3c4043]">
+                  <div className="p-8 text-center bg-white dark:bg-[#18191b] rounded-3xl border border-slate-200 dark:border-[#26282a]">
                     <p className="text-sm text-slate-500">No cards in this filter.</p>
                   </div>
                 )}
@@ -592,7 +592,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 </div>
 
                 {/* Sub-dock: Previous / Next Card Peek Controls */}
-                <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#3c4043]/50">
+                <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#26282a]/50">
                   <button
                     type="button"
                     disabled={currentCardIndex === 0 || isSwipeAnimating}
@@ -635,7 +635,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
           <div className="max-w-2xl mx-auto space-y-6 animate-fade-scale">
             {isQuizCompleted ? (
               /* Quiz Completion Summary Card */
-              <div className="bg-white dark:bg-[#282a2c] rounded-3xl p-8 border border-slate-200/90 dark:border-[#3c4043] text-center shadow-lg space-y-5 animate-in zoom-in-95">
+              <div className="bg-white dark:bg-[#18191b] rounded-3xl p-8 border border-slate-200/90 dark:border-[#26282a] text-center shadow-lg space-y-5 animate-in zoom-in-95">
                 <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center mx-auto shadow-md shadow-violet-500/20">
                   <Award className="w-8 h-8 stroke-[2.2]" />
                 </div>
@@ -668,7 +668,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                   <button
                     type="button"
                     onClick={() => onSelectSlab(null)}
-                    className="px-5 py-2.5 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer google-btn-press"
+                    className="px-5 py-2.5 bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] text-slate-700 dark:text-[#e8eaed] text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer google-btn-press"
                   >
                     Back to Library
                   </button>
@@ -689,7 +689,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="w-full h-1.5 bg-slate-200/80 dark:bg-[#353739] rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 bg-slate-200/80 dark:bg-[#26282a] rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-[#c58af9] dark:to-[#8ab4f8] transition-all duration-300"
                       style={{
@@ -699,7 +699,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                   </div>
 
                   {/* Question Stem Card */}
-                  <div className="bg-white dark:bg-[#282a2c] rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-[#3c4043] shadow-xs space-y-4">
+                  <div className="bg-white dark:bg-[#18191b] rounded-3xl p-6 sm:p-7 border border-slate-200/90 dark:border-[#26282a] shadow-xs space-y-4">
                     <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-[#e8eaed] leading-relaxed">
                       <MarkdownRenderer content={currentMcq.question} />
                     </div>
@@ -711,7 +711,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                         const isCorrect = optIdx === currentMcq.correctIndex;
 
                         let styleClasses =
-                          'bg-slate-50 dark:bg-[#1e1f20] border-slate-200 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] hover:bg-violet-50/50 dark:hover:bg-violet-950/30 hover:border-violet-300 dark:hover:border-violet-500/50';
+                          'bg-slate-50 dark:bg-[#0f0f10] border-slate-200 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] hover:bg-violet-50/50 dark:hover:bg-violet-950/30 hover:border-violet-300 dark:hover:border-violet-500/50';
 
                         if (mcqAnswered) {
                           if (isCorrect) {
@@ -721,7 +721,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                             styleClasses =
                               'bg-rose-50 dark:bg-rose-950/40 border-rose-500 text-rose-900 dark:text-rose-300 font-bold ring-2 ring-rose-500/20';
                           } else {
-                            styleClasses = 'bg-slate-50 dark:bg-[#1e1f20] border-slate-200 dark:border-[#3c4043] text-slate-400 dark:text-[#5f6368] opacity-60';
+                            styleClasses = 'bg-slate-50 dark:bg-[#0f0f10] border-slate-200 dark:border-[#26282a] text-slate-400 dark:text-[#5f6368] opacity-60';
                           }
                         }
 
@@ -740,8 +740,8 @@ export const SlabView: React.FC<SlabViewProps> = ({
                                     ? 'bg-emerald-600 text-white'
                                     : isSelected
                                     ? 'bg-rose-600 text-white'
-                                    : 'bg-slate-200 dark:bg-[#303134] text-slate-600 dark:text-[#9aa0a6]'
-                                  : 'bg-slate-200 dark:bg-[#303134] text-slate-700 dark:text-[#c4c7c5]'
+                                    : 'bg-slate-200 dark:bg-[#202123] text-slate-600 dark:text-[#9aa0a6]'
+                                  : 'bg-slate-200 dark:bg-[#202123] text-slate-700 dark:text-[#c4c7c5]'
                               }`}
                             >
                               {String.fromCharCode(65 + optIdx)}
@@ -774,7 +774,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                       type="button"
                       disabled={currentMcqIndex === 0}
                       onClick={() => setCurrentMcqIndex((prev) => Math.max(0, prev - 1))}
-                      className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-[#e8eaed] bg-white dark:bg-[#282a2c] hover:bg-slate-50 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043] rounded-xl transition-all disabled:opacity-30 cursor-pointer shadow-2xs google-btn-press"
+                      className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-[#e8eaed] bg-white dark:bg-[#18191b] hover:bg-slate-50 dark:hover:bg-[#202123] border border-slate-200 dark:border-[#26282a] rounded-xl transition-all disabled:opacity-30 cursor-pointer shadow-2xs google-btn-press"
                     >
                       <ChevronLeft className="w-4 h-4" />
                       <span>Previous</span>
@@ -856,7 +856,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search study sets, topics, or notes..."
-            className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-xl focus:outline-hidden focus:ring-2 focus:ring-violet-500 text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] shadow-2xs transition-all"
+            className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-xl focus:outline-hidden focus:ring-2 focus:ring-violet-500 text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] shadow-2xs transition-all"
           />
         </div>
 
@@ -868,13 +868,13 @@ export const SlabView: React.FC<SlabViewProps> = ({
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
               filterClassId === 'all'
                 ? 'bg-violet-600 text-white shadow-2xs font-extrabold'
-                : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+                : 'bg-white dark:bg-[#0f0f10] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] border border-slate-200 dark:border-[#26282a]'
             }`}
           >
             <span>All Classes</span>
             <span
               className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                filterClassId === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#353739]'
+                filterClassId === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#26282a]'
               }`}
             >
               {slabs.length}
@@ -892,7 +892,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
                   isSelected
                     ? 'bg-violet-600 text-white shadow-2xs font-extrabold'
-                    : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+                    : 'bg-white dark:bg-[#0f0f10] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] border border-slate-200 dark:border-[#26282a]'
                 }`}
               >
                 <span
@@ -902,7 +902,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 <span className="truncate max-w-[120px]">{cls.name}</span>
                 <span
                   className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#353739]'
+                    isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#26282a]'
                   }`}
                 >
                   {count}
@@ -918,13 +918,13 @@ export const SlabView: React.FC<SlabViewProps> = ({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
                 filterClassId === 'unassigned'
                   ? 'bg-violet-600 text-white shadow-2xs font-extrabold'
-                  : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+                  : 'bg-white dark:bg-[#0f0f10] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] border border-slate-200 dark:border-[#26282a]'
               }`}
             >
               <span>General</span>
               <span
                 className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                  filterClassId === 'unassigned' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#353739]'
+                  filterClassId === 'unassigned' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#26282a]'
                 }`}
               >
                 {slabs.filter((s) => !s.classId).length}
@@ -936,7 +936,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
 
       {/* Slabs Grid */}
       {filteredSlabs.length === 0 ? (
-        <div className="py-16 text-center bg-white dark:bg-[#282a2c] rounded-3xl border border-slate-200/80 dark:border-[#3c4043] p-8 shadow-2xs space-y-4">
+        <div className="py-16 text-center bg-white dark:bg-[#18191b] rounded-3xl border border-slate-200/80 dark:border-[#26282a] p-8 shadow-2xs space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-[#c58af9] flex items-center justify-center mx-auto">
             <BookCheck className="w-7 h-7 stroke-[2.2]" />
           </div>
@@ -968,7 +968,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
               <div
                 key={slab.id}
                 onClick={() => !isEditing && handleSelectSlabItem(slab)}
-                className="group bg-white dark:bg-[#282a2c] rounded-3xl border border-slate-200/90 dark:border-[#3c4043] hover:border-violet-300 dark:hover:border-violet-500/50 p-5 sm:p-6 shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4 relative google-card"
+                className="group bg-white dark:bg-[#18191b] rounded-3xl border border-slate-200/90 dark:border-[#26282a] hover:border-violet-300 dark:hover:border-violet-500/50 p-5 sm:p-6 shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4 relative google-card"
               >
                 <div>
                   {/* Card Header: Type Badge & Action Buttons */}
@@ -994,7 +994,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                       </span>
 
                       {slab.className && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#303134] text-slate-700 dark:text-[#c4c7c5] border border-slate-200/60 dark:border-[#3c4043] flex items-center gap-1">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#202123] text-slate-700 dark:text-[#c4c7c5] border border-slate-200/60 dark:border-[#26282a] flex items-center gap-1">
                           <span
                             className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                             style={{
@@ -1007,7 +1007,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                       )}
 
                       {slab.difficulty && (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-[#303134] text-slate-500 dark:text-[#9aa0a6]">
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-[#202123] text-slate-500 dark:text-[#9aa0a6]">
                           {slab.difficulty}
                         </span>
                       )}
@@ -1051,7 +1051,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                           if (e.key === 'Escape') setEditingSlabId(null);
                         }}
                         autoFocus
-                        className="w-full text-sm font-bold px-2 py-1 bg-white dark:bg-[#1e1f20] border border-violet-500 rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-hidden shadow-2xs"
+                        className="w-full text-sm font-bold px-2 py-1 bg-white dark:bg-[#0f0f10] border border-violet-500 rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-hidden shadow-2xs"
                       />
                       <button
                         type="button"
@@ -1075,7 +1075,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 </div>
 
                 {/* Footer Info: Counts & Sources */}
-                <div className="pt-3 border-t border-slate-100 dark:border-[#3c4043] flex items-center justify-between text-xs">
+                <div className="pt-3 border-t border-slate-100 dark:border-[#26282a] flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 text-slate-500 dark:text-[#9aa0a6] font-semibold text-[11px]">
                     {fcCount > 0 && <span>{fcCount} cards</span>}
                     {fcCount > 0 && mcqCount > 0 && <span>&bull;</span>}

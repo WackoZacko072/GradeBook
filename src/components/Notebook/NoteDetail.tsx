@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   Trash2,
@@ -381,12 +381,12 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
   return (
     <div className="space-y-5 animate-fade-scale">
       {/* Top Navigation & Status Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/90 dark:border-[#3c4043]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/90 dark:border-[#26282a]">
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200/80 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] text-xs font-semibold rounded-xl transition-all cursor-pointer min-h-[36px] google-btn-press"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-[#202123] hover:bg-slate-200/80 dark:hover:bg-[#26282a] text-slate-700 dark:text-[#e8eaed] text-xs font-semibold rounded-xl transition-all cursor-pointer min-h-[36px] google-btn-press"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>All Notes</span>
@@ -439,7 +439,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
       </div>
 
       {/* Notion Page Header Canvas */}
-      <div className="bg-white dark:bg-[#282a2c] border border-slate-200/90 dark:border-[#3c4043] rounded-2xl p-5 sm:p-7 shadow-2xs space-y-4">
+      <div className="bg-white dark:bg-[#18191b] border border-slate-200/90 dark:border-[#26282a] rounded-2xl p-5 sm:p-7 shadow-2xs space-y-4">
         {/* Icon & Title Row */}
         <div className="flex items-start gap-3">
           {/* Notion Emoji / Icon Picker */}
@@ -448,19 +448,19 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               type="button"
               onClick={() => setIsIconPickerOpen(!isIconPickerOpen)}
               title="Change note icon"
-              className="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-[#1e1f20] hover:bg-slate-200/80 dark:hover:bg-[#303134] flex items-center justify-center text-2xl transition-all cursor-pointer select-none border border-slate-200/80 dark:border-[#3c4043] google-btn-press"
+              className="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-[#0f0f10] hover:bg-slate-200/80 dark:hover:bg-[#202123] flex items-center justify-center text-2xl transition-all cursor-pointer select-none border border-slate-200/80 dark:border-[#26282a] google-btn-press"
             >
               {icon}
             </button>
 
             {isIconPickerOpen && (
-              <div className="absolute top-13 left-0 z-30 p-2.5 bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-2xl shadow-xl flex gap-1.5 flex-wrap w-48 animate-in zoom-in-95 duration-150">
+              <div className="absolute top-13 left-0 z-30 p-2.5 bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-2xl shadow-xl flex gap-1.5 flex-wrap w-48 animate-in zoom-in-95 duration-150">
                 {NOTE_ICONS.map((emoji) => (
                   <button
                     key={emoji}
                     type="button"
                     onClick={() => handleSelectIcon(emoji)}
-                    className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-[#303134] flex items-center justify-center text-lg cursor-pointer transition-colors"
+                    className="w-8 h-8 rounded-lg hover:bg-slate-100 dark:hover:bg-[#202123] flex items-center justify-center text-lg cursor-pointer transition-colors"
                   >
                     {emoji}
                   </button>
@@ -483,7 +483,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
         </div>
 
         {/* Notion Database Properties Bar */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 border-t border-slate-100 dark:border-[#3c4043] text-xs text-slate-600 dark:text-[#c4c7c5]">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 border-t border-slate-100 dark:border-[#26282a] text-xs text-slate-600 dark:text-[#c4c7c5]">
           {/* Property 1: Class Tag Selector */}
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-400 dark:text-[#9aa0a6] flex items-center gap-1">
@@ -493,7 +493,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
             <select
               value={selectedClassId}
               onChange={(e) => handleClassChange(e.target.value)}
-              className="bg-slate-100 dark:bg-[#1e1f20] hover:bg-slate-200/80 dark:hover:bg-[#303134] text-slate-800 dark:text-[#e8eaed] font-bold px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-[#3c4043] cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+              className="bg-slate-100 dark:bg-[#0f0f10] hover:bg-slate-200/80 dark:hover:bg-[#202123] text-slate-800 dark:text-[#e8eaed] font-bold px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-[#26282a] cursor-pointer focus:outline-hidden focus:ring-1 focus:ring-blue-500"
             >
               <option value="">General (No Class)</option>
               {classes.map((cls) => (
@@ -511,7 +511,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold border transition-colors cursor-pointer google-btn-press ${
               (note.sources?.length || 0) > 0 || showSourcesPanel
                 ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-[#8ab4f8] border-blue-200 dark:border-blue-800/40'
-                : 'bg-slate-100 dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] border-slate-200/80 dark:border-[#3c4043] hover:bg-slate-200/80 dark:hover:bg-[#303134]'
+                : 'bg-slate-100 dark:bg-[#0f0f10] text-slate-600 dark:text-[#c4c7c5] border-slate-200/80 dark:border-[#26282a] hover:bg-slate-200/80 dark:hover:bg-[#202123]'
             }`}
           >
             <Paperclip className="w-3.5 h-3.5" />
@@ -551,7 +551,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
 
         {/* Collapsible Class & Note File Uploads Panel */}
         {showSourcesPanel && (
-          <div className="pt-3 border-t border-slate-100 dark:border-[#3c4043] animate-in slide-in-from-top-2 duration-150">
+          <div className="pt-3 border-t border-slate-100 dark:border-[#26282a] animate-in slide-in-from-top-2 duration-150">
             <SourcesSection
               sources={note.sources || []}
               onUpdateSources={handleUpdateSources}
@@ -562,18 +562,18 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
 
       {/* Notion-Style Full-Width Canvas */}
       <div className="w-full space-y-4">
-        <div className="bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-2xl shadow-2xs overflow-hidden flex flex-col">
+        <div className="bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-2xl shadow-2xs overflow-hidden flex flex-col">
           {/* Sticky Notion Formatting & View Mode Toolbar */}
-          <div className="px-3.5 py-2 bg-slate-50 dark:bg-[#242526] border-b border-slate-200 dark:border-[#3c4043] flex items-center justify-between gap-2 flex-wrap">
+          <div className="px-3.5 py-2 bg-slate-50 dark:bg-[#242526] border-b border-slate-200 dark:border-[#26282a] flex items-center justify-between gap-2 flex-wrap">
             {/* Left Toolbar: View Mode Switches */}
-            <div className="flex items-center p-0.5 bg-slate-200/80 dark:bg-[#1e1f20] rounded-lg">
+            <div className="flex items-center p-0.5 bg-slate-200/80 dark:bg-[#0f0f10] rounded-lg">
               <button
                 type="button"
                 onClick={() => setViewMode('write')}
                 title="Focused note-taking mode"
                 className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer google-btn-press ${
                   viewMode === 'write'
-                    ? 'bg-white dark:bg-[#303134] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
+                    ? 'bg-white dark:bg-[#202123] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
                     : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
               >
@@ -586,7 +586,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 title="Side-by-side live formatted preview"
                 className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer google-btn-press ${
                   viewMode === 'split'
-                    ? 'bg-white dark:bg-[#303134] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
+                    ? 'bg-white dark:bg-[#202123] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
                     : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
               >
@@ -599,7 +599,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 title="Formatted interactive preview"
                 className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer google-btn-press ${
                   viewMode === 'preview'
-                    ? 'bg-white dark:bg-[#303134] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
+                    ? 'bg-white dark:bg-[#202123] text-blue-700 dark:text-[#8ab4f8] shadow-2xs'
                     : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
               >
@@ -616,7 +616,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('# ', '', 'Heading 1')}
                   title="Heading 1 (# )"
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer text-xs font-bold"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
                   H1
                 </button>
@@ -624,7 +624,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('## ', '', 'Heading 2')}
                   title="Heading 2 (## )"
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer text-xs font-bold"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
                   H2
                 </button>
@@ -632,19 +632,19 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('### ', '', 'Heading 3')}
                   title="Heading 3 (### )"
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer text-xs font-bold"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer text-xs font-bold"
                 >
                   H3
                 </button>
 
-                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#3c4043] mx-0.5" />
+                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#26282a] mx-0.5" />
 
                 {/* Bold, Italic, Strikethrough, Code */}
                 <button
                   type="button"
                   onClick={() => handleInsertSnippet('**', '**', 'bold text')}
                   title="Bold (**text**)"
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer"
                 >
                   <Bold className="w-3.5 h-3.5" />
                 </button>
@@ -652,7 +652,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('*', '*', 'italic text')}
                   title="Italic (*text*)"
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer"
                 >
                   <Italic className="w-3.5 h-3.5" />
                 </button>
@@ -660,19 +660,19 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('`', '`', 'code')}
                   title="Inline Code (`code`)"
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer"
                 >
                   <Code className="w-3.5 h-3.5" />
                 </button>
 
-                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#3c4043] mx-0.5" />
+                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#26282a] mx-0.5" />
 
                 {/* Bullet list, Numbered list, Todo Checklist */}
                 <button
                   type="button"
                   onClick={() => handleInsertSnippet('- ', '', 'Bullet point')}
                   title="Bullet List (- )"
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer"
                 >
                   <List className="w-3.5 h-3.5" />
                 </button>
@@ -680,7 +680,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   type="button"
                   onClick={() => handleInsertSnippet('1. ', '', 'Numbered point')}
                   title="Numbered List (1. )"
-                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer"
+                  className="p-1 hover:bg-slate-200 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer"
                 >
                   <ListOrdered className="w-3.5 h-3.5" />
                 </button>
@@ -693,7 +693,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   <CheckSquare className="w-3.5 h-3.5" />
                 </button>
 
-                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#3c4043] mx-0.5" />
+                <div className="w-[1px] h-4 bg-slate-200 dark:bg-[#26282a] mx-0.5" />
 
                 {/* Notion Callout & LaTeX */}
                 <button
@@ -723,7 +723,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               <button
                 type="button"
                 onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-200/70 dark:hover:bg-[#303134] rounded-md transition-colors cursor-pointer google-btn-press"
+                className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-200/70 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer google-btn-press"
               >
                 <LayoutTemplate className="w-3.5 h-3.5 text-blue-600 dark:text-[#8ab4f8]" />
                 <span className="hidden sm:inline">Templates</span>
@@ -731,11 +731,11 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               </button>
 
               {isTemplatesOpen && (
-                <div className="absolute right-0 top-8 z-30 w-56 p-1.5 bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-xl shadow-xl space-y-1 animate-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-8 z-30 w-56 p-1.5 bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-xl shadow-xl space-y-1 animate-in zoom-in-95 duration-150">
                   <button
                     type="button"
                     onClick={() => handleInsertTemplate('lecture')}
-                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#303134] rounded-lg text-xs transition-colors cursor-pointer"
+                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#202123] rounded-lg text-xs transition-colors cursor-pointer"
                   >
                     <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📚 Lecture Notes</div>
                     <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Objectives, notes & key takeaways</div>
@@ -743,7 +743,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   <button
                     type="button"
                     onClick={() => handleInsertTemplate('cornell')}
-                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#303134] rounded-lg text-xs transition-colors cursor-pointer"
+                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#202123] rounded-lg text-xs transition-colors cursor-pointer"
                   >
                     <div className="font-bold text-slate-800 dark:text-[#e8eaed]">⚖️ Cornell Method</div>
                     <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Cues, derivations & summary</div>
@@ -751,7 +751,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   <button
                     type="button"
                     onClick={() => handleInsertTemplate('exam')}
-                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#303134] rounded-lg text-xs transition-colors cursor-pointer"
+                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#202123] rounded-lg text-xs transition-colors cursor-pointer"
                   >
                     <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📈 Exam Prep & Formulas</div>
                     <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Formulas, common traps & checklist</div>
@@ -759,7 +759,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                   <button
                     type="button"
                     onClick={() => handleInsertTemplate('analysis')}
-                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#303134] rounded-lg text-xs transition-colors cursor-pointer"
+                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#202123] rounded-lg text-xs transition-colors cursor-pointer"
                   >
                     <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📊 Analytical & Case Notes</div>
                     <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Market dynamics & equations</div>
@@ -785,7 +785,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               />
             </div>
           ) : viewMode === 'split' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-[#3c4043] min-h-[460px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-[#26282a] min-h-[460px]">
               {/* Left Split: Editor */}
               <div className="p-4 sm:p-5 flex flex-col">
                 <textarea
@@ -800,7 +800,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 />
               </div>
               {/* Right Split: Live KaTeX & Markdown Rendering */}
-              <div className="p-4 sm:p-6 overflow-y-auto bg-[#FAFBFD] dark:bg-[#1e1f20] min-h-[420px]">
+              <div className="p-4 sm:p-6 overflow-y-auto bg-[#FAFBFD] dark:bg-[#0f0f10] min-h-[420px]">
                 {content.trim() ? (
                   <MarkdownRenderer content={content} />
                 ) : (
@@ -809,7 +809,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               </div>
             </div>
           ) : (
-            <div className="p-6 sm:p-8 min-h-[460px] overflow-y-auto bg-[#FAFBFD] dark:bg-[#1e1f20]">
+            <div className="p-6 sm:p-8 min-h-[460px] overflow-y-auto bg-[#FAFBFD] dark:bg-[#0f0f10]">
               {content.trim() ? (
                 <MarkdownRenderer content={content} />
               ) : (
@@ -821,7 +821,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
           )}
 
           {/* Bottom Editor Bar */}
-          <div className="px-4 py-2 bg-slate-50 dark:bg-[#242526] border-t border-slate-100 dark:border-[#3c4043] flex items-center justify-between text-[11px] text-slate-400 dark:text-[#9aa0a6]">
+          <div className="px-4 py-2 bg-slate-50 dark:bg-[#242526] border-t border-slate-100 dark:border-[#26282a] flex items-center justify-between text-[11px] text-slate-400 dark:text-[#9aa0a6]">
             <span className="flex items-center gap-1.5">
               <span>Tab = Indent</span>
               <span>&bull;</span>
@@ -841,7 +841,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
             className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-2xs"
             onClick={() => setIsDeleteModalOpen(false)}
           />
-          <div className="relative bg-white dark:bg-[#282a2c] rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 dark:border-[#3c4043] z-10 animate-fade-scale">
+          <div className="relative bg-white dark:bg-[#18191b] rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 dark:border-[#26282a] z-10 animate-fade-scale">
             <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
               <Trash2 className="w-5 h-5" />
             </div>
@@ -853,7 +853,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               <button
                 type="button"
                 onClick={() => setIsDeleteModalOpen(false)}
-                className="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl cursor-pointer google-btn-press"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl cursor-pointer google-btn-press"
               >
                 Cancel
               </button>

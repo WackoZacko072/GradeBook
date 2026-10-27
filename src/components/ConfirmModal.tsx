@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmModalProps {
@@ -32,7 +32,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs transition-opacity animate-fade-scale"
     >
       <div
-        className="w-full max-w-md bg-white dark:bg-[#282a2c] rounded-2xl shadow-xl border border-slate-100 dark:border-[#3c4043] p-6 transform transition-all animate-slide-up"
+        className="w-full max-w-md bg-white dark:bg-[#18191b] rounded-2xl shadow-xl border border-slate-100 dark:border-[#26282a] p-6 transform transition-all animate-slide-up"
       >
         <div className="flex items-start gap-4">
           <div
@@ -58,7 +58,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="w-full sm:w-auto px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-[#e8eaed] bg-slate-100 hover:bg-slate-200 dark:bg-[#353739] dark:hover:bg-[#444746] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
+            className="w-full sm:w-auto px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-[#e8eaed] bg-slate-100 hover:bg-slate-200 dark:bg-[#26282a] dark:hover:bg-[#444746] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
           >
             {cancelLabel}
           </button>

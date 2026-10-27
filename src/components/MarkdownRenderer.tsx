@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { LatexRenderer } from './LatexRenderer';
 
 interface MarkdownRendererProps {
@@ -16,7 +16,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <div
               key={index}
-              className="my-3 p-3 bg-slate-50/80 dark:bg-[#1e1f20] rounded-xl border border-slate-200/90 dark:border-[#3c4043] overflow-x-auto text-center shadow-2xs"
+              className="my-3 p-3 bg-slate-50/80 dark:bg-[#0f0f10] rounded-xl border border-slate-200/90 dark:border-[#26282a] overflow-x-auto text-center shadow-2xs"
             >
               <LatexRenderer content={block.content} block />
             </div>
@@ -28,7 +28,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <h3
                 key={index}
-                className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-[#e8eaed] mt-3.5 mb-1.5 border-b border-slate-200 dark:border-[#3c4043] pb-1"
+                className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-[#e8eaed] mt-3.5 mb-1.5 border-b border-slate-200 dark:border-[#26282a] pb-1"
               >
                 {renderInline(block.content)}
               </h3>
@@ -69,10 +69,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           const headers = block.headers || [];
           const rows = block.rows || [];
           return (
-            <div key={index} className="my-2.5 overflow-x-auto rounded-xl border border-slate-200 dark:border-[#3c4043] shadow-2xs">
+            <div key={index} className="my-2.5 overflow-x-auto rounded-xl border border-slate-200 dark:border-[#26282a] shadow-2xs">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-100/80 dark:bg-[#1e1f20] border-b border-slate-200 dark:border-[#3c4043]">
+                  <tr className="bg-slate-100/80 dark:bg-[#0f0f10] border-b border-slate-200 dark:border-[#26282a]">
                     {headers.map((h, i) => (
                       <th key={i} className="px-3 py-2 font-bold text-slate-700 dark:text-[#e8eaed]">
                         {renderInline(h)}
@@ -80,9 +80,9 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-[#3c4043] bg-white dark:bg-[#282a2c]">
+                <tbody className="divide-y divide-slate-100 dark:divide-[#26282a] bg-white dark:bg-[#18191b]">
                   {rows.map((row, rIndex) => (
-                    <tr key={rIndex} className="hover:bg-slate-50/80 dark:hover:bg-[#303134] transition-colors">
+                    <tr key={rIndex} className="hover:bg-slate-50/80 dark:hover:bg-[#202123] transition-colors">
                       {row.map((cell, cIndex) => (
                         <td key={cIndex} className="px-3 py-1.5 text-slate-700 dark:text-[#c4c7c5]">
                           {renderInline(cell)}
@@ -112,7 +112,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                         className={`w-4 h-4 rounded-md mt-0.5 flex items-center justify-center flex-shrink-0 border text-[11px] font-bold ${
                           isChecked
                             ? 'bg-blue-600 border-blue-600 text-white'
-                            : 'border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#1e1f20] shadow-2xs'
+                            : 'border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#0f0f10] shadow-2xs'
                         }`}
                       >
                         {isChecked ? '✓' : ''}
@@ -177,7 +177,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <div
                 key={index}
-                className="my-3 p-3 bg-slate-50/80 dark:bg-[#1e1f20] rounded-xl border border-slate-200/90 dark:border-[#3c4043] overflow-x-auto text-center shadow-2xs"
+                className="my-3 p-3 bg-slate-50/80 dark:bg-[#0f0f10] rounded-xl border border-slate-200/90 dark:border-[#26282a] overflow-x-auto text-center shadow-2xs"
               >
                 <LatexRenderer content={block.content} block />
               </div>
@@ -186,7 +186,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <pre
               key={index}
-              className="my-2 p-3 bg-slate-900 dark:bg-[#1e1f20] text-slate-100 rounded-xl font-mono text-[11px] overflow-x-auto border border-transparent dark:border-[#3c4043]"
+              className="my-2 p-3 bg-slate-900 dark:bg-[#0f0f10] text-slate-100 rounded-xl font-mono text-[11px] overflow-x-auto border border-transparent dark:border-[#26282a]"
             >
               <code>{block.content}</code>
             </pre>
@@ -496,7 +496,7 @@ function renderFormattingOnly(text: string): React.ReactNode {
       parts.push(
         <code
           key={keyIndex++}
-          className="px-1.5 py-0.5 bg-slate-100 dark:bg-[#1e1f20] text-blue-700 dark:text-blue-400 font-mono text-[11px] rounded-md border border-slate-200 dark:border-[#3c4043]"
+          className="px-1.5 py-0.5 bg-slate-100 dark:bg-[#0f0f10] text-blue-700 dark:text-blue-400 font-mono text-[11px] rounded-md border border-slate-200 dark:border-[#26282a]"
         >
           {best.content}
         </code>

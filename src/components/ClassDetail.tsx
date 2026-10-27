@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   ArrowLeft,
   Plus,
@@ -206,7 +206,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#282a2c] hover:bg-slate-100 dark:hover:bg-[#353739] border border-slate-200/80 dark:border-[#3c4043] rounded-xl transition-all cursor-pointer shadow-2xs min-h-[44px] google-btn-press"
+          className="flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-white bg-white dark:bg-[#18191b] hover:bg-slate-100 dark:hover:bg-[#26282a] border border-slate-200/80 dark:border-[#26282a] rounded-xl transition-all cursor-pointer shadow-2xs min-h-[44px] google-btn-press"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>All Classes</span>
@@ -218,7 +218,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
       </div>
 
       {/* Class Overview Hero Card */}
-      <section className="bg-white dark:bg-[#282a2c] rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200/80 dark:border-[#3c4043] relative overflow-hidden transition-colors">
+      <section className="bg-white dark:bg-[#18191b] rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200/80 dark:border-[#26282a] relative overflow-hidden transition-colors">
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex-1">
             {/* Editable Class Name */}
@@ -239,14 +239,14 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                   <button
                     type="button"
                     onClick={handleSaveClassName}
-                    className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-[#353739] rounded-xl cursor-pointer"
+                    className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-[#26282a] rounded-xl cursor-pointer"
                   >
                     <Check className="w-5 h-5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsEditingClassName(false)}
-                    className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#353739] rounded-xl cursor-pointer"
+                    className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#26282a] rounded-xl cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -263,7 +263,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                       setIsEditingClassName(true);
                     }}
                     title="Rename Class"
-                    className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] hover:bg-blue-50 dark:hover:bg-[#353739] rounded-lg transition-colors cursor-pointer"
+                    className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] hover:bg-blue-50 dark:hover:bg-[#26282a] rounded-lg transition-colors cursor-pointer"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -280,7 +280,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                 {classCalc.average.toFixed(2)}
                 <span className="text-3xl sm:text-4xl text-blue-600 dark:text-[#8ab4f8] font-semibold">%</span>
               </div>
-              <div className={`px-3 py-1 text-sm font-bold rounded-xl border ${letterGradeInfo.badgeBg} dark:bg-[#353739] dark:text-[#e8eaed] dark:border-[#444746]`}>
+              <div className={`px-3 py-1 text-sm font-bold rounded-xl border ${letterGradeInfo.badgeBg} dark:bg-[#26282a] dark:text-[#e8eaed] dark:border-[#444746]`}>
                 Grade: {letterGradeInfo.letter}
               </div>
               {classCalc.isDefault100 && (
@@ -312,7 +312,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
               type="button"
               onClick={() => setIsManageWeightsOpen(true)}
               title="Configure categories and weights"
-              className="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-[#c4c7c5] bg-slate-100 hover:bg-slate-200 dark:bg-[#353739] dark:hover:bg-[#444746] rounded-xl transition-all flex items-center gap-2 cursor-pointer min-h-[44px] google-btn-press"
+              className="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-[#c4c7c5] bg-slate-100 hover:bg-slate-200 dark:bg-[#26282a] dark:hover:bg-[#444746] rounded-xl transition-all flex items-center gap-2 cursor-pointer min-h-[44px] google-btn-press"
             >
               <Sliders className="w-4 h-4 text-slate-500 dark:text-[#80868b]" />
               <span>Configure Weights</span>
@@ -332,13 +332,13 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
         </div>
 
         {/* Visual Weighted Progress & Contribution Breakdown */}
-        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-[#3c4043] space-y-3">
+        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-[#26282a] space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#c4c7c5] font-medium">
             <span>Class Grade Meter</span>
             <span>{classCalc.average.toFixed(2)}%</span>
           </div>
 
-          <div className="w-full h-3 bg-slate-100 dark:bg-[#353739] rounded-full overflow-hidden flex">
+          <div className="w-full h-3 bg-slate-100 dark:bg-[#26282a] rounded-full overflow-hidden flex">
             {classItem.categories.map((cat, idx) => {
               const calc = classCalc.categoryCalculations[cat.id];
               const contribution = calc ? calc.contribution : 0;
@@ -382,7 +382,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
               return (
                 <div
                   key={cat.id}
-                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 dark:bg-[#353739] border border-slate-200/60 dark:border-[#444746]"
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 dark:bg-[#26282a] border border-slate-200/60 dark:border-[#444746]"
                 >
                   <span className={`w-2 h-2 rounded-full ${dotColor}`} />
                   <span className="font-medium text-slate-800 dark:text-[#e8eaed]">{cat.name}:</span>
@@ -424,7 +424,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
       )}
 
       {/* Add Grading Category Section */}
-      <div className="bg-blue-50/60 dark:bg-[#282a2c] rounded-2xl p-4 sm:p-5 border border-blue-200/60 dark:border-[#3c4043] transition-colors">
+      <div className="bg-blue-50/60 dark:bg-[#18191b] rounded-2xl p-4 sm:p-5 border border-blue-200/60 dark:border-[#26282a] transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-blue-900 dark:text-[#8ab4f8] uppercase tracking-wider">
@@ -516,7 +516,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
         </div>
 
         {classItem.categories.length === 0 ? (
-          <div className="bg-white dark:bg-[#282a2c] rounded-2xl p-8 text-center border border-slate-200/80 dark:border-[#3c4043]">
+          <div className="bg-white dark:bg-[#18191b] rounded-2xl p-8 text-center border border-slate-200/80 dark:border-[#26282a]">
             <p className="text-sm font-semibold text-slate-800 dark:text-[#e8eaed]">No grading categories defined.</p>
             <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1">
               Add categories like Tests, Quizzes, or Assignments above.
@@ -550,7 +550,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
       </div>
 
       {/* Total Weight Status Bar at bottom */}
-      <div className="bg-white dark:bg-[#282a2c] rounded-2xl p-5 border border-slate-200/80 dark:border-[#3c4043] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
+      <div className="bg-white dark:bg-[#18191b] rounded-2xl p-5 border border-slate-200/80 dark:border-[#26282a] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-bold text-slate-900 dark:text-[#e8eaed]">
@@ -589,7 +589,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
           <button
             type="button"
             onClick={handleEqualizeWeights}
-            className="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-[#c4c7c5] bg-slate-100 hover:bg-slate-200 dark:bg-[#353739] dark:hover:bg-[#444746] rounded-xl transition-colors cursor-pointer min-h-[40px] google-btn-press"
+            className="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-[#c4c7c5] bg-slate-100 hover:bg-slate-200 dark:bg-[#26282a] dark:hover:bg-[#444746] rounded-xl transition-colors cursor-pointer min-h-[40px] google-btn-press"
           >
             Equalize Weights
           </button>
@@ -682,9 +682,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-[#282a2c] rounded-2xl border border-slate-200/80 dark:border-[#3c4043] shadow-xs overflow-hidden transition-all google-card">
+    <div className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] shadow-xs overflow-hidden transition-all google-card">
       {/* Category Header */}
-      <div className="p-4 sm:p-5 bg-slate-50/60 dark:bg-[#242526] border-b border-slate-100 dark:border-[#3c4043] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 bg-slate-50/60 dark:bg-[#242526] border-b border-slate-100 dark:border-[#26282a] flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Name and Reorder */}
         <div className="flex items-center gap-2.5 flex-1">
           {/* Reorder Buttons */}
@@ -720,19 +720,19 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                   if (e.key === 'Escape') setIsEditingName(false);
                 }}
                 autoFocus
-                className="w-full px-2.5 py-1 text-sm bg-white dark:bg-[#1e1f20] border border-blue-500 dark:border-[#8ab4f8] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none"
+                className="w-full px-2.5 py-1 text-sm bg-white dark:bg-[#0f0f10] border border-blue-500 dark:border-[#8ab4f8] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none"
               />
               <button
                 type="button"
                 onClick={saveName}
-                className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-[#353739] rounded-lg cursor-pointer"
+                className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-[#26282a] rounded-lg cursor-pointer"
               >
                 <Check className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => setIsEditingName(false)}
-                className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#353739] rounded-lg cursor-pointer"
+                className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#26282a] rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -789,7 +789,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                 inputMode="decimal"
                 value={category.weight}
                 onChange={(e) => onWeightChange(e.target.value)}
-                className="w-20 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
+                className="w-20 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
               />
               <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-[#80868b] pointer-events-none">
                 %
@@ -821,7 +821,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
       {/* Assessments list inside this category */}
       <div className="p-4 sm:p-5 space-y-3">
         {category.assessments.length === 0 ? (
-          <div className="py-6 px-4 bg-slate-50/50 dark:bg-[#242526] rounded-xl text-center border border-dashed border-slate-200 dark:border-[#3c4043]">
+          <div className="py-6 px-4 bg-slate-50/50 dark:bg-[#242526] rounded-xl text-center border border-dashed border-slate-200 dark:border-[#26282a]">
             <p className="text-xs font-medium text-slate-500 dark:text-[#9aa0a6]">
               No assessments in this category yet.
             </p>
@@ -927,7 +927,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
   const isGraded = assessment.score !== null && assessment.score !== undefined;
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 sm:px-4 sm:py-3 bg-white dark:bg-[#242526] rounded-xl border border-slate-200/70 dark:border-[#3c4043] hover:border-blue-300 dark:hover:border-blue-500/40 hover:shadow-2xs transition-all">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 sm:px-4 sm:py-3 bg-white dark:bg-[#242526] rounded-xl border border-slate-200/70 dark:border-[#26282a] hover:border-blue-300 dark:hover:border-blue-500/40 hover:shadow-2xs transition-all">
       {/* Title Input */}
       <div className="flex items-center gap-2 flex-1">
         <span className="text-xs font-semibold text-slate-300 dark:text-[#5f6368] w-5 text-right select-none">
@@ -954,7 +954,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
             })
           }
           title="Toggle between Percentage and Points earned"
-          className="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-slate-200 dark:border-[#3c4043] text-slate-600 dark:text-[#c4c7c5] hover:text-blue-600 dark:hover:text-[#8ab4f8] hover:bg-blue-50 dark:hover:bg-[#303134] transition-colors cursor-pointer select-none min-h-[38px] min-w-[38px] flex items-center justify-center"
+          className="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg border border-slate-200 dark:border-[#26282a] text-slate-600 dark:text-[#c4c7c5] hover:text-blue-600 dark:hover:text-[#8ab4f8] hover:bg-blue-50 dark:hover:bg-[#202123] transition-colors cursor-pointer select-none min-h-[38px] min-w-[38px] flex items-center justify-center"
         >
           {isPointsMode ? 'Pts' : '%'}
         </button>
@@ -970,7 +970,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Pts"
               value={assessment.earnedScore !== undefined ? assessment.earnedScore : ''}
               onChange={(e) => handlePointsEarnedChange(e.target.value)}
-              className="w-16 px-2 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
+              className="w-16 px-2 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
             />
             <span className="text-xs font-bold text-slate-400 dark:text-[#9aa0a6]">/</span>
             <input
@@ -981,7 +981,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Total"
               value={assessment.maxScore !== undefined ? assessment.maxScore : 100}
               onChange={(e) => handlePointsMaxChange(e.target.value)}
-              className="w-16 px-2 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
+              className="w-16 px-2 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
             />
           </div>
         ) : (
@@ -995,7 +995,7 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               placeholder="Grade"
               value={assessment.score !== null && assessment.score !== undefined ? assessment.score : ''}
               onChange={(e) => handlePercentageChange(e.target.value)}
-              className="w-24 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
+              className="w-24 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
             />
             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-[#9aa0a6] pointer-events-none">
               %

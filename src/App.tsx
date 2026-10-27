@@ -333,7 +333,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFBFD] dark:bg-[#1e1f20] text-[#0F172A] dark:text-[#e8eaed] flex flex-col font-sans transition-colors duration-250">
+    <div className="min-h-screen bg-[#FAFBFD] dark:bg-[#0f0f10] text-[#0F172A] dark:text-[#f8f9fa] flex flex-col font-sans transition-colors duration-250">
       {/* Top Header with Sliding Taskbar Indicator & Dark Mode Toggle */}
       <Header
         activeTab={activeTab}
@@ -348,7 +348,7 @@ export const App: React.FC = () => {
       />
 
       {/* App Body: Full width flex layout */}
-      <div className="flex-1 w-full bg-[#FAFBFD] dark:bg-[#1e1f20] flex overflow-hidden transition-colors duration-250">
+      <div className="flex-1 w-full bg-[#FAFBFD] dark:bg-[#0f0f10] flex overflow-hidden transition-colors duration-250">
         {/* Left Sidebar (Desktop + Mobile Drawer) */}
         <Sidebar
           activeTab={activeTab}
@@ -397,7 +397,7 @@ export const App: React.FC = () => {
         {/* Main Content Area with Sliding Over Transition */}
         <main
           ref={mainContentRef}
-          className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] dark:bg-[#1e1f20] pb-24 md:pb-8 transition-colors duration-250"
+          className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] dark:bg-[#0f0f10] pb-24 md:pb-8 transition-colors duration-250"
         >
           <div className="w-full max-w-[1140px] mx-auto px-4 sm:px-8 lg:px-10 py-5 sm:py-8">
             <div

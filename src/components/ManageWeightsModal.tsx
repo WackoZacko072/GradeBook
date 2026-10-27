@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { X, Sliders, Plus, Trash2, ArrowUp, ArrowDown, AlertCircle, CheckCircle2 } from 'lucide-react';
 import type { Category } from '../types/grade';
 import { roundTo, equalizeCategoryWeights } from '../utils/gradeCalculations';
@@ -98,9 +98,9 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
       aria-labelledby="manage-weights-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-xl bg-white dark:bg-[#282a2c] rounded-2xl shadow-xl border border-slate-100 dark:border-[#3c4043] p-6 transform transition-all animate-fade-scale max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-xl bg-white dark:bg-[#18191b] rounded-2xl shadow-xl border border-slate-100 dark:border-[#26282a] p-6 transform transition-all animate-fade-scale max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#3c4043] flex-shrink-0">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#26282a] flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-xl">
               <Sliders className="w-5 h-5" />
@@ -118,7 +118,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer google-btn-press"
+            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer google-btn-press"
           >
             <X className="w-5 h-5" />
           </button>
@@ -152,7 +152,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             <button
               type="button"
               onClick={handleEqualize}
-              className="px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-[#e8eaed] bg-white dark:bg-[#1e1f20] hover:bg-slate-50 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043] rounded-lg transition-colors cursor-pointer google-btn-press"
+              className="px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-[#e8eaed] bg-white dark:bg-[#0f0f10] hover:bg-slate-50 dark:hover:bg-[#202123] border border-slate-200 dark:border-[#26282a] rounded-lg transition-colors cursor-pointer google-btn-press"
             >
               Split Equally
             </button>
@@ -170,7 +170,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             {draftCategories.map((cat, idx) => (
               <div
                 key={cat.id}
-                className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-xl"
+                className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl"
               >
                 {/* Reorder Buttons */}
                 <div className="flex flex-col gap-0.5 text-slate-400 dark:text-[#9aa0a6]">
@@ -198,7 +198,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
                   value={cat.name}
                   onChange={(e) => handleUpdateName(cat.id, e.target.value)}
                   placeholder="Category Name"
-                  className="flex-1 px-3 py-2 text-sm bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"
+                  className="flex-1 px-3 py-2 text-sm bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"
                 />
 
                 {/* Weight Input */}
@@ -210,7 +210,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
                     step="any"
                     value={cat.weight}
                     onChange={(e) => handleUpdateWeight(cat.id, e.target.value)}
-                    className="w-full pl-2.5 pr-7 py-2 text-sm font-bold text-right bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"
+                    className="w-full pl-2.5 pr-7 py-2 text-sm font-bold text-right bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"
                   />
                   <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-[#9aa0a6] pointer-events-none">
                     %
@@ -242,7 +242,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="pt-4 border-t border-slate-100 dark:border-[#3c4043] flex flex-col-reverse sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+        <div className="pt-4 border-t border-slate-100 dark:border-[#26282a] flex flex-col-reverse sm:flex-row items-center justify-between gap-3 flex-shrink-0">
           <span className="text-xs text-slate-400 dark:text-[#9aa0a6]">
             Changes only apply once weights total 100%.
           </span>
@@ -250,7 +250,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 sm:flex-initial px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-[#c4c7c5] bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
+              className="flex-1 sm:flex-initial px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-[#c4c7c5] bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
             >
               Cancel
             </button>
