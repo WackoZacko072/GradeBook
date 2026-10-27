@@ -89,7 +89,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             </span>
           )}
         </div>
-        <span className="text-[10px] tracking-tight">Notebook</span>
+        <span className="text-[10px] tracking-tight">Sources</span>
       </button>
 
       {/* 3. Slab Tab (Flashcards & MCQs) */}

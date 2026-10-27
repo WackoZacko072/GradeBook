@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BookCheck,
   Plus,
@@ -18,28 +18,40 @@ import {
   Award,
 } from 'lucide-react';
 import type { SlabItem, SlabType } from '../../types/slab';
-import type { NoteItem } from '../../types/notebook';
+import type { NoteItem, NoteSource } from '../../types/notebook';
 import { MarkdownRenderer } from '../MarkdownRenderer';
 import { CreateSlabModal } from './CreateSlabModal';
 
 interface SlabViewProps {
   slabs: SlabItem[];
   notes: NoteItem[];
+  sources?: NoteSource[];
   selectedSlabId: string | null;
   onSelectSlab: (id: string | null) => void;
   onAddSlab: (slab: SlabItem) => void;
   onUpdateSlab: (slab: SlabItem) => void;
   onDeleteSlab: (id: string) => void;
+  initialCreateConfig?: {
+    prompt?: string;
+    type?: SlabType;
+    sourceIds?: string[];
+  };
+  isCreateModalForcedOpen?: boolean;
+  onCloseCreateModalForced?: () => void;
 }
 
 export const SlabView: React.FC<SlabViewProps> = ({
   slabs,
   notes,
+  sources = [],
   selectedSlabId,
   onSelectSlab,
   onAddSlab,
   onUpdateSlab,
   onDeleteSlab,
+  initialCreateConfig,
+  isCreateModalForcedOpen,
+  onCloseCreateModalForced,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<SlabType | 'all'>('all');
@@ -52,9 +64,14 @@ export const SlabView: React.FC<SlabViewProps> = ({
   // Active study mode state inside a selected slab
   const [studyMode, setStudyMode] = useState<'flashcards' | 'mcq'>('flashcards');
 
-  // Flashcard Player State
+  // Flashcard Player State with Know / Don't Know Tracking & Swipe Physics
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const [cardReviews, setCardReviews] = useState<Record<string, 'know' | 'dont_know'>>({});
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [isSwipeAnimating, setIsSwipeAnimating] = useState(false);
+  const [isDeckCompleted, setIsDeckCompleted] = useState(false);
+  const [activeCardFilter, setActiveCardFilter] = useState<'all' | 'dont_know'>('all');
 
   // MCQ Player State
   const [currentMcqIndex, setCurrentMcqIndex] = useState(0);
@@ -101,28 +118,73 @@ export const SlabView: React.FC<SlabViewProps> = ({
     setStudyMode(slab.type === 'mcq' ? 'mcq' : 'flashcards');
     setCurrentCardIndex(0);
     setIsCardFlipped(false);
+    setCardReviews({});
+    setSwipeDirection(null);
+    setIsSwipeAnimating(false);
+    setIsDeckCompleted(false);
+    setActiveCardFilter('all');
     setCurrentMcqIndex(0);
     setUserAnswers({});
     setIsQuizCompleted(false);
   };
 
-  // Toggle flashcard mastered
-  const handleToggleMastered = (cardIndex: number) => {
-    if (!selectedSlab) return;
-    const updatedCards = [...selectedSlab.flashcards];
-    const card = updatedCards[cardIndex];
-    if (card) {
-      updatedCards[cardIndex] = {
-        ...card,
-        mastered: !card.mastered,
-      };
-      onUpdateSlab({
-        ...selectedSlab,
-        flashcards: updatedCards,
-        updatedAt: Date.now(),
-      });
-    }
+  // Trigger Review with Left/Right Swipe Animation
+  const triggerReview = (status: 'know' | 'dont_know') => {
+    if (isSwipeAnimating || !selectedSlab) return;
+
+    const allCards = selectedSlab.flashcards;
+    const cardsToUse = activeCardFilter === 'dont_know'
+      ? allCards.filter((c) => cardReviews[c.id] === 'dont_know')
+      : allCards;
+
+    const card = cardsToUse[currentCardIndex];
+    if (!card) return;
+
+    setIsSwipeAnimating(true);
+    setSwipeDirection(status === 'dont_know' ? 'left' : 'right');
+
+    const cardId = card.id;
+    setCardReviews((prev) => ({
+      ...prev,
+      [cardId]: status,
+    }));
+
+    setTimeout(() => {
+      if (currentCardIndex + 1 < cardsToUse.length) {
+        setCurrentCardIndex((prev) => prev + 1);
+        setIsCardFlipped(false);
+        setSwipeDirection(null);
+        setIsSwipeAnimating(false);
+      } else {
+        setIsDeckCompleted(true);
+        setSwipeDirection(null);
+        setIsSwipeAnimating(false);
+      }
+    }, 280);
   };
+
+  // Keyboard Navigation for Flashcard Review & Swiping
+  useEffect(() => {
+    if (studyMode !== 'flashcards' || !selectedSlab || isDeckCompleted) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        triggerReview('dont_know');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        triggerReview('know');
+      } else if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setIsCardFlipped((f) => !f);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  });
 
   // Shuffle flashcards
   const handleShuffleCards = () => {
@@ -135,6 +197,8 @@ export const SlabView: React.FC<SlabViewProps> = ({
     });
     setCurrentCardIndex(0);
     setIsCardFlipped(false);
+    setSwipeDirection(null);
+    setIsDeckCompleted(false);
   };
 
   // Select MCQ Option
@@ -166,10 +230,17 @@ export const SlabView: React.FC<SlabViewProps> = ({
   if (selectedSlab) {
     const hasFlashcards = selectedSlab.flashcards.length > 0;
     const hasMcqs = selectedSlab.mcqs.length > 0;
-    const masteredCount = selectedSlab.flashcards.filter((f) => f.mastered).length;
-    const totalCards = selectedSlab.flashcards.length;
 
-    const currentCard = selectedSlab.flashcards[currentCardIndex] || null;
+    const allCards = selectedSlab.flashcards;
+    const activeCards = activeCardFilter === 'dont_know'
+      ? allCards.filter((c) => cardReviews[c.id] === 'dont_know')
+      : allCards;
+    const totalCards = activeCards.length;
+    const currentCard = activeCards[currentCardIndex] || null;
+
+    const knowCount = Object.values(cardReviews).filter((s) => s === 'know').length;
+    const dontKnowCount = Object.values(cardReviews).filter((s) => s === 'dont_know').length;
+
     const currentMcq = selectedSlab.mcqs[currentMcqIndex] || null;
     const mcqAnswered = userAnswers[currentMcqIndex] !== undefined;
     const selectedAnswer = userAnswers[currentMcqIndex];
@@ -276,135 +347,278 @@ export const SlabView: React.FC<SlabViewProps> = ({
         {/* ================================================================= */}
         {studyMode === 'flashcards' && hasFlashcards && (
           <div className="max-w-2xl mx-auto space-y-5 animate-fade-scale">
-            {/* Flashcard Header Controls */}
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#9aa0a6] font-semibold px-1">
-              <div className="flex items-center gap-2">
-                <span>
-                  Card {currentCardIndex + 1} of {totalCards}
-                </span>
-                <span>&bull;</span>
-                <span className="text-violet-600 dark:text-[#c58af9]">
-                  {masteredCount} of {totalCards} Mastered ({totalCards > 0 ? Math.round((masteredCount / totalCards) * 100) : 0}%)
-                </span>
-              </div>
+            {isDeckCompleted ? (
+              /* Deck Review Complete Screen */
+              <div className="bg-white dark:bg-[#282a2c] rounded-3xl p-8 border border-slate-200/90 dark:border-[#3c4043] text-center shadow-lg space-y-6 animate-fade-scale">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center mx-auto shadow-md shadow-violet-500/20">
+                  <Award className="w-8 h-8 stroke-[2.2]" />
+                </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleShuffleCards}
-                  className="flex items-center gap-1 px-2.5 py-1 text-slate-600 dark:text-[#c4c7c5] hover:text-violet-700 dark:hover:text-[#c58af9] hover:bg-violet-50 dark:hover:bg-violet-950/30 rounded-lg transition-colors cursor-pointer text-xs font-bold google-btn-press"
-                  title="Shuffle flashcards"
-                >
-                  <Shuffle className="w-3.5 h-3.5" />
-                  <span>Shuffle</span>
-                </button>
-              </div>
-            </div>
+                <div>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-[#9aa0a6]">
+                    Review Session Complete
+                  </span>
+                  <h3 className="text-3xl font-extrabold text-slate-900 dark:text-[#e8eaed] mt-1">
+                    {knowCount} / {allCards.length} Cards Known
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-1">
+                    {dontKnowCount === 0
+                      ? 'Incredible job! You know every single flashcard in this deck.'
+                      : `You have ${dontKnowCount} card${dontKnowCount === 1 ? '' : 's'} that need further review.`}
+                  </p>
+                </div>
 
-            {/* Progress Bar */}
-            <div className="w-full h-1.5 bg-slate-200/80 dark:bg-[#353739] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-[#c58af9] dark:to-[#8ab4f8] transition-all duration-300"
-                style={{ width: `${((currentCardIndex + 1) / totalCards) * 100}%` }}
-              />
-            </div>
+                <div className="flex items-center justify-center gap-4">
+                  <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-2xl min-w-[130px]">
+                    <div className="text-2xl font-extrabold text-rose-600 dark:text-rose-400">{dontKnowCount}</div>
+                    <div className="text-xs font-semibold text-rose-700 dark:text-rose-300">Need Review</div>
+                  </div>
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-2xl min-w-[130px]">
+                    <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{knowCount}</div>
+                    <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Know</div>
+                  </div>
+                </div>
 
-            {/* Interactive Flipping Card */}
-            {currentCard && (
-              <div
-                onClick={() => setIsCardFlipped(!isCardFlipped)}
-                className={`w-full min-h-[300px] sm:min-h-[340px] rounded-3xl p-6 sm:p-10 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-lg relative select-none ${
-                  isCardFlipped
-                    ? 'bg-gradient-to-br from-violet-950 via-indigo-950 to-slate-900 text-white border-violet-800'
-                    : 'bg-white dark:bg-[#282a2c] text-slate-900 dark:text-[#e8eaed] border-slate-200/90 dark:border-[#3c4043]'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <span
-                    className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full ${
-                      isCardFlipped
-                        ? 'bg-white/20 text-violet-200 border border-white/20'
-                        : 'bg-violet-100 dark:bg-violet-950/50 text-violet-700 dark:text-[#c58af9]'
-                    }`}
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  {dontKnowCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveCardFilter('dont_know');
+                        setCurrentCardIndex(0);
+                        setIsCardFlipped(false);
+                        setIsDeckCompleted(false);
+                      }}
+                      className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer google-btn-press"
+                    >
+                      <X className="w-4 h-4 stroke-[3]" />
+                      <span>Review {dontKnowCount} Cards You Don't Know</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveCardFilter('all');
+                      setCardReviews({});
+                      setCurrentCardIndex(0);
+                      setIsCardFlipped(false);
+                      setIsDeckCompleted(false);
+                    }}
+                    className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer google-btn-press"
                   >
-                    {isCardFlipped ? 'Answer / Explanation' : 'Front / Concept'}
+                    <RotateCw className="w-4 h-4" />
+                    <span>Restart Entire Deck</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleShuffleCards();
+                      setActiveCardFilter('all');
+                      setCardReviews({});
+                      setCurrentCardIndex(0);
+                      setIsCardFlipped(false);
+                      setIsDeckCompleted(false);
+                    }}
+                    className="px-4 py-2.5 bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-bold transition-all border border-slate-200 dark:border-[#3c4043] flex items-center gap-2 cursor-pointer google-btn-press"
+                  >
+                    <Shuffle className="w-4 h-4" />
+                    <span>Shuffle & Restart</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Flashcard Header Controls with Live Know / Don't Know Counter */}
+                <div className="flex items-center justify-between text-xs font-semibold px-1">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {/* Don't Know Counter Pill */}
+                    <span className="flex items-center gap-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 rounded-full text-xs font-extrabold shadow-2xs">
+                      <X className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>{dontKnowCount} Don't Know</span>
+                    </span>
+
+                    {/* Know Counter Pill */}
+                    <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 rounded-full text-xs font-extrabold shadow-2xs">
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>{knowCount} Know</span>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-500 dark:text-[#9aa0a6] text-xs font-bold">
+                      {currentCardIndex + 1} / {totalCards}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleShuffleCards}
+                      className="flex items-center gap-1 px-2.5 py-1 text-slate-600 dark:text-[#c4c7c5] hover:text-violet-700 dark:hover:text-[#c58af9] hover:bg-violet-50 dark:hover:bg-violet-950/30 rounded-lg transition-colors cursor-pointer text-xs font-bold google-btn-press"
+                      title="Shuffle flashcards"
+                    >
+                      <Shuffle className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Shuffle</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full h-1.5 bg-slate-200/80 dark:bg-[#353739] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-[#c58af9] dark:to-[#8ab4f8] transition-all duration-300"
+                    style={{ width: `${totalCards > 0 ? ((currentCardIndex + 1) / totalCards) * 100 : 0}%` }}
+                  />
+                </div>
+
+                {/* Interactive Flipping Card with Left/Right Swipe Physics & High Contrast Legibility */}
+                {currentCard ? (
+                  <div className="relative w-full min-h-[300px] sm:min-h-[340px]">
+                    <div
+                      onClick={() => setIsCardFlipped(!isCardFlipped)}
+                      className={`w-full min-h-[300px] sm:min-h-[340px] rounded-3xl p-6 sm:p-10 border transition-all duration-300 cursor-pointer flex flex-col justify-between shadow-md hover:shadow-lg relative select-none ${
+                        swipeDirection === 'left'
+                          ? 'animate-swipe-left pointer-events-none'
+                          : swipeDirection === 'right'
+                          ? 'animate-swipe-right pointer-events-none'
+                          : 'animate-card-enter'
+                      } ${
+                        isCardFlipped
+                          ? 'bg-white dark:bg-[#282a2c] text-slate-900 dark:text-[#e8eaed] border-2 border-violet-400/80 dark:border-violet-500/50 shadow-violet-500/10'
+                          : 'bg-white dark:bg-[#282a2c] text-slate-900 dark:text-[#e8eaed] border border-slate-200/90 dark:border-[#3c4043]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <span
+                          className={`text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full ${
+                            isCardFlipped
+                              ? 'bg-violet-100 dark:bg-violet-950/60 text-violet-800 dark:text-[#c58af9] border border-violet-200/60 dark:border-violet-800/40'
+                              : 'bg-slate-100 dark:bg-[#353739] text-slate-700 dark:text-[#c4c7c5]'
+                          }`}
+                        >
+                          {isCardFlipped ? 'Answer / Explanation' : 'Front / Concept'}
+                        </span>
+
+                        {cardReviews[currentCard.id] && (
+                          <span
+                            className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                              cardReviews[currentCard.id] === 'know'
+                                ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                                : 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
+                            }`}
+                          >
+                            {cardReviews[currentCard.id] === 'know' ? '✓ Known' : '✕ Review'}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Card Content with Markdown & LaTeX - Crisp Contrast in Light and Dark Mode */}
+                      <div className="flex-1 flex items-center justify-center text-center my-4 px-2">
+                        <div className="w-full text-base sm:text-lg font-semibold leading-relaxed text-slate-900 dark:text-[#e8eaed]">
+                          {isCardFlipped ? (
+                            <MarkdownRenderer content={currentCard.back} />
+                          ) : (
+                            <MarkdownRenderer content={currentCard.front} />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 dark:text-[#9aa0a6]">
+                        <RotateCw className="w-3.5 h-3.5" />
+                        <span>Click card or press Space to flip</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-white dark:bg-[#282a2c] rounded-3xl border border-slate-200 dark:border-[#3c4043]">
+                    <p className="text-sm text-slate-500">No cards in this filter.</p>
+                  </div>
+                )}
+
+                {/* Two Review Action Buttons Below Card: X (Swipe Left) & Checkmark (Swipe Right) */}
+                <div className="flex items-center justify-center gap-6 sm:gap-10 pt-3 pb-1">
+                  {/* X Button: Don't Know / Need Review (Swipes Left) */}
+                  <div className="flex flex-col items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={isSwipeAnimating || !currentCard}
+                      onClick={() => triggerReview('dont_know')}
+                      aria-label="Don't Know / Need Review (Swipe Left)"
+                      title="Don't Know / Need Review (Left Arrow)"
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border-2 border-rose-300 dark:border-rose-900/60 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer google-btn-press disabled:opacity-40"
+                    >
+                      <X className="w-7 h-7 stroke-[3]" />
+                    </button>
+                    <span className="text-[11px] font-bold text-rose-700 dark:text-rose-400 tracking-tight">
+                      Don't Know
+                    </span>
+                  </div>
+
+                  {/* Center: Flip Card Button */}
+                  <div className="flex flex-col items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setIsCardFlipped(!isCardFlipped)}
+                      className="px-4 py-2 text-xs font-bold text-violet-700 dark:text-[#c58af9] bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/40 rounded-xl transition-all cursor-pointer border border-violet-200/80 dark:border-violet-800/40 google-btn-press"
+                    >
+                      {isCardFlipped ? 'Show Front' : 'Flip Card'}
+                    </button>
+                    <span className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">
+                      (Spacebar)
+                    </span>
+                  </div>
+
+                  {/* Checkmark Button: Know / Got It (Swipes Right) */}
+                  <div className="flex flex-col items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={isSwipeAnimating || !currentCard}
+                      onClick={() => triggerReview('know')}
+                      aria-label="Know / Got It (Swipe Right)"
+                      title="Know / Got It (Right Arrow)"
+                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 border-2 border-emerald-300 dark:border-emerald-900/60 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer google-btn-press disabled:opacity-40"
+                    >
+                      <Check className="w-7 h-7 stroke-[3]" />
+                    </button>
+                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 tracking-tight">
+                      Know
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sub-dock: Previous / Next Card Peek Controls */}
+                <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-[#3c4043]/50">
+                  <button
+                    type="button"
+                    disabled={currentCardIndex === 0 || isSwipeAnimating}
+                    onClick={() => {
+                      setCurrentCardIndex((prev) => Math.max(0, prev - 1));
+                      setIsCardFlipped(false);
+                    }}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span>Previous Card</span>
+                  </button>
+
+                  <span className="text-[11px] text-slate-400 dark:text-[#80868b]">
+                    Use Left / Right arrow keys to swipe
                   </span>
 
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleMastered(currentCardIndex);
+                    disabled={currentCardIndex === totalCards - 1 || isSwipeAnimating}
+                    onClick={() => {
+                      setCurrentCardIndex((prev) => Math.min(totalCards - 1, prev + 1));
+                      setIsCardFlipped(false);
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer google-btn-press ${
-                      currentCard.mastered
-                        ? isCardFlipped
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
-                        : isCardFlipped
-                        ? 'bg-white/10 hover:bg-white/20 text-white/80'
-                        : 'bg-slate-100 dark:bg-[#303134] hover:bg-slate-200 dark:hover:bg-[#3c4043] text-slate-600 dark:text-[#c4c7c5]'
-                    }`}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors disabled:opacity-30 cursor-pointer"
                   >
-                    <Check className="w-3.5 h-3.5 stroke-[2.8]" />
-                    <span>{currentCard.mastered ? 'Mastered' : 'Mark as Mastered'}</span>
+                    <span>Next Card</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
-
-                {/* Card Content with Markdown & LaTeX */}
-                <div className="flex-1 flex items-center justify-center text-center my-4">
-                  <div className="w-full text-base sm:text-lg font-medium leading-relaxed">
-                    {isCardFlipped ? (
-                      <MarkdownRenderer content={currentCard.back} />
-                    ) : (
-                      <MarkdownRenderer content={currentCard.front} />
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-center gap-1.5 text-[11px] opacity-60">
-                  <RotateCw className="w-3 h-3" />
-                  <span>Click card to flip</span>
-                </div>
-              </div>
+              </>
             )}
-
-            {/* Bottom Navigation Buttons */}
-            <div className="flex items-center justify-between pt-2">
-              <button
-                type="button"
-                disabled={currentCardIndex === 0}
-                onClick={() => {
-                  setCurrentCardIndex((prev) => Math.max(0, prev - 1));
-                  setIsCardFlipped(false);
-                }}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-[#e8eaed] bg-white dark:bg-[#282a2c] hover:bg-slate-50 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043] rounded-xl transition-all disabled:opacity-30 cursor-pointer shadow-2xs google-btn-press"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Previous</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsCardFlipped(!isCardFlipped)}
-                className="px-5 py-2.5 text-xs font-extrabold text-violet-700 dark:text-[#c58af9] bg-violet-50 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/40 rounded-xl transition-colors cursor-pointer border border-violet-200/80 dark:border-violet-800/40 google-btn-press"
-              >
-                {isCardFlipped ? 'Show Front' : 'Show Back'}
-              </button>
-
-              <button
-                type="button"
-                disabled={currentCardIndex === totalCards - 1}
-                onClick={() => {
-                  setCurrentCardIndex((prev) => Math.min(totalCards - 1, prev + 1));
-                  setIsCardFlipped(false);
-                }}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-[#e8eaed] bg-white dark:bg-[#282a2c] hover:bg-slate-50 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043] rounded-xl transition-all disabled:opacity-30 cursor-pointer shadow-2xs google-btn-press"
-              >
-                <span>Next</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
           </div>
         )}
 
@@ -820,9 +1034,16 @@ export const SlabView: React.FC<SlabViewProps> = ({
 
       {/* Creation Modal */}
       <CreateSlabModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        isOpen={isCreateModalOpen || !!isCreateModalForcedOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          if (onCloseCreateModalForced) onCloseCreateModalForced();
+        }}
         notes={notes}
+        sources={sources}
+        initialPrompt={initialCreateConfig?.prompt}
+        initialType={initialCreateConfig?.type}
+        initialSourceIds={initialCreateConfig?.sourceIds}
         onCreateSlab={(newSlab) => {
           onAddSlab(newSlab);
           handleSelectSlabItem(newSlab);

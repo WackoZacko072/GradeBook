@@ -18,7 +18,7 @@ import {
   BookCheck,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
-import type { NoteItem } from '../types/notebook';
+import type { NoteItem, NoteSource } from '../types/notebook';
 import type { SlabItem } from '../types/slab';
 import {
   sendSlateAiMessage,
@@ -31,6 +31,7 @@ interface AiAdvisorDrawerProps {
   onClose: () => void;
   classes: ClassItem[];
   notes?: NoteItem[];
+  sources?: NoteSource[];
   slabs?: SlabItem[];
   prefilledPrompt?: string;
   initialPrompt?: string;
@@ -107,6 +108,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   onClose,
   classes,
   notes = [],
+  sources = [],
   slabs = [],
   prefilledPrompt,
   initialPrompt,
@@ -303,7 +305,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      const reply = await sendSlateAiMessage(prompt, currentSession.messages, classes, notes);
+      const reply = await sendSlateAiMessage(prompt, currentSession.messages, classes, notes, undefined, sources);
       const aiMessage: ChatMessage = {
         id: 'msg_' + (Date.now() + 1),
         role: 'model',

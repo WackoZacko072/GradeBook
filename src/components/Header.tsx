@@ -174,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Gradebook</span>
           </button>
 
-          {/* Notebook Tab */}
+          {/* Sources Hub Tab */}
           <button
             ref={notebookTabRef}
             type="button"
@@ -186,7 +186,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             <BookMarked className="w-3.5 h-3.5 stroke-[2.2]" />
-            <span>Notebook</span>
+            <span>Sources</span>
             {noteCount > 0 && (
               <span className="hidden sm:inline-flex px-1.5 py-0.2 bg-indigo-100 dark:bg-purple-900/40 text-indigo-700 dark:text-purple-300 text-[10px] font-extrabold rounded-full">
                 {noteCount}

@@ -10,7 +10,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
-import type { NoteItem } from '../types/notebook';
+import type { NoteItem, NoteSource } from '../types/notebook';
 import type { SlabItem } from '../types/slab';
 import { calculateClassAverage } from '../utils/gradeCalculations';
 
@@ -19,6 +19,7 @@ interface SidebarProps {
   onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab') => void;
   classes: ClassItem[];
   notes?: NoteItem[];
+  sources?: NoteSource[];
   slabs?: SlabItem[];
   selectedClassId: string | null;
   selectedNoteId?: string | null;
@@ -39,7 +40,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onChangeTab,
   classes,
-  notes = [],
+  notes: _notes = [],
+  sources = [],
   slabs = [],
   selectedClassId,
   selectedNoteId = null,
@@ -49,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectNote,
   onSelectSlab,
   onOpenAddClass,
-  onCreateNote,
+  onCreateNote: _onCreateNote,
   onCreateSlab,
   onOpenSlateAi,
   isMobileOpen = false,
@@ -110,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <BookMarked className="w-4 h-4 text-indigo-600 dark:text-[#c58af9]" />
-                <span>Notebook</span>
+                <span>Sources</span>
               </div>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
@@ -119,7 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     : 'bg-slate-200 dark:bg-[#353739] text-slate-600 dark:text-[#9aa0a6]'
                 }`}
               >
-                {notes.length}
+                {sources.length}
               </span>
             </button>
 
@@ -312,62 +314,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider">
-                Your Notes
+                Your Sources
               </span>
-              {onCreateNote && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onCreateNote();
-                    onMobileClose?.();
-                  }}
-                  title="New Note"
-                  className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/80 dark:hover:bg-[#353739] rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center google-btn-press"
-                >
-                  <Plus className="w-4 h-4 stroke-[2.5]" />
-                </button>
-              )}
             </div>
 
             <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
-              {notes.length === 0 ? (
+              {sources.length === 0 ? (
                 <div className="px-3 py-3 text-center bg-slate-100/60 dark:bg-[#282a2c] rounded-xl border border-dashed border-slate-200 dark:border-[#3c4043]">
-                  <p className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">No notes yet</p>
-                  {onCreateNote && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onCreateNote();
-                        onMobileClose?.();
-                      }}
-                      className="mt-2 text-xs font-bold text-indigo-600 dark:text-[#c58af9] hover:underline inline-flex items-center gap-1 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" /> Create Note
-                    </button>
-                  )}
+                  <p className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">No sources uploaded yet</p>
+                  <p className="text-[11px] text-slate-400 dark:text-[#80868b] mt-1">Upload PDFs or paste lecture notes</p>
                 </div>
               ) : (
-                notes.map((n) => {
-                  const isSelected = selectedNoteId === n.id;
+                sources.map((s) => {
                   return (
-                    <button
-                      key={n.id}
-                      type="button"
-                      onClick={() => {
-                        onSelectNote?.(n.id);
-                        onMobileClose?.();
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] google-btn-press ${
-                        isSelected
-                          ? 'bg-white dark:bg-[#353739] text-indigo-700 dark:text-[#c58af9] font-semibold shadow-2xs border border-slate-200/80 dark:border-[#444746]'
-                          : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739] font-medium'
-                      }`}
+                    <div
+                      key={s.id}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#353739]"
                     >
                       <div className="flex items-center gap-2.5 truncate">
                         <FileText className="w-4 h-4 text-indigo-500 dark:text-[#c58af9] flex-shrink-0" />
-                        <span className="truncate">{n.title || 'Untitled Note'}</span>
+                        <span className="truncate font-medium text-xs">{s.name || 'Untitled Source'}</span>
                       </div>
-                    </button>
+                      {s.className && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-[#c58af9] flex-shrink-0">
+                          {s.className}
+                        </span>
+                      )}
+                    </div>
                   );
                 })
               )}

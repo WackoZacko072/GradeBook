@@ -131,6 +131,52 @@
   transform: scale(0.965);
 }
 
+/* Flashcard Swipe Animations */
+@keyframes swipeLeftAnim {
+  0% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-140%) rotate(-14deg);
+    opacity: 0;
+  }
+}
+
+@keyframes swipeRightAnim {
+  0% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(140%) rotate(14deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cardEnterAnim {
+  0% {
+    transform: scale(0.92) translateY(12px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-swipe-left {
+  animation: swipeLeftAnim 0.28s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.animate-swipe-right {
+  animation: swipeRightAnim 0.28s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+.animate-card-enter {
+  animation: cardEnterAnim 0.26s cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 8px;

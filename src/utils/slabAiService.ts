@@ -13,42 +13,65 @@ const FALLBACK_MODELS: GeminiModel[] = [
   'gemini-3.5-flash-lite',
 ];
 
-/**
- * Builds rich combined context from the student's selected notes and all uploaded files within them.
- */
-function buildSourceContext(notes: NoteItem[], selectedNoteIds?: string[]): { context: string; noteNames: string[] } {
-  const targetNotes = selectedNoteIds && selectedNoteIds.length > 0
-    ? notes.filter((n) => selectedNoteIds.includes(n.id))
-    : notes;
+import type { NoteSource } from '../types/notebook';
 
-  if (targetNotes.length === 0) {
+/**
+ * Builds rich combined context from the student's selected sources (PDFs, files, pasted notes) and notes.
+ */
+function buildSourceContext(
+  notes?: NoteItem[],
+  selectedNoteIds?: string[],
+  sources?: NoteSource[],
+  selectedSourceIds?: string[]
+): { context: string; noteNames: string[] } {
+  const chunks: string[] = [];
+  const sourceNames: string[] = [];
+
+  // Prioritize dedicated uploaded sources & documents
+  if (sources && sources.length > 0) {
+    const targetSources = selectedSourceIds && selectedSourceIds.length > 0
+      ? sources.filter((s) => selectedSourceIds.includes(s.id))
+      : sources;
+
+    for (const src of targetSources) {
+      sourceNames.push(src.name);
+      chunks.push(
+        `--- CLASS SOURCE: ${src.name} (Class: ${src.className || 'General'}, Type: ${src.type}) ---\n${src.content.slice(0, 12000)}`
+      );
+    }
+  }
+
+  // Also include notes if available
+  if (notes && notes.length > 0) {
+    const targetNotes = selectedNoteIds && selectedNoteIds.length > 0
+      ? notes.filter((n) => selectedNoteIds.includes(n.id))
+      : notes;
+
+    for (const note of targetNotes) {
+      sourceNames.push(note.title);
+      chunks.push(`--- NOTE TITLE: ${note.title} (Class: ${note.className || 'General'}) ---`);
+      if (note.content && note.content.trim()) {
+        chunks.push(`NOTE CONTENT:\n${note.content.trim()}`);
+      }
+
+      if (note.sources && note.sources.length > 0) {
+        for (const s of note.sources) {
+          chunks.push(`[File: ${s.name} (${s.type})]:\n${s.content.slice(0, 4000)}`);
+        }
+      }
+    }
+  }
+
+  if (chunks.length === 0) {
     return {
       context: 'General student knowledge base.',
       noteNames: ['All Knowledge Base'],
     };
   }
 
-  const chunks: string[] = [];
-  const noteNames: string[] = [];
-
-  for (const note of targetNotes) {
-    noteNames.push(note.title);
-    chunks.push(`--- NOTE TITLE: ${note.title} (Class: ${note.className || 'General'}) ---`);
-    if (note.content && note.content.trim()) {
-      chunks.push(`NOTE CONTENT:\n${note.content.trim()}`);
-    }
-
-    if (note.sources && note.sources.length > 0) {
-      chunks.push(`ATTACHED / UPLOADED STUDY FILES:`);
-      for (const s of note.sources) {
-        chunks.push(`[File: ${s.name} (${s.type})]:\n${s.content.slice(0, 3000)}`);
-      }
-    }
-  }
-
   return {
     context: chunks.join('\n\n'),
-    noteNames,
+    noteNames: sourceNames,
   };
 }
 
@@ -170,20 +193,30 @@ function extractJsonObject(raw: string): any {
 export interface GenerateSlabOptions {
   prompt: string;
   type: SlabType;
-  notes: NoteItem[];
+  notes?: NoteItem[];
+  sources?: NoteSource[];
+  selectedSourceIds?: string[];
   selectedNoteIds?: string[];
   count?: number;
 }
 
 /**
- * Generates an interactive Slab study set (Flashcards, MCQs, or Both) grounded in the student's notes and uploaded files.
+ * Generates an interactive Slab study set (Flashcards, MCQs, or Both) grounded in the student's sources and notes.
  */
 export async function generateSlabSet(options: GenerateSlabOptions): Promise<SlabItem> {
-  const { prompt, type, notes, selectedNoteIds, count = 10 } = options;
-  const { context, noteNames } = buildSourceContext(notes, selectedNoteIds);
+  const { prompt, type, notes, sources, selectedNoteIds, selectedSourceIds, count = 10 } = options;
+  const { context, noteNames } = buildSourceContext(notes, selectedNoteIds, sources, selectedSourceIds);
+
+  // Parse prompt for requested count (e.g. "create 20 flashcards", "give me 25 questions", "make 20", etc.)
+  const promptNumMatch =
+    prompt.match(/\b(\d+)\s*(?:flashcards?|cards?|mcqs?|questions?|items?)\b/i) ||
+    prompt.match(/\b(?:create|make|give me|generate)\s+(\d+)\b/i);
+
+  const parsedPromptCount = promptNumMatch ? parseInt(promptNumMatch[1], 10) : 0;
+  const finalCount = parsedPromptCount > 0 ? Math.max(parsedPromptCount, count) : count;
 
   const systemPrompt = `You are Slab AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
-Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) strictly grounded in the student's notes and uploaded files.
+Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) strictly grounded in the student's class sources and uploaded files.
 
 CANADIAN ENGLISH & SPELLING:
 - Use Canadian English conventions (e.g., colour, behaviour, centre, analyse).
@@ -213,14 +246,15 @@ Output ONLY a single valid JSON object strictly matching this schema:
 }
 
 RULES:
-1. If the user requested 'flashcards', output at least ${count} items in the "flashcards" array and an empty or minimal "mcqs" array.
-2. If the user requested 'mcq', output at least ${count} items in the "mcqs" array and an empty "flashcards" array.
-3. If the user requested 'both', output ~${Math.ceil(count / 2)} items in "flashcards" and ~${Math.ceil(count / 2)} in "mcqs".
-4. Base questions directly on the provided notes and files. If the user prompt asks for specific topics (e.g. 'Chapter 3 MCQs'), tailor the questions precisely.`;
+1. CRITICAL COUNT REQUIREMENT: You MUST generate EXACTLY ${finalCount} items in the target array. Do NOT default to 10 or stop early.
+   - If 'flashcards', output EXACTLY ${finalCount} items in the "flashcards" array and an empty "mcqs" array.
+   - If 'mcq', output EXACTLY ${finalCount} items in the "mcqs" array and an empty "flashcards" array.
+   - If 'both', output ~${Math.ceil(finalCount / 2)} items in "flashcards" and ~${Math.floor(finalCount / 2)} in "mcqs".
+2. Base questions directly on the provided class sources and files. If the user prompt asks for specific topics (e.g. 'Chapter 3 MCQs'), tailor the questions precisely.`;
 
   const userPrompt = `STUDENT REQUEST / PROMPT: "${prompt}"
 REQUESTED TYPE: ${type}
-TARGET ITEM COUNT: ${count}
+TARGET ITEM COUNT: ${finalCount} (CRITICAL: Output EXACTLY ${finalCount} items, do not stop at 10!)
 
 GROUNDING SOURCES (Notes & Uploaded Files):
 ${context}`;

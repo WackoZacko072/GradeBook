@@ -177,6 +177,8 @@ export function buildGradebookContext(classes: ClassItem[]): any {
   };
 }
 
+import type { NoteSource } from '../types/notebook';
+
 /**
  * Builds a structured JSON representation of the student's notebook and uploaded sources
  * for direct injection into Slate AI.
@@ -201,11 +203,31 @@ export function buildNotebookContext(notes: NoteItem[] = []): any {
 }
 
 /**
- * Builds the system instructions for Slate AI with complete Gradebook + Notebook workspace context.
+ * Builds a structured representation of uploaded class sources (PDFs, readings, files, copied texts)
  */
-export function buildSlateAiSystemPrompt(classes: ClassItem[], notes: NoteItem[] = []): string {
+export function buildSourcesContext(sources: NoteSource[] = []): any {
+  return sources.map((s) => ({
+    id: s.id,
+    name: s.name,
+    type: s.type,
+    classId: s.classId || null,
+    className: s.className || 'General',
+    wordCount: s.extractedWordCount || (s.content ? s.content.trim().split(/\s+/).filter(Boolean).length : 0),
+    content: s.content ? s.content.substring(0, 6000) : '',
+  }));
+}
+
+/**
+ * Builds the system instructions for Slate AI with complete Gradebook + Sources workspace context.
+ */
+export function buildSlateAiSystemPrompt(
+  classes: ClassItem[],
+  notes: NoteItem[] = [],
+  sources: NoteSource[] = []
+): string {
   const gradebookJson = JSON.stringify(buildGradebookContext(classes), null, 2);
   const notebookJson = JSON.stringify(buildNotebookContext(notes), null, 2);
+  const sourcesJson = JSON.stringify(buildSourcesContext(sources), null, 2);
 
   return `You are **Slate AI**, an elite, multi-talented AI academic co-pilot and strategist powered by Google Gemini, embedded directly inside GradeSlate.
 
@@ -214,8 +236,11 @@ You have complete, live access to the student's entire GradeSlate academic works
 GRADEBOOK CONTEXT:
 ${gradebookJson}
 
-2. **STUDENT NOTEBOOK**: All notes, assigned class tags, full typed notes, attached class/lecture files, sources, and study materials.
-NOTEBOOK CONTEXT:
+2. **CLASS SOURCES & DOCUMENTS**: All uploaded PDF files, textbooks, lecture slides, syllabus excerpts, and pasted notes organized by class.
+CLASS SOURCES CONTEXT:
+${sourcesJson}
+
+3. **STUDENT NOTEBOOK**:
 ${notebookJson}
 
 ### CANADIAN ENGLISH SPELLING POLICY (MANDATORY):
@@ -337,7 +362,8 @@ export async function sendSlateAiMessage(
   history: ChatMessage[],
   classes: ClassItem[],
   notes: NoteItem[] = [],
-  preferredModel?: GeminiModel
+  preferredModel?: GeminiModel,
+  sources: NoteSource[] = []
 ): Promise<string> {
   const apiKey = getGeminiApiKey();
 
@@ -351,7 +377,7 @@ export async function sendSlateAiMessage(
     ...FALLBACK_MODELS.filter((m) => m !== startingModel),
   ];
 
-  const systemInstructionText = buildSlateAiSystemPrompt(classes, notes);
+  const systemInstructionText = buildSlateAiSystemPrompt(classes, notes, sources);
 
 
   // Build clean, alternating multi-turn conversation contents for the Gemini REST API

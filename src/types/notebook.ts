@@ -1,9 +1,12 @@
 export interface NoteSource {
   id: string;
   name: string;
-  type: 'file' | 'text';
+  type: 'file' | 'text' | 'pdf';
   content: string;
   fileSize?: string;
+  classId?: string;
+  className?: string;
+  extractedWordCount?: number;
   addedAt: number;
 }
 
@@ -33,6 +36,7 @@ export interface FlashcardItem {
   front: string;
   back: string;
   mastered?: boolean;
+  status?: 'know' | 'dont_know' | 'unreviewed';
 }
 
 export interface NoteItem {

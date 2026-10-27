@@ -10,42 +10,64 @@ import {
   Layers,
   HelpCircle,
 } from 'lucide-react';
-import type { NoteItem } from '../../types/notebook';
+import type { NoteItem, NoteSource } from '../../types/notebook';
 import type { SlabItem, SlabType } from '../../types/slab';
 import { generateSlabSet } from '../../utils/slabAiService';
 
 interface CreateSlabModalProps {
   isOpen: boolean;
   onClose: () => void;
-  notes: NoteItem[];
+  notes?: NoteItem[];
+  sources?: NoteSource[];
+  initialPrompt?: string;
+  initialType?: SlabType;
+  initialSourceIds?: string[];
   onCreateSlab: (slab: SlabItem) => void;
 }
 
 const PROMPT_SUGGESTIONS = [
-  'Create 10 challenging MCQs on key concepts from my notes',
-  'Make 8 flashcards covering all definitions and formulas',
-  'Generate an exam review covering all chapters in my uploaded notes',
-  'Create a practice quiz testing tough problem solving and derivations',
+  'Create 20 flashcards on key concepts from my sources',
+  'Make 15 flashcards covering all definitions and formulas',
+  'Generate 20 challenging MCQs from my uploaded files',
+  'Create an exam review covering all chapters in my sources',
 ];
 
 export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
   isOpen,
   onClose,
-  notes,
+  notes = [],
+  sources = [],
+  initialPrompt = '',
+  initialType = 'flashcards',
+  initialSourceIds = [],
   onCreateSlab,
 }) => {
-  const [prompt, setPrompt] = useState('');
-  const [slabType, setSlabType] = useState<SlabType>('both');
+  const [prompt, setPrompt] = useState(initialPrompt);
+  const [slabType, setSlabType] = useState<SlabType>(initialType);
+  const [selectedSourceIds, setSelectedSourceIds] = useState<string[]>(initialSourceIds);
   const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
-  const [useAllNotes, setUseAllNotes] = useState(true);
-  const [itemCount, setItemCount] = useState(10);
+  const [useAllSources, setUseAllSources] = useState(initialSourceIds.length === 0);
+  const [itemCount, setItemCount] = useState(20);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleToggleNote = (id: string) => {
-    setSelectedNoteIds((prev) =>
+  const handlePromptChange = (val: string) => {
+    setPrompt(val);
+    const match =
+      val.match(/\b(\d+)\s*(?:flashcards?|cards?|mcqs?|questions?|items?)\b/i) ||
+      val.match(/\b(?:create|make|give me|generate)\s+(\d+)\b/i);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num >= 3 && num <= 40) {
+        setItemCount(num);
+      }
+    }
+  };
+
+  const handleToggleSource = (id: string) => {
+    setSelectedSourceIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
@@ -58,12 +80,19 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
     setError(null);
 
     try {
+      const promptMatch =
+        prompt.match(/\b(\d+)\s*(?:flashcards?|cards?|mcqs?|questions?|items?)\b/i) ||
+        prompt.match(/\b(?:create|make|give me|generate)\s+(\d+)\b/i);
+      const effectiveCount = promptMatch ? Math.max(parseInt(promptMatch[1], 10), itemCount) : itemCount;
+
       const generated = await generateSlabSet({
         prompt,
         type: slabType,
         notes,
-        selectedNoteIds: useAllNotes ? undefined : selectedNoteIds,
-        count: itemCount,
+        sources,
+        selectedSourceIds: useAllSources ? undefined : selectedSourceIds,
+        selectedNoteIds: useAllSources ? undefined : selectedNoteIds,
+        count: effectiveCount,
       });
 
       onCreateSlab(generated);
@@ -130,9 +159,9 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
               required
               rows={3}
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
+              onChange={(e) => handlePromptChange(e.target.value)}
               disabled={isGenerating}
-              placeholder="e.g. Look at my Economics notes and create 10 MCQs on supply, demand, and elasticity formulas..."
+              placeholder="e.g. Look at my Biology sources and create 20 flashcards on cellular respiration and ATP..."
               className="w-full text-xs sm:text-sm p-3.5 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-2xl focus:bg-white dark:focus:bg-[#1e1f20] focus:outline-hidden focus:ring-2 focus:ring-violet-500 transition-all text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] leading-relaxed shadow-2xs"
             />
 
@@ -143,7 +172,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                   key={i}
                   type="button"
                   disabled={isGenerating}
-                  onClick={() => setPrompt(sug)}
+                  onClick={() => handlePromptChange(sug)}
                   className="text-[11px] px-2.5 py-1 bg-slate-100 dark:bg-[#303134] hover:bg-violet-50 dark:hover:bg-violet-950/40 text-slate-600 dark:text-[#c4c7c5] hover:text-violet-700 dark:hover:text-[#c58af9] rounded-lg transition-colors cursor-pointer border border-slate-200/60 dark:border-[#3c4043] font-medium truncate max-w-full google-btn-press"
                 >
                   {sug}
@@ -211,18 +240,18 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             </div>
           </div>
 
-          {/* 3. Number of items */}
+          {/* 3. Number of items (Supports 20, 25, 30) */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">
                 Number of Items to Generate
               </label>
-              <span className="text-xs font-extrabold text-violet-600 dark:text-[#c58af9] bg-violet-50 dark:bg-violet-950/40 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-extrabold text-violet-600 dark:text-[#c58af9] bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full">
                 {itemCount} items
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              {[5, 8, 10, 15, 20].map((num) => (
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {[5, 10, 15, 20, 25, 30].map((num) => (
                 <button
                   key={num}
                   type="button"
@@ -240,28 +269,28 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             </div>
           </div>
 
-          {/* 4. Grounding Sources (Notes & Uploaded Files) */}
+          {/* 4. Grounding Sources (PDFs, Files & Notes) */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">
-                Grounded Notes & Uploaded Files
+                Grounded Class Sources & Files
               </label>
               <button
                 type="button"
                 disabled={isGenerating}
-                onClick={() => setUseAllNotes(!useAllNotes)}
+                onClick={() => setUseAllSources(!useAllSources)}
                 className="text-[11px] font-semibold text-violet-600 dark:text-[#c58af9] hover:underline cursor-pointer"
               >
-                {useAllNotes ? 'Pick specific notes' : 'Use all notes & files'}
+                {useAllSources ? 'Pick specific sources' : 'Use all sources'}
               </button>
             </div>
 
-            {useAllNotes ? (
+            {useAllSources ? (
               <div className="p-3 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200/80 dark:border-[#3c4043] rounded-2xl flex items-center justify-between text-xs text-slate-600 dark:text-[#c4c7c5]">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-violet-600 dark:text-[#c58af9] flex-shrink-0" />
                   <span>
-                    Analyzing all {notes.length} notes and their attached files
+                    Analyzing all {sources.length > 0 ? sources.length : notes.length} sources and uploaded materials
                   </span>
                 </div>
                 <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
@@ -269,18 +298,59 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 </span>
               </div>
             ) : (
-              <div className="border border-slate-200 dark:border-[#3c4043] rounded-2xl p-2.5 max-h-40 overflow-y-auto space-y-1.5 bg-slate-50 dark:bg-[#1e1f20]">
-                {notes.length === 0 ? (
+              <div className="border border-slate-200 dark:border-[#3c4043] rounded-2xl p-2.5 max-h-44 overflow-y-auto space-y-1.5 bg-slate-50 dark:bg-[#1e1f20]">
+                {sources.length === 0 && notes.length === 0 ? (
                   <p className="text-xs text-slate-400 dark:text-[#9aa0a6] p-2 text-center">
-                    No notes found. You can still prompt Gemini for any topic!
+                    No sources uploaded yet. Gemini will generate high-yield questions from your prompt!
                   </p>
+                ) : sources.length > 0 ? (
+                  sources.map((s) => {
+                    const isChecked = selectedSourceIds.includes(s.id);
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => !isGenerating && handleToggleSource(s.id)}
+                        className={`flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer transition-colors ${
+                          isChecked
+                            ? 'bg-violet-100/70 dark:bg-violet-950/50 text-violet-900 dark:text-[#c58af9] font-semibold'
+                            : 'hover:bg-slate-100 dark:hover:bg-[#303134] text-slate-700 dark:text-[#c4c7c5]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="text-xs font-bold px-1.5 py-0.5 bg-violet-100 dark:bg-violet-950/60 text-violet-700 dark:text-[#c58af9] rounded">
+                            {s.type.toUpperCase()}
+                          </span>
+                          <span className="truncate">{s.name}</span>
+                          {s.className && (
+                            <span className="text-[10px] bg-slate-200/80 dark:bg-[#303134] text-slate-600 dark:text-[#9aa0a6] px-1.5 py-0.2 rounded-md">
+                              {s.className}
+                            </span>
+                          )}
+                        </div>
+                        <div
+                          className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 ${
+                            isChecked
+                              ? 'bg-violet-600 border-violet-600 text-white'
+                              : 'border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#282a2c]'
+                          }`}
+                        >
+                          {isChecked && <Check className="w-3 h-3 stroke-[2.8]" />}
+                        </div>
+                      </div>
+                    );
+                  })
                 ) : (
                   notes.map((n) => {
                     const isChecked = selectedNoteIds.includes(n.id);
                     return (
                       <div
                         key={n.id}
-                        onClick={() => !isGenerating && handleToggleNote(n.id)}
+                        onClick={() => {
+                          if (isGenerating) return;
+                          setSelectedNoteIds((prev) =>
+                            prev.includes(n.id) ? prev.filter((id) => id !== n.id) : [...prev, n.id]
+                          );
+                        }}
                         className={`flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer transition-colors ${
                           isChecked
                             ? 'bg-violet-100/70 dark:bg-violet-950/50 text-violet-900 dark:text-[#c58af9] font-semibold'
@@ -290,11 +360,6 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                         <div className="flex items-center gap-2 truncate">
                           <span className="text-sm">{n.icon || '📝'}</span>
                           <span className="truncate">{n.title}</span>
-                          {n.sources.length > 0 && (
-                            <span className="text-[10px] bg-slate-200/80 dark:bg-[#303134] text-slate-600 dark:text-[#9aa0a6] px-1.5 py-0.2 rounded-md">
-                              {n.sources.length} file{n.sources.length > 1 ? 's' : ''}
-                            </span>
-                          )}
                         </div>
                         <div
                           className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 ${

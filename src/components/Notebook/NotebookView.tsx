@@ -1,76 +1,49 @@
 import React from 'react';
-import type { NoteItem } from '../../types/notebook';
+import type { NoteSource, NoteItem } from '../../types/notebook';
 import type { ClassItem } from '../../types/grade';
-import { NotesLibrary } from './NotesLibrary';
-import { NoteDetail } from './NoteDetail';
+import { SourcesLibrary } from './SourcesLibrary';
 
 interface NotebookViewProps {
-  notes: NoteItem[];
+  sources?: NoteSource[];
+  notes?: NoteItem[];
   classes?: ClassItem[];
-  selectedNoteId: string | null;
-  onSelectNote: (noteId: string | null) => void;
-  onAddNote: (newNote: NoteItem) => void;
-  onUpdateNote: (updatedNote: NoteItem) => void;
-  onDeleteNote: (noteId: string) => void;
+  selectedNoteId?: string | null;
+  onSelectNote?: (noteId: string | null) => void;
+  onAddNote?: (newNote: NoteItem) => void;
+  onUpdateNote?: (updatedNote: NoteItem) => void;
+  onDeleteNote?: (noteId: string) => void;
+  onAddSource: (source: NoteSource) => void;
+  onUpdateSource: (source: NoteSource) => void;
+  onDeleteSource: (sourceId: string) => void;
+  onAddClass?: (name: string, color?: string) => void;
   onOpenSlateAi?: (prompt?: string) => void;
+  onOpenCreateSlab?: (options: {
+    prompt: string;
+    type: 'flashcards' | 'mcq' | 'both';
+    sourceId: string;
+  }) => void;
 }
 
 export const NotebookView: React.FC<NotebookViewProps> = ({
-  notes,
+  sources = [],
   classes = [],
-  selectedNoteId,
-  onSelectNote,
-  onAddNote,
-  onUpdateNote,
-  onDeleteNote,
+  onAddSource,
+  onUpdateSource,
+  onDeleteSource,
+  onAddClass,
   onOpenSlateAi,
+  onOpenCreateSlab,
 }) => {
-  const activeNote = notes.find((n) => n.id === selectedNoteId) || null;
-
-  const handleCreateNewNote = (defaultClassId?: string) => {
-    const matchedClass = classes.find((c) => c.id === defaultClassId);
-    const newNote: NoteItem = {
-      id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      title: 'Untitled Note',
-      classId: defaultClassId || undefined,
-      className: matchedClass ? matchedClass.name : undefined,
-      icon: '📝',
-      content: '',
-      sources: [],
-      multipleChoice: [],
-      longAnswer: [],
-      flashcards: [],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    onAddNote(newNote);
-    onSelectNote(newNote.id);
-  };
-
-  if (activeNote) {
-    return (
-      <NoteDetail
-        note={activeNote}
-        classes={classes}
-        onBack={() => onSelectNote(null)}
-        onUpdateNote={onUpdateNote}
-        onDeleteNote={(id) => {
-          onDeleteNote(id);
-          onSelectNote(null);
-        }}
-        onOpenSlateAi={onOpenSlateAi}
-      />
-    );
-  }
-
   return (
-    <NotesLibrary
-      notes={notes}
+    <SourcesLibrary
+      sources={sources}
       classes={classes}
-      onSelectNote={(id) => onSelectNote(id)}
-      onCreateNote={handleCreateNewNote}
-      onDeleteNote={onDeleteNote}
+      onAddSource={onAddSource}
+      onUpdateSource={onUpdateSource}
+      onDeleteSource={onDeleteSource}
+      onAddClass={onAddClass}
       onOpenSlateAi={onOpenSlateAi}
+      onOpenCreateSlab={onOpenCreateSlab}
     />
   );
 };

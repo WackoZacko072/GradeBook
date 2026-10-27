@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { ClassItem } from './types/grade';
-import type { NoteItem } from './types/notebook';
-import type { SlabItem } from './types/slab';
+import type { NoteItem, NoteSource } from './types/notebook';
+import type { SlabItem, SlabType } from './types/slab';
 import {
   getInitialClasses,
   subscribeToUserClasses,
@@ -12,10 +12,15 @@ import {
 import {
   getInitialNotes,
   subscribeToUserNotes,
-  saveUserNotes,
   loadGuestNotes,
-  saveGuestNotes,
 } from './utils/notebookService';
+import {
+  getInitialSources,
+  subscribeToUserSources,
+  saveUserSources,
+  loadGuestSources,
+  saveGuestSources,
+} from './utils/sourceService';
 import { useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
@@ -64,9 +69,20 @@ export const App: React.FC = () => {
   const [classes, setClasses] = useState<ClassItem[]>(() => getInitialClasses());
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
-  // Notebook notes state
+  // Notebook notes state (legacy fallback)
   const [notes, setNotes] = useState<NoteItem[]>(() => getInitialNotes());
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+
+  // Sources Hub state (replaces notetaking)
+  const [sources, setSources] = useState<NoteSource[]>(() => getInitialSources());
+
+  // External Slab creation modal config (triggered from Sources Hub)
+  const [slabModalConfig, setSlabModalConfig] = useState<{
+    prompt?: string;
+    type?: SlabType;
+    sourceIds?: string[];
+  } | undefined>(undefined);
+  const [isCreateSlabForced, setIsCreateSlabForced] = useState(false);
 
   // Slab flashcards and MCQ state
   const [slabs, setSlabs] = useState<SlabItem[]>(() => loadLocalSlabs());
@@ -123,6 +139,27 @@ export const App: React.FC = () => {
     return () => {
       if (unsubscribeUser) {
         unsubscribeUser();
+      }
+    };
+  }, [user, authLoading]);
+
+  // Real-time synchronization for Sources: subscribe in Firestore
+  useEffect(() => {
+    let unsubscribeSources: (() => void) | null = null;
+    if (authLoading) return;
+
+    if (user) {
+      unsubscribeSources = subscribeToUserSources(user.uid, (cloudSources) => {
+        setSources(cloudSources);
+      });
+    } else {
+      const guestSources = loadGuestSources();
+      setSources(guestSources);
+    }
+
+    return () => {
+      if (unsubscribeSources) {
+        unsubscribeSources();
       }
     };
   }, [user, authLoading]);
@@ -205,40 +242,66 @@ export const App: React.FC = () => {
     }
   };
 
-  // Notes handlers
-  const handleAddNote = (newNote: NoteItem) => {
-    setNotes((prev) => {
-      const next = [newNote, ...prev];
-      if (user) saveUserNotes(user.uid, next);
-      else saveGuestNotes(next);
+  // Sources handlers (replaces notetaking with Sources Hub)
+  const handleAddSource = (newSource: NoteSource) => {
+    setSources((prev) => {
+      const next = [newSource, ...prev];
+      if (user) saveUserSources(user.uid, next);
+      else saveGuestSources(next);
       return next;
     });
+  };
+
+  const handleUpdateSource = (updated: NoteSource) => {
+    setSources((prev) => {
+      const next = prev.map((s) => (s.id === updated.id ? updated : s));
+      if (user) saveUserSources(user.uid, next);
+      else saveGuestSources(next);
+      return next;
+    });
+  };
+
+  const handleDeleteSource = (id: string) => {
+    setSources((prev) => {
+      const next = prev.filter((s) => s.id !== id);
+      if (user) saveUserSources(user.uid, next);
+      else saveGuestSources(next);
+      return next;
+    });
+  };
+
+  // Quick-create class from sources hub
+  const handleQuickAddClass = (name: string, color?: string) => {
+    const newClass: ClassItem = {
+      id: `class_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      name,
+      code: name.substring(0, 6).toUpperCase(),
+      color: color || '#8b5cf6',
+      credits: 3,
+      categories: [
+        { id: `cat_1_${Date.now()}`, name: 'Assignments', weight: 40, assessments: [] },
+        { id: `cat_2_${Date.now()}`, name: 'Exams', weight: 60, assessments: [] },
+      ],
+      createdAt: Date.now(),
+    };
+    handleAddClass(newClass);
+  };
+
+  // Open Create Slab Modal preselected with source
+  const handleOpenCreateSlabFromSource = (options: {
+    prompt: string;
+    type: 'flashcards' | 'mcq' | 'both';
+    sourceId: string;
+  }) => {
+    setSlabModalConfig({
+      prompt: options.prompt,
+      type: options.type,
+      sourceIds: [options.sourceId],
+    });
+    setIsCreateSlabForced(true);
     setSlideDirection('right');
-    setSelectedNoteId(newNote.id);
-    setActiveTab('notebook');
-    setIsMobileDrawerOpen(false);
-  };
-
-  const handleUpdateNote = (updated: NoteItem) => {
-    setNotes((prev) => {
-      const next = prev.map((n) => (n.id === updated.id ? updated : n));
-      if (user) saveUserNotes(user.uid, next);
-      else saveGuestNotes(next);
-      return next;
-    });
-  };
-
-  const handleDeleteNote = (id: string) => {
-    setNotes((prev) => {
-      const next = prev.filter((n) => n.id !== id);
-      if (user) saveUserNotes(user.uid, next);
-      else saveGuestNotes(next);
-      return next;
-    });
-    if (selectedNoteId === id) {
-      setSlideDirection('left');
-      setSelectedNoteId(null);
-    }
+    setActiveTab('slab');
+    setSelectedSlabId(null);
   };
 
   // Slab handlers (Interactive Flashcards & MCQ Study Sets)
@@ -276,7 +339,7 @@ export const App: React.FC = () => {
         activeTab={activeTab}
         onChangeTab={handleTabChange}
         classes={classes}
-        noteCount={notes.length}
+        noteCount={sources.length}
         slabCount={slabs.length}
         onOpenTranscript={() => setIsTranscriptModalOpen(true)}
         onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
@@ -292,6 +355,7 @@ export const App: React.FC = () => {
           onChangeTab={handleTabChange}
           classes={classes}
           notes={notes}
+          sources={sources}
           slabs={slabs}
           selectedClassId={selectedClassId}
           selectedNoteId={selectedNoteId}
@@ -318,19 +382,7 @@ export const App: React.FC = () => {
           }}
           onOpenAddClass={() => setIsAddModalOpen(true)}
           onCreateNote={() => {
-            const newNote: NoteItem = {
-              id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-              title: 'Untitled Note',
-              icon: '📝',
-              content: '',
-              sources: [],
-              multipleChoice: [],
-              longAnswer: [],
-              flashcards: [],
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-            };
-            handleAddNote(newNote);
+            handleTabChange('notebook');
           }}
           onCreateSlab={() => {
             setSlideDirection('right');
@@ -356,7 +408,11 @@ export const App: React.FC = () => {
                 <SlabView
                   slabs={slabs}
                   notes={notes}
+                  sources={sources}
                   selectedSlabId={selectedSlabId}
+                  initialCreateConfig={slabModalConfig}
+                  isCreateModalForcedOpen={isCreateSlabForced}
+                  onCloseCreateModalForced={() => setIsCreateSlabForced(false)}
                   onSelectSlab={(id) => {
                     setSlideDirection(id ? 'right' : 'left');
                     setSelectedSlabId(id);
@@ -367,17 +423,14 @@ export const App: React.FC = () => {
                 />
               ) : activeTab === 'notebook' ? (
                 <NotebookView
-                  notes={notes}
+                  sources={sources}
                   classes={classes}
-                  selectedNoteId={selectedNoteId}
-                  onSelectNote={(id) => {
-                    setSlideDirection(id ? 'right' : 'left');
-                    setSelectedNoteId(id);
-                  }}
-                  onAddNote={handleAddNote}
-                  onUpdateNote={handleUpdateNote}
-                  onDeleteNote={handleDeleteNote}
+                  onAddSource={handleAddSource}
+                  onUpdateSource={handleUpdateSource}
+                  onDeleteSource={handleDeleteSource}
+                  onAddClass={handleQuickAddClass}
                   onOpenSlateAi={(prompt) => handleOpenAiAdvisor(prompt)}
+                  onOpenCreateSlab={handleOpenCreateSlabFromSource}
                 />
               ) : activeClass ? (
                 <ClassDetail
@@ -413,7 +466,7 @@ export const App: React.FC = () => {
         onChangeTab={handleTabChange}
         selectedClassId={selectedClassId}
         classCount={classes.length}
-        noteCount={notes.length}
+        noteCount={sources.length}
         slabCount={slabs.length}
         onSelectOverview={() => {
           setSlideDirection('left');
@@ -423,19 +476,7 @@ export const App: React.FC = () => {
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
         onOpenAddClass={() => setIsAddModalOpen(true)}
         onOpenAddNote={() => {
-          const newNote: NoteItem = {
-            id: `note_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-            title: 'Untitled Note',
-            icon: '📝',
-            content: '',
-            sources: [],
-            multipleChoice: [],
-            longAnswer: [],
-            flashcards: [],
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          };
-          handleAddNote(newNote);
+          handleTabChange('notebook');
         }}
         onOpenAddSlab={() => {
           setSlideDirection('right');
@@ -470,6 +511,7 @@ export const App: React.FC = () => {
         onClose={() => setIsAiAdvisorOpen(false)}
         classes={classes}
         notes={notes}
+        sources={sources}
         initialPrompt={prefilledAdvisorPrompt}
         onNavigateToClass={(id: string) => {
           setSlideDirection('right');
