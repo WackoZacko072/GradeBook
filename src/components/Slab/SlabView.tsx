@@ -57,7 +57,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
   onCloseCreateModalForced,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<SlabType | 'all'>('all');
+  const [filterClassId, setFilterClassId] = useState<string | 'all'>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Rename state
@@ -83,15 +83,18 @@ export const SlabView: React.FC<SlabViewProps> = ({
 
   const selectedSlab = slabs.find((s) => s.id === selectedSlabId) || null;
 
-  // Filtered slabs in library
+  // Filtered slabs in library by class & search
   const filteredSlabs = slabs.filter((s) => {
     const matchesSearch =
       s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (s.className && s.className.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (s.sourceNoteNames && s.sourceNoteNames.some((n) => n.toLowerCase().includes(searchQuery.toLowerCase())));
 
-    if (filterType === 'all') return matchesSearch;
-    return matchesSearch && (s.type === filterType || s.type === 'both');
+    if (!matchesSearch) return false;
+    if (filterClassId === 'all') return true;
+    if (filterClassId === 'unassigned') return !s.classId;
+    return s.classId === filterClassId;
   });
 
   const handleStartRename = (slab: SlabItem, e?: React.MouseEvent) => {
@@ -857,43 +860,77 @@ export const SlabView: React.FC<SlabViewProps> = ({
           />
         </div>
 
-        {/* Type Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-[#1e1f20] rounded-xl border border-slate-200/80 dark:border-[#3c4043] self-start sm:self-auto shadow-inner">
+        {/* Class Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full self-start sm:self-auto">
           <button
             type="button"
-            onClick={() => setFilterType('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer google-btn-press ${
-              filterType === 'all'
-                ? 'bg-white dark:bg-[#303134] text-violet-700 dark:text-[#c58af9] shadow-2xs font-extrabold'
-                : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
+            onClick={() => setFilterClassId('all')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
+              filterClassId === 'all'
+                ? 'bg-violet-600 text-white shadow-2xs font-extrabold'
+                : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
             }`}
           >
-            All Sets ({slabs.length})
+            <span>All Classes</span>
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                filterClassId === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#353739]'
+              }`}
+            >
+              {slabs.length}
+            </span>
           </button>
-          <button
-            type="button"
-            onClick={() => setFilterType('flashcards')}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer google-btn-press ${
-              filterType === 'flashcards'
-                ? 'bg-white dark:bg-[#303134] text-violet-700 dark:text-[#c58af9] shadow-2xs font-extrabold'
-                : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Flashcards</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilterType('mcq')}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer google-btn-press ${
-              filterType === 'mcq'
-                ? 'bg-white dark:bg-[#303134] text-violet-700 dark:text-[#c58af9] shadow-2xs font-extrabold'
-                : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
-            }`}
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span>MCQs</span>
-          </button>
+
+          {classes.map((cls) => {
+            const count = slabs.filter((s) => s.classId === cls.id).length;
+            const isSelected = filterClassId === cls.id;
+            return (
+              <button
+                key={cls.id}
+                type="button"
+                onClick={() => setFilterClassId(cls.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
+                  isSelected
+                    ? 'bg-violet-600 text-white shadow-2xs font-extrabold'
+                    : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+                }`}
+              >
+                <span
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: cls.color || '#8B5CF6' }}
+                />
+                <span className="truncate max-w-[120px]">{cls.name}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                    isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#353739]'
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+
+          {slabs.some((s) => !s.classId) && (
+            <button
+              type="button"
+              onClick={() => setFilterClassId('unassigned')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
+                filterClassId === 'unassigned'
+                  ? 'bg-violet-600 text-white shadow-2xs font-extrabold'
+                  : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+              }`}
+            >
+              <span>General</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                  filterClassId === 'unassigned' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#353739]'
+                }`}
+              >
+                {slabs.filter((s) => !s.classId).length}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -935,25 +972,46 @@ export const SlabView: React.FC<SlabViewProps> = ({
               >
                 <div>
                   {/* Card Header: Type Badge & Action Buttons */}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-[#c58af9] border border-violet-100 dark:border-violet-800/40 flex items-center gap-1">
-                      {slab.type === 'both' ? (
-                        <>
-                          <BookCheck className="w-3 h-3 text-violet-600 dark:text-[#c58af9]" />
-                          <span>Flashcards & MCQs</span>
-                        </>
-                      ) : slab.type === 'flashcards' ? (
-                        <>
-                          <Layers className="w-3 h-3 text-violet-600 dark:text-[#c58af9]" />
-                          <span>Flashcard Deck</span>
-                        </>
-                      ) : (
-                        <>
-                          <HelpCircle className="w-3 h-3 text-violet-600 dark:text-[#c58af9]" />
-                          <span>Practice Quiz (MCQ)</span>
-                        </>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-[#c58af9] border border-violet-100 dark:border-violet-800/40 flex items-center gap-1">
+                        {slab.type === 'both' ? (
+                          <>
+                            <BookCheck className="w-3 h-3 text-violet-600 dark:text-[#c58af9]" />
+                            <span>Flashcards & MCQs</span>
+                          </>
+                        ) : slab.type === 'flashcards' ? (
+                          <>
+                            <Layers className="w-3 h-3 text-violet-600 dark:text-[#c58af9]" />
+                            <span>Flashcard Deck</span>
+                          </>
+                        ) : (
+                          <>
+                            <HelpCircle className="w-3 h-3 text-violet-600 dark:text-[#c58af9]" />
+                            <span>Practice Quiz</span>
+                          </>
+                        )}
+                      </span>
+
+                      {slab.className && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-[#303134] text-slate-700 dark:text-[#c4c7c5] border border-slate-200/60 dark:border-[#3c4043] flex items-center gap-1">
+                          <span
+                            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                            style={{
+                              backgroundColor:
+                                classes.find((c) => c.id === slab.classId)?.color || '#8B5CF6',
+                            }}
+                          />
+                          <span className="truncate max-w-[100px]">{slab.className}</span>
+                        </span>
                       )}
-                    </span>
+
+                      {slab.difficulty && (
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-[#303134] text-slate-500 dark:text-[#9aa0a6]">
+                          {slab.difficulty}
+                        </span>
+                      )}
+                    </div>
 
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button

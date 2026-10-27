@@ -348,9 +348,22 @@ function splitIntoBlocks(text: string): Block[] {
  * This prevents math delimiters from splitting bold pairs and leaving stray asterisks.
  */
 function normalizeMathAsterisks(text: string): string {
-  // Bold wrapping math: **prefix $math$ suffix**
-  let normalized = text.replace(
-    /\*\*([^*$\n]*?)(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|(?<!\\)\$(?!\s)[^$\n]+?(?<!\s)\$|\\\([\s\S]+?\\\))([^*$\n]*?)\*\*/g,
+  if (!text) return '';
+
+  // 1. Normalize \[ ... \] to $$ ... $$ and \( ... \) to $ ... $
+  let normalized = text
+    .replace(/\\\[([\s\S]+?)\\\]/g, '$$$$$1$$$$')
+    .replace(/\\\(([\s\S]+?)\\\)/g, '$$$1$$');
+
+  // 2. Normalize double-escaped commands like \\frac -> \frac
+  normalized = normalized.replace(/\\\\([a-zA-Z]+)/g, '\\$1');
+
+  // 3. Normalize spaced math like $ x $ -> $x$
+  normalized = normalized.replace(/\$\s+([^$\n]+?)\s+\$/g, '$$$1$$');
+
+  // 4. Bold wrapping math: **prefix $math$ suffix**
+  normalized = normalized.replace(
+    /\*\*([^*$\n]*?)(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)([^*$\n]*?)\*\*/g,
     (_match, p1, math, p2) => {
       const b1 = p1.trim() ? `**${p1.trim()}** ` : '';
       const b2 = p2.trim() ? ` **${p2.trim()}**` : '';
@@ -358,9 +371,9 @@ function normalizeMathAsterisks(text: string): string {
     }
   );
 
-  // Single asterisk italic wrapping math: *prefix $math$ suffix*
+  // 5. Single asterisk italic wrapping math: *prefix $math$ suffix*
   normalized = normalized.replace(
-    /(?<!\*)\*([^*$\n]+?)(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|(?<!\\)\$(?!\s)[^$\n]+?(?<!\s)\$|\\\([\s\S]+?\\\))([^*$\n]*?)\*(?!\*)/g,
+    /(?<!\*)\*([^*$\n]+?)(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)([^*$\n]*?)\*(?!\*)/g,
     (_match, p1, math, p2) => {
       const i1 = p1.trim() ? `*${p1.trim()}* ` : '';
       const i2 = p2.trim() ? ` *${p2.trim()}*` : '';
@@ -372,21 +385,21 @@ function normalizeMathAsterisks(text: string): string {
 }
 
 /**
- * Handles inline formatting: LaTeX math ($...$, \(...\)), **bold**, *italic*, `code`, etc.
+ * Handles inline formatting: LaTeX math ($...$, $$...$$), **bold**, *italic*, `code`, etc.
  */
 function renderInline(text: string): React.ReactNode {
-  // Normalize math with surrounding asterisks first
+  // Normalize math and delimiters first
   const normalized = normalizeMathAsterisks(text);
 
   // Check if text contains LaTeX math
-  const hasLatex = /(\$|\\\(|\\\[)/.test(normalized);
+  const hasLatex = normalized.includes('$');
 
   if (!hasLatex) {
     return renderFormattingOnly(normalized);
   }
 
-  // Tokenize math vs non-math
-  const mathRegex = /(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|(?<!\\)\$(?!\s)(.+?)(?<!\s)\$|\\\([\s\S]+?\\\))/g;
+  // Tokenize math ($$...$$ or $...$) vs non-math
+  const mathRegex = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g;
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;

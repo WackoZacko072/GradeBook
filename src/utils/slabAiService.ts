@@ -198,14 +198,50 @@ export interface GenerateSlabOptions {
   selectedSourceIds?: string[];
   selectedNoteIds?: string[];
   count?: number;
+  difficulty?: 'easy' | 'medium' | 'hard';
+  classId?: string;
+  className?: string;
+}
+
+function sanitizeLatexString(text: string): string {
+  if (!text) return '';
+  return text
+    // Normalize double-escaped backslashes in commands: \\frac -> \frac
+    .replace(/\\\\([a-zA-Z]+)/g, '\\$1')
+    // Normalize display math delimiters \[ and \] to $$
+    .replace(/\\\[/g, '$$')
+    .replace(/\\\]/g, '$$')
+    // Normalize inline math delimiters \( and \) to $
+    .replace(/\\\(/g, '$')
+    .replace(/\\\)/g, '$')
+    // Clean up spaces right after opening $ or before closing $
+    .replace(/\$\s+([^$\n]+?)\s+\$/g, '$$1$');
 }
 
 /**
  * Generates an interactive Slab study set (Flashcards, MCQs, or Both) grounded in the student's sources and notes.
  */
 export async function generateSlabSet(options: GenerateSlabOptions): Promise<SlabItem> {
-  const { prompt, type, notes, sources, selectedNoteIds, selectedSourceIds, count = 10 } = options;
+  const {
+    prompt,
+    type,
+    notes,
+    sources,
+    selectedNoteIds,
+    selectedSourceIds,
+    count = 20,
+    difficulty = 'medium',
+    classId,
+    className,
+  } = options;
   const { context, noteNames } = buildSourceContext(notes, selectedNoteIds, sources, selectedSourceIds);
+
+  const difficultyInstruction =
+    difficulty === 'easy'
+      ? 'DIFFICULTY LEVEL: EASY. Focus on foundational terminology, fundamental definitions, key properties, and clear straightforward recognition.'
+      : difficulty === 'hard'
+      ? 'DIFFICULTY LEVEL: HARD. Focus on challenging conceptual synthesis, edge cases, multi-step problem solving, tricky distractors, and rigorous analytical questions.'
+      : 'DIFFICULTY LEVEL: MEDIUM (STANDARD). Balanced exam-level difficulty combining core concepts with practical application scenarios.';
 
   // Parse prompt for requested count (e.g. "create 20 flashcards", "give me 25 questions", "make 20", etc.)
   const promptNumMatch =
@@ -223,13 +259,24 @@ export async function generateSlabSet(options: GenerateSlabOptions): Promise<Sla
     const countB = Math.floor(finalCount / 2);
 
     const makeBatchSystemPrompt = (batchNum: number, batchCount: number, focusTopic: string) => `You are Slab AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
-Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) strictly grounded in the student's class sources and uploaded files.
+Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) based on the student's class sources and uploaded files.
 
 CANADIAN ENGLISH & SPELLING:
 - Use Canadian English conventions (e.g., colour, behaviour, centre, analyse).
 
-MATHEMATICAL & SCIENTIFIC NOTATION:
-- ALWAYS format formulas, scientific units, equations, and mathematical derivations in standard LaTeX ($...$ for inline, $$...$$ for display).
+${difficultyInstruction}
+
+QUESTION DIVERSITY & CONCEPTUAL EXTENSION:
+- Do NOT simply copy text word-for-word from the sources.
+- Formulate creative, diverse questions that are SIMILAR TO and EXTEND the concepts from the sources (e.g. realistic application scenarios, analogous problems, variation of parameters, counterexamples).
+- Provide a wide variety of questions testing genuine conceptual understanding rather than rote memorization.
+
+MATHEMATICAL & SCIENTIFIC NOTATION (LATEX):
+- Format ALL mathematical variables, formulas, chemical equations, units, and expressions in clean, standard KaTeX-compatible LaTeX:
+  - Use $...$ for inline formulas (e.g., $E = mc^2$, $\\Delta G$, $\\frac{a}{b}$).
+  - Use $$...$$ for standalone display equations.
+  - DO NOT output broken or pseudo-latex syntax (such as dangling backslashes, unclosed brackets, or quadruple backslashes).
+  - When writing regular non-math text, use clean plain text without unnecessary backslashes or symbols.
 
 OUTPUT FORMAT:
 Output ONLY a single valid JSON object strictly matching this schema:
@@ -258,11 +305,12 @@ RULES:
    - If 'flashcards', output EXACTLY ${batchCount} items in the "flashcards" array and an empty "mcqs" array.
    - If 'mcq', output EXACTLY ${batchCount} items in the "mcqs" array and an empty "flashcards" array.
    - If 'both', output ~${Math.ceil(batchCount / 2)} items in "flashcards" and ~${Math.floor(batchCount / 2)} in "mcqs".
-2. Base questions directly on the provided class sources and files.`;
+2. Base questions directly on the concepts in the provided class sources and files, generating wide variety.`;
 
     const makeBatchUserPrompt = (batchNum: number, batchCount: number, focusTopic: string) => `STUDENT REQUEST / PROMPT: "${prompt}" (BATCH ${batchNum}: ${focusTopic})
 REQUESTED TYPE: ${type}
 TARGET ITEM COUNT: ${batchCount} (CRITICAL: Output EXACTLY ${batchCount} items!)
+DIFFICULTY: ${difficulty.toUpperCase()}
 
 GROUNDING SOURCES (Notes & Uploaded Files):
 ${context}`;
@@ -308,13 +356,24 @@ ${context}`;
   // Fallback to single generation if count < 16 or parallel failed
   if (!parsed) {
     const systemPrompt = `You are Slab AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
-Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) strictly grounded in the student's class sources and uploaded files.
+Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) based on the student's class sources and uploaded files.
 
 CANADIAN ENGLISH & SPELLING:
 - Use Canadian English conventions (e.g., colour, behaviour, centre, analyse).
 
-MATHEMATICAL & SCIENTIFIC NOTATION:
-- ALWAYS format formulas, scientific units, equations, and mathematical derivations in standard LaTeX ($...$ for inline, $$...$$ for display).
+${difficultyInstruction}
+
+QUESTION DIVERSITY & CONCEPTUAL EXTENSION:
+- Do NOT simply copy text word-for-word from the sources.
+- Formulate creative, diverse questions that are SIMILAR TO and EXTEND the concepts from the sources (e.g. realistic application scenarios, analogous problems, variation of parameters, counterexamples).
+- Provide a wide variety of questions testing genuine conceptual understanding rather than rote memorization.
+
+MATHEMATICAL & SCIENTIFIC NOTATION (LATEX):
+- Format ALL mathematical variables, formulas, chemical equations, units, and expressions in clean, standard KaTeX-compatible LaTeX:
+  - Use $...$ for inline formulas (e.g., $E = mc^2$, $\\Delta G$, $\\frac{a}{b}$).
+  - Use $$...$$ for standalone display equations.
+  - DO NOT output broken or pseudo-latex syntax (such as dangling backslashes, unclosed brackets, or quadruple backslashes).
+  - When writing regular non-math text, use clean plain text without unnecessary backslashes or symbols.
 
 OUTPUT FORMAT:
 Output ONLY a single valid JSON object strictly matching this schema:
@@ -342,11 +401,12 @@ RULES:
    - If 'flashcards', output EXACTLY ${finalCount} items in the "flashcards" array and an empty "mcqs" array.
    - If 'mcq', output EXACTLY ${finalCount} items in the "mcqs" array and an empty "flashcards" array.
    - If 'both', output ~${Math.ceil(finalCount / 2)} items in "flashcards" and ~${Math.floor(finalCount / 2)} in "mcqs".
-2. Base questions directly on the provided class sources and files. If the user prompt asks for specific topics (e.g. 'Chapter 3 MCQs'), tailor the questions precisely.`;
+2. Base questions directly on the concepts in the provided class sources and files, generating wide variety. If the user prompt asks for specific topics (e.g. 'Chapter 3 MCQs'), tailor the questions precisely.`;
 
     const userPrompt = `STUDENT REQUEST / PROMPT: "${prompt}"
 REQUESTED TYPE: ${type}
-TARGET ITEM COUNT: ${finalCount} (CRITICAL: Output EXACTLY ${finalCount} items, do not stop at 10!)
+TARGET ITEM COUNT: ${finalCount} (CRITICAL: Output EXACTLY ${finalCount} items, do not stop early!)
+DIFFICULTY: ${difficulty.toUpperCase()}
 
 GROUNDING SOURCES (Notes & Uploaded Files):
 ${context}`;
@@ -362,8 +422,8 @@ ${context}`;
   const flashcards: FlashcardItem[] = Array.isArray(parsed.flashcards)
     ? parsed.flashcards.map((f: any, idx: number) => ({
         id: `fc_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
-        front: String(f.front || 'Untitled Concept'),
-        back: String(f.back || ''),
+        front: sanitizeLatexString(String(f.front || 'Untitled Concept')),
+        back: sanitizeLatexString(String(f.back || '')),
         mastered: false,
       }))
     : [];
@@ -371,14 +431,14 @@ ${context}`;
   const mcqs: MultipleChoiceQuestion[] = Array.isArray(parsed.mcqs)
     ? parsed.mcqs.map((m: any, idx: number) => ({
         id: `mc_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
-        question: String(m.question || 'Untitled Question'),
+        question: sanitizeLatexString(String(m.question || 'Untitled Question')),
         options: Array.isArray(m.options) && m.options.length >= 2
-          ? m.options.map(String)
+          ? m.options.map((opt: any) => sanitizeLatexString(String(opt)))
           : ['Option A', 'Option B', 'Option C', 'Option D'],
         correctIndex: typeof m.correctIndex === 'number' && m.correctIndex >= 0 && m.correctIndex < 4
           ? m.correctIndex
           : 0,
-        explanation: String(m.explanation || ''),
+        explanation: sanitizeLatexString(String(m.explanation || '')),
       }))
     : [];
 
@@ -396,6 +456,9 @@ ${context}`;
     description: parsed.description ? String(parsed.description).trim() : undefined,
     type: effectiveType,
     prompt: prompt.trim(),
+    classId,
+    className,
+    difficulty,
     sourceNoteIds: selectedNoteIds,
     sourceNoteNames: noteNames,
     flashcards,

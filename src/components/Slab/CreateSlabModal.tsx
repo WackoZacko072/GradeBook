@@ -28,10 +28,10 @@ interface CreateSlabModalProps {
 }
 
 const PROMPT_SUGGESTIONS = [
-  'Create 20 flashcards on key concepts from my sources',
-  'Make 15 flashcards covering all definitions and formulas',
-  'Generate 20 challenging MCQs from my uploaded files',
-  'Create an exam review covering all chapters in my sources',
+  'Key concepts, terms, and applications from my sources',
+  'Core definitions, formulas, and fundamental laws',
+  'Challenging questions extending concepts from my files',
+  'Comprehensive exam review with diverse question styles',
 ];
 
 export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
@@ -51,7 +51,8 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
   const [selectedSourceIds, setSelectedSourceIds] = useState<string[]>(initialSourceIds);
   const [selectedNoteIds] = useState<string[]>([]);
   const [useAllSources, setUseAllSources] = useState(initialSourceIds.length === 0);
-  const [itemCount, setItemCount] = useState(20);
+  const [quantity, setQuantity] = useState<'less' | 'standard' | 'more'>('standard');
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,15 +68,15 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
 
   const handlePromptChange = (val: string) => {
     setPrompt(val);
-    const match =
-      val.match(/\b(\d+)\s*(?:flashcards?|cards?|mcqs?|questions?|items?)\b/i) ||
-      val.match(/\b(?:create|make|give me|generate)\s+(\d+)\b/i);
-    if (match) {
-      const num = parseInt(match[1], 10);
-      if (num >= 3 && num <= 40) {
-        setItemCount(num);
-      }
+    const numMatch = val.match(/\b(\d+)\s*(?:flashcards?|cards?|mcqs?|questions?|items?)\b/i);
+    if (numMatch) {
+      const num = parseInt(numMatch[1], 10);
+      if (num <= 12) setQuantity('less');
+      else if (num >= 25) setQuantity('more');
+      else setQuantity('standard');
     }
+    if (/\beasy\b/i.test(val)) setDifficulty('easy');
+    else if (/\bhard\b|\bchallenging\b|\badvanced\b/i.test(val)) setDifficulty('hard');
   };
 
   const handleToggleSource = (id: string) => {
@@ -92,17 +93,22 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
     setError(null);
 
     try {
-      const promptMatch =
-        prompt.match(/\b(\d+)\s*(?:flashcards?|cards?|mcqs?|questions?|items?)\b/i) ||
-        prompt.match(/\b(?:create|make|give me|generate)\s+(\d+)\b/i);
-      const effectiveCount = promptMatch ? Math.max(parseInt(promptMatch[1], 10), itemCount) : itemCount;
+      const countMap = {
+        less: 10,
+        standard: 20,
+        more: 30,
+      };
+      const effectiveCount = countMap[quantity];
 
-      const targetSources = selectedClassNotebook === 'all'
-        ? sources
-        : sources.filter((s) => s.classId === selectedClassNotebook);
+      const targetSources =
+        selectedClassNotebook === 'all'
+          ? sources
+          : sources.filter((s) => s.classId === selectedClassNotebook);
 
       const effectiveSourceIds = useAllSources
-        ? (selectedClassNotebook === 'all' ? undefined : targetSources.map((s) => s.id))
+        ? selectedClassNotebook === 'all'
+          ? undefined
+          : targetSources.map((s) => s.id)
         : selectedSourceIds;
 
       const generated = await generateSlabSet({
@@ -113,6 +119,9 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
         selectedSourceIds: effectiveSourceIds,
         selectedNoteIds: useAllSources ? undefined : selectedNoteIds,
         count: effectiveCount,
+        difficulty,
+        classId: selectedClassNotebook === 'all' ? undefined : selectedClassNotebook,
+        className: selectedClassEntity?.name,
       });
 
       onCreateSlab(generated);
@@ -130,10 +139,10 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-[#282a2c] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/80 dark:border-[#3c4043] overflow-hidden flex flex-col max-h-[92vh] animate-fade-scale">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-[#282a2c] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/80 dark:border-[#3c4043] flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[88vh] min-h-0 my-auto animate-fade-scale overflow-hidden">
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-[#3c4043] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526]">
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-[#3c4043] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526] flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-xs">
               <BookCheck className="w-5 h-5 stroke-[2.2]" />
@@ -161,10 +170,10 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
         </div>
 
         {/* Scrollable Form Body */}
-        <form onSubmit={handleGenerate} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
+        <form onSubmit={handleGenerate} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4">
           {/* Error Banner */}
           {error && (
-            <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-2xl flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300 animate-in slide-in-from-top-1">
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-2xl flex items-start gap-2.5 text-xs text-rose-800 dark:text-rose-300 animate-in slide-in-from-top-1">
               <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1 leading-relaxed">{error}</div>
             </div>
@@ -181,7 +190,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
               value={prompt}
               onChange={(e) => handlePromptChange(e.target.value)}
               disabled={isGenerating}
-              placeholder="e.g. Look at my Biology sources and create 20 flashcards on cellular respiration and ATP..."
+              placeholder="e.g. Look at my Biology sources and create flashcards on cellular respiration and ATP..."
               className="w-full text-xs sm:text-sm p-3.5 bg-slate-50 dark:bg-[#1e1f20] border border-slate-200 dark:border-[#3c4043] rounded-2xl focus:bg-white dark:focus:bg-[#1e1f20] focus:outline-hidden focus:ring-2 focus:ring-violet-500 transition-all text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] leading-relaxed shadow-2xs"
             />
 
@@ -260,36 +269,93 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             </div>
           </div>
 
-          {/* 3. Number of items (Supports 20, 25, 30) */}
+          {/* 3. Quantity Selector: Less, Standard, More */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">
-                Number of Items to Generate
+                Quantity
               </label>
-              <span className="text-xs font-extrabold text-violet-600 dark:text-[#c58af9] bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full">
-                {itemCount} items
+              <span className="text-[11px] font-bold text-violet-600 dark:text-[#c58af9] bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full">
+                {quantity === 'less' ? 'Less (~10 items)' : quantity === 'more' ? 'More (~30 items)' : 'Standard (~20 items)'}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {[5, 10, 15, 20, 25, 30].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  disabled={isGenerating}
-                  onClick={() => setItemCount(num)}
-                  className={`flex-1 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer google-btn-press ${
-                    itemCount === num
-                      ? 'bg-violet-600 text-white border-violet-600 shadow-2xs'
-                      : 'bg-slate-50 dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] border-slate-200 dark:border-[#3c4043] hover:bg-slate-100 dark:hover:bg-[#303134]'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { id: 'less' as const, label: 'Less', desc: '~10 items' },
+                { id: 'standard' as const, label: 'Standard', desc: '~20 items' },
+                { id: 'more' as const, label: 'More', desc: '~30 items' },
+              ].map((q) => {
+                const isSelected = quantity === q.id;
+                return (
+                  <button
+                    key={q.id}
+                    type="button"
+                    disabled={isGenerating}
+                    onClick={() => setQuantity(q.id)}
+                    className={`py-2 px-2.5 rounded-xl border text-center transition-all cursor-pointer google-btn-press ${
+                      isSelected
+                        ? 'bg-violet-600 text-white border-violet-600 shadow-2xs font-extrabold'
+                        : 'bg-white dark:bg-[#1e1f20] text-slate-700 dark:text-[#c4c7c5] border-slate-200 dark:border-[#3c4043] hover:bg-slate-50 dark:hover:bg-[#303134]'
+                    }`}
+                  >
+                    <div className="text-xs font-bold">{q.label}</div>
+                    <div
+                      className={`text-[10px] mt-0.5 ${
+                        isSelected ? 'text-violet-100' : 'text-slate-400 dark:text-[#9aa0a6]'
+                      }`}
+                    >
+                      {q.desc}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* 4. Choose Class Notebook */}
+          {/* 4. Difficulty Selector: Easy, Medium, Hard */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">
+                Difficulty Level
+              </label>
+              <span className="text-[11px] font-bold text-violet-600 dark:text-[#c58af9] bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full capitalize">
+                {difficulty}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { id: 'easy' as const, label: 'Easy', desc: 'Core terms & concepts' },
+                { id: 'medium' as const, label: 'Medium', desc: 'Standard exam level' },
+                { id: 'hard' as const, label: 'Hard', desc: 'Deep synthesis & edge cases' },
+              ].map((d) => {
+                const isSelected = difficulty === d.id;
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    disabled={isGenerating}
+                    onClick={() => setDifficulty(d.id)}
+                    className={`py-2 px-2.5 rounded-xl border text-center transition-all cursor-pointer google-btn-press ${
+                      isSelected
+                        ? 'bg-violet-600 text-white border-violet-600 shadow-2xs font-extrabold'
+                        : 'bg-white dark:bg-[#1e1f20] text-slate-700 dark:text-[#c4c7c5] border-slate-200 dark:border-[#3c4043] hover:bg-slate-50 dark:hover:bg-[#303134]'
+                    }`}
+                  >
+                    <div className="text-xs font-bold">{d.label}</div>
+                    <div
+                      className={`text-[10px] mt-0.5 ${
+                        isSelected ? 'text-violet-100' : 'text-slate-400 dark:text-[#9aa0a6]'
+                      }`}
+                    >
+                      {d.desc}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 5. Choose Class Notebook */}
           {classes.length > 0 && (
             <div>
               <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-1.5">
@@ -352,7 +418,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             </div>
           )}
 
-          {/* 5. Grounding Sources (PDFs, Files & Notes) */}
+          {/* 6. Grounded Class Sources (PDFs, Files & Notes) */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">
@@ -383,12 +449,12 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 </span>
               </div>
             ) : (
-              <div className="border border-slate-200 dark:border-[#3c4043] rounded-2xl p-2.5 max-h-44 overflow-y-auto space-y-1.5 bg-slate-50 dark:bg-[#1e1f20]">
+              <div className="border border-slate-200 dark:border-[#3c4043] rounded-2xl p-2.5 max-h-40 overflow-y-auto space-y-1.5 bg-slate-50 dark:bg-[#1e1f20]">
                 {availableSources.length === 0 ? (
                   <p className="text-xs text-slate-400 dark:text-[#9aa0a6] p-2 text-center">
                     {selectedClassEntity
                       ? `No sources uploaded in ${selectedClassEntity.name} yet.`
-                      : 'No sources uploaded yet.'} Gemini will generate high-yield questions from your prompt!
+                      : 'No sources uploaded yet.'} Gemini will formulate high-yield questions extending your prompt!
                   </p>
                 ) : (
                   availableSources.map((s) => {
@@ -433,12 +499,12 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
         </form>
 
         {/* Footer Actions */}
-        <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-[#3c4043] bg-slate-50/70 dark:bg-[#242526] flex items-center justify-between gap-3">
+        <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-[#3c4043] bg-slate-50/70 dark:bg-[#242526] flex items-center justify-between gap-3 flex-shrink-0">
           <button
             type="button"
             disabled={isGenerating}
             onClick={onClose}
-            className="px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer google-btn-press"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer google-btn-press"
           >
             Cancel
           </button>

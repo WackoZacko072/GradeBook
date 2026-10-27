@@ -127,21 +127,55 @@ export function parseLatexAndText(rawText: string): ParsedSegment[] {
       formula = matchedText.slice(1, -1).trim();
     }
 
+    // Sanitize escaped backslashes and HTML entities inside LaTeX
+    formula = formula
+      .replace(/\\\\([a-zA-Z]+)/g, '\\$1')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
+
+    let html = '';
     try {
-      const html = katex.renderToString(formula, {
+      html = katex.renderToString(formula, {
         displayMode: isBlock,
         throwOnError: false,
+        strict: false,
       });
+    } catch {
+      html = '';
+    }
 
+    // If KaTeX produced an error span (katex-error), fallback to clean readable mathematical text
+    if (!html || html.includes('katex-error')) {
+      const cleanFallback = formula
+        .replace(/\\(?:text|mathrm|mathbf|mathit)\{([^}]+)\}/g, '$1')
+        .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+        .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+        .replace(/\\cdot/g, '·')
+        .replace(/\\times/g, '×')
+        .replace(/\\pm/g, '±')
+        .replace(/\\le(?:q)?/g, '≤')
+        .replace(/\\ge(?:q)?/g, '≥')
+        .replace(/\\neq/g, '≠')
+        .replace(/\\approx/g, '≈')
+        .replace(/\\infty/g, '∞')
+        .replace(/\\Delta/g, 'Δ')
+        .replace(/\\pi/g, 'π')
+        .replace(/\\theta/g, 'θ')
+        .replace(/\\alpha/g, 'α')
+        .replace(/\\beta/g, 'β')
+        .replace(/\\lambda/g, 'λ')
+        .replace(/\\sigma/g, 'σ')
+        .replace(/\\([a-zA-Z]+)/g, '$1');
+
+      segments.push({
+        type: 'text',
+        text: cleanFallback,
+      });
+    } else {
       segments.push({
         type: isBlock ? 'block-math' : 'inline-math',
         html,
-      });
-    } catch {
-      // Fallback: render raw text
-      segments.push({
-        type: 'text',
-        text: matchedText,
       });
     }
   }

@@ -9,6 +9,9 @@ export interface SlabItem {
   type: SlabType;
   icon?: string;
   prompt: string;
+  classId?: string;
+  className?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
   sourceNoteIds?: string[];
   sourceNoteNames?: string[];
   flashcards: FlashcardItem[];
