@@ -228,7 +228,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                       <div className="flex items-center gap-2.5 truncate">
                         <BookCheck className="w-4 h-4 text-violet-500 dark:text-[#c58af9] flex-shrink-0" />
-                        <span className="truncate">{s.title || 'Untitled Slab'}</span>
+                        <span className="truncate">{s.title || 'Untitled Set'}</span>
                       </div>
                       <span className="text-[10px] text-slate-400 dark:text-[#80868b] flex-shrink-0">
                         {s.flashcards.length + s.mcqs.length}
@@ -395,7 +395,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <img
                 src="/gemini-gradebook-logo.png"
                 alt="Gemini Gradebook"
-                className="w-8 h-8 object-contain flex-shrink-0"
+                className="w-9 h-9 object-contain flex-shrink-0 drop-shadow-sm filter brightness-105"
               />
               <span className="font-bold text-base text-slate-900 dark:text-[#e8eaed] tracking-tight">
                 Gemini Gradebook

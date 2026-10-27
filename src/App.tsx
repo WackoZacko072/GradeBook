@@ -513,7 +513,16 @@ export const App: React.FC = () => {
         classes={classes}
         notes={notes}
         sources={sources}
+        slabs={slabs}
         initialPrompt={prefilledAdvisorPrompt}
+        onNavigate={(tab) => {
+          setSlideDirection('right');
+          setActiveTab(tab);
+          if (tab === 'gradebook') setSelectedClassId(null);
+          if (tab === 'notebook') setSelectedNoteId(null);
+          if (tab === 'slab') setSelectedSlabId(null);
+          setIsAiAdvisorOpen(false);
+        }}
         onNavigateToClass={(id: string) => {
           setSlideDirection('right');
           setActiveTab('gradebook');

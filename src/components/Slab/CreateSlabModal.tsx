@@ -128,7 +128,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
       onClose();
     } catch (err: any) {
       console.error('Error generating Slab:', err);
-      let msg = err.message || 'Failed to generate Slab set. Please try again.';
+      let msg = err.message || 'Failed to generate Office study set. Please try again.';
       if (msg === 'QUOTA_EXCEEDED') {
         msg = 'Gemini API quota exceeded. Please wait a moment and try again.';
       }

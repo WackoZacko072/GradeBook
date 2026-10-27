@@ -262,7 +262,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
               type="button"
               onClick={() => onSelectSlab(null)}
               className="p-2 text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold google-btn-press"
-              title="Back to all Slabs"
+              title="Back to all Office study sets"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>

@@ -258,7 +258,7 @@ export async function generateSlabSet(options: GenerateSlabOptions): Promise<Sla
     const countA = Math.ceil(finalCount / 2);
     const countB = Math.floor(finalCount / 2);
 
-    const makeBatchSystemPrompt = (batchNum: number, batchCount: number, focusTopic: string) => `You are Slab AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
+    const makeBatchSystemPrompt = (batchNum: number, batchCount: number, focusTopic: string) => `You are Gemini Office AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
 Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) based on the student's class sources and uploaded files.
 
 CANADIAN ENGLISH & SPELLING:
@@ -355,7 +355,7 @@ ${context}`;
 
   // Fallback to single generation if count < 16 or parallel failed
   if (!parsed) {
-    const systemPrompt = `You are Slab AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
+    const systemPrompt = `You are Gemini Office AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
 Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) based on the student's class sources and uploaded files.
 
 CANADIAN ENGLISH & SPELLING:

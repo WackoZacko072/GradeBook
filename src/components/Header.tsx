@@ -137,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
             <img
               src="/gemini-gradebook-logo.png"
               alt="Gemini Gradebook"
-              className="w-8 h-8 sm:w-9 sm:h-9 object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
             />
             <span className="font-bold text-base sm:text-lg text-slate-900 dark:text-[#e8eaed] tracking-tight transition-colors">
               Gemini Gradebook

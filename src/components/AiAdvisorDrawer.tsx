@@ -379,7 +379,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
             <img
               src="/gemini-gradebook-logo.png"
               alt="Gemini Gradebook"
-              className="w-8 h-8 object-contain flex-shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 drop-shadow-sm filter brightness-105"
             />
             <div>
               <div className="flex items-center gap-2">
@@ -520,7 +520,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   <div className="p-1.5 bg-violet-100/70 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 rounded-lg group-hover:bg-violet-200/70 dark:group-hover:bg-violet-900/60 transition-colors">
                     <BookCheck className="w-3.5 h-3.5 stroke-[2.2]" />
                   </div>
-                  <span>Slab</span>
+                  <span>Office</span>
                 </div>
                 <span className="text-[10px] font-semibold text-slate-400 dark:text-[#9aa0a6] group-hover:text-violet-600 dark:group-hover:text-violet-400 bg-slate-200/60 dark:bg-[#303134] group-hover:bg-violet-100/70 dark:group-hover:bg-violet-950/60 px-2 py-0.5 rounded-full">
                   {slabs.length} {slabs.length === 1 ? 'set' : 'sets'}

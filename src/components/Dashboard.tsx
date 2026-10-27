@@ -115,18 +115,27 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 1. Header Title & Top Add Class Button */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <span className="block text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-widest mb-1">
-            {firstName ? `${firstName}'s Gradebook` : 'Your Personal Gradebook'}
-          </span>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
-            {firstName ? `Welcome back, ${firstName}.` : 'A clearer view of your grades.'}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-[#c4c7c5] mt-1">
-            {classes.length === 0
-              ? 'Your gradebook is clean and ready. Add your current courses to start tracking.'
-              : 'All your classes. One place to keep track.'}
-          </p>
+        <div className="flex items-start gap-3.5 sm:gap-4">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-white via-slate-50 to-blue-50/40 dark:from-[#282a2c] dark:via-[#282a2c] dark:to-[#353739] border border-slate-200/90 dark:border-[#3c4043] p-2 sm:p-2.5 flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/10">
+            <img
+              src="/gemini-gradebook-logo.png"
+              alt="Gemini Gradebook"
+              className="w-full h-full object-contain filter drop-shadow-sm brightness-105"
+            />
+          </div>
+          <div>
+            <span className="block text-[11px] font-bold text-blue-600 dark:text-[#8ab4f8] uppercase tracking-widest mb-1">
+              {firstName ? `${firstName}'s Gradebook` : 'Gemini Gradebook'}
+            </span>
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
+              {firstName ? `Welcome back, ${firstName}.` : 'A clearer view of your grades.'}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-[#c4c7c5] mt-1">
+              {classes.length === 0
+                ? 'Your gradebook is clean and ready. Add your current courses to start tracking.'
+                : 'All your classes. One place to keep track.'}
+            </p>
+          </div>
         </div>
 
         <button
