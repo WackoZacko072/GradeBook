@@ -358,42 +358,33 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     <div className="fixed inset-0 z-50 bg-[#FAFBFD] dark:bg-[#1e1f20] flex flex-col overflow-hidden animate-in fade-in duration-200">
       {/* Top Header Bar */}
       <header className="h-16 px-3 sm:px-6 bg-white dark:bg-[#282a2c] border-b border-slate-200/90 dark:border-[#3c4043] flex items-center justify-between flex-shrink-0 z-20 shadow-2xs">
-        {/* Left: 3-line hamburger menu button + Branding */}
+        {/* Left: Gemini Gradebook Branding (Matches Google Notebook branding) */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Three-line button on top left-hand corner to toggle sidebar */}
-          <button
-            type="button"
-            onClick={() => setIsSidebarOpen((prev) => !prev)}
-            className="p-2 text-slate-700 dark:text-[#e8eaed] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#303134] rounded-xl transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center -ml-1 google-btn-press"
-            title={isSidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-            aria-label="Toggle sidebar menu"
-          >
-            <Menu className="w-5 h-5 stroke-[2.2]" />
-          </button>
-
           <div
             onClick={onClose}
-            className="flex items-center gap-2.5 select-none cursor-pointer"
+            className="flex items-center gap-2 sm:gap-2.5 select-none cursor-pointer group"
             title="Return to Gemini Gradebook Workspace"
           >
             <img
               src="/gemini-gradebook-logo.png"
               alt="Gemini Gradebook"
-              className="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 drop-shadow-sm filter brightness-105"
+              className="w-7 h-7 sm:w-8 sm:h-8 object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
             />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-base text-slate-900 dark:text-[#e8eaed] tracking-tight">
-                  Gemini Gradebook
-                </span>
-                <span className="text-slate-300 dark:text-[#5f6368] font-light">/</span>
-                <span className="font-extrabold text-blue-600 dark:text-[#8ab4f8] text-sm">Gemini</span>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] hidden sm:block">
-                Academic Co-Pilot & Whole Gradebook Analyzer
-              </p>
-            </div>
+            <span className="text-[18px] sm:text-[20px] font-medium tracking-tight text-slate-900 dark:text-white font-sans antialiased">
+              Gemini Gradebook
+            </span>
           </div>
+
+          {/* Toggle sidebar button right next to title */}
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen((prev) => !prev)}
+            className="p-1.5 text-slate-500 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#303134] rounded-lg transition-colors cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center google-btn-press"
+            title={isSidebarOpen ? 'Hide chats sidebar' : 'Show chats sidebar'}
+            aria-label="Toggle sidebar menu"
+          >
+            <Menu className="w-4 h-4 stroke-[2.2]" />
+          </button>
         </div>
 
         {/* Center: Current Chat Name with Rename Trigger */}

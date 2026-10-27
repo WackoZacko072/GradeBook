@@ -6,7 +6,6 @@ import {
   FileText,
   LogOut,
   Settings,
-  Menu,
   CloudUpload,
   AlertTriangle,
   User,
@@ -45,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   slabCount = 0,
   onOpenTranscript,
   onOpenFirebaseConfig,
-  onOpenMobileDrawer,
+  onOpenMobileDrawer: _onOpenMobileDrawer,
 }) => {
   const { user, isConfigured, signInWithGoogle, logout, authError } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -117,32 +116,20 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-[#3c4043] transition-colors duration-250">
       <div className="relative w-full px-3 sm:px-6 h-16 flex items-center justify-between">
-        {/* Left: Mobile Menu Toggle + Gemini Gradebook Logo */}
-        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 z-20">
-          {/* Hamburger toggle for mobile drawer */}
-          <button
-            type="button"
-            onClick={onOpenMobileDrawer}
-            className="md:hidden p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#353739] rounded-xl transition-colors cursor-pointer min-h-[42px] min-w-[42px] flex items-center justify-center -ml-1 google-btn-press"
-            aria-label="Open navigation menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
-          <div
-            onClick={() => onChangeTab('gradebook')}
-            className="flex items-center gap-2.5 cursor-pointer select-none group"
-            title="Gemini Gradebook"
-          >
-            <img
-              src="/gemini-gradebook-logo.png"
-              alt="Gemini Gradebook"
-              className="w-9 h-9 sm:w-10 sm:h-10 object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
-            />
-            <span className="font-bold text-base sm:text-lg text-slate-900 dark:text-[#e8eaed] tracking-tight transition-colors">
-              Gemini Gradebook
-            </span>
-          </div>
+        {/* Left: Gemini Gradebook Branding (Matches Google Notebook branding) */}
+        <div
+          onClick={() => onChangeTab('gradebook')}
+          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none flex-shrink-0 z-20 group"
+          title="Gemini Gradebook"
+        >
+          <img
+            src="/gemini-gradebook-logo.png"
+            alt="Gemini Gradebook"
+            className="w-7 h-7 sm:w-8 sm:h-8 object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
+          />
+          <span className="text-[18px] sm:text-[20px] font-medium tracking-tight text-slate-900 dark:text-white font-sans antialiased">
+            Gemini Gradebook
+          </span>
         </div>
 
         {/* Center: Primary Task Bar (Desktop only: hidden on mobile to eliminate clutter) */}
