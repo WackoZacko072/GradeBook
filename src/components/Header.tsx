@@ -114,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#1e1f20]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-[#3c4043] transition-colors duration-250">
+    <header className="sticky top-0 z-30 bg-[#FAFBFD]/95 dark:bg-[#1e1f20]/95 backdrop-blur-md transition-colors duration-250">
       <div className="relative w-full px-3 sm:px-6 h-16 flex items-center justify-between">
         {/* Left: Gemini Gradebook Branding (Matches Google Notebook branding) */}
         <div

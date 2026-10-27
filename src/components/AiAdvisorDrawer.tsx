@@ -357,7 +357,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-[#FAFBFD] dark:bg-[#1e1f20] flex flex-col overflow-hidden animate-in fade-in duration-200">
       {/* Top Header Bar */}
-      <header className="h-16 px-3 sm:px-6 bg-white dark:bg-[#282a2c] border-b border-slate-200/90 dark:border-[#3c4043] flex items-center justify-between flex-shrink-0 z-20 shadow-2xs">
+      <header className="h-16 px-3 sm:px-6 bg-white dark:bg-[#282a2c] flex items-center justify-between flex-shrink-0 z-20 shadow-2xs">
         {/* Left: Gemini Gradebook Branding (Matches Google Notebook branding) */}
         <div className="flex items-center gap-2 sm:gap-3">
           <div
@@ -429,7 +429,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
             isSidebarOpen
               ? 'fixed inset-y-16 left-0 z-40 w-72 shadow-2xl flex md:static md:w-72 md:shadow-none'
               : 'hidden'
-          } lg:w-80 border-r border-slate-200/90 dark:border-[#3c4043] bg-white dark:bg-[#282a2c] flex-col flex-shrink-0 h-full overflow-hidden transition-all`}
+          } lg:w-80 bg-white dark:bg-[#282a2c] flex-col flex-shrink-0 h-full overflow-hidden transition-all`}
         >
           {/* Workspace Switcher Section */}
           <div className="p-3 border-b border-slate-100 dark:border-[#3c4043] bg-slate-50/80 dark:bg-[#1e1f20]/60">
