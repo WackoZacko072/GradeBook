@@ -334,11 +334,21 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFBFD] dark:bg-[#0f0f10] text-[#0F172A] dark:text-[#f8f9fa] flex flex-col font-sans transition-colors duration-250">
-      {/* Top Header with Sliding Taskbar Indicator & Dark Mode Toggle */}
+      {/* Top Header matching Google NotebookLM style */}
       <Header
         activeTab={activeTab}
         onChangeTab={handleTabChange}
         classes={classes}
+        onSelectClass={(id) => {
+          setSlideDirection('right');
+          setActiveTab('gradebook');
+          setSelectedClassId(id);
+        }}
+        onSelectOverview={() => {
+          setSlideDirection('left');
+          setActiveTab('gradebook');
+          setSelectedClassId(null);
+        }}
         noteCount={sources.length}
         slabCount={slabs.length}
         onOpenTranscript={() => setIsTranscriptModalOpen(true)}

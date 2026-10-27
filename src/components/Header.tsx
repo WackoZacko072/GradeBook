@@ -1,18 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  BookOpen,
-  ShieldCheck,
-  CheckCircle2,
-  FileText,
-  LogOut,
+  Search,
+  X,
+  LayoutGrid,
+  List,
   Settings,
+  FileText,
   CloudUpload,
   AlertTriangle,
   User,
-  BookMarked,
-  BookCheck,
   Sun,
   Moon,
+  LogOut,
+  CheckCircle2,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -22,63 +23,62 @@ import {
   forceSyncToCloud,
   type SyncStatusInfo,
 } from '../utils/gradebookService';
+import { calculateClassAverage } from '../utils/gradeCalculations';
 import type { ClassItem } from '../types/grade';
 
 interface HeaderProps {
   activeTab: 'gradebook' | 'notebook' | 'slab';
   onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab') => void;
   classes: ClassItem[];
+  onSelectClass?: (id: string) => void;
+  onSelectOverview?: () => void;
   noteCount?: number;
   slabCount?: number;
   onOpenTranscript: () => void;
   onOpenFirebaseConfig: () => void;
   onOpenMobileDrawer?: () => void;
   onOpenAiAdvisor?: () => void;
+  viewMode?: 'grid' | 'list';
+  onToggleViewMode?: (mode: 'grid' | 'list') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  activeTab,
   onChangeTab,
   classes,
-  noteCount = 0,
-  slabCount = 0,
+  onSelectClass,
+  onSelectOverview,
+  noteCount: _noteCount = 0,
+  slabCount: _slabCount = 0,
   onOpenTranscript,
   onOpenFirebaseConfig,
   onOpenMobileDrawer: _onOpenMobileDrawer,
+  viewMode: controlledViewMode,
+  onToggleViewMode,
 }) => {
   const { user, isConfigured, signInWithGoogle, logout, authError } = useAuth();
   const { theme, toggleTheme } = useTheme();
+
+  // Search state for "Search gradebook"
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // View mode state (grid vs list)
+  const [internalViewMode, setInternalViewMode] = useState<'grid' | 'list'>('grid');
+  const viewMode = controlledViewMode ?? internalViewMode;
+
+  const handleSetViewMode = (mode: 'grid' | 'list') => {
+    setInternalViewMode(mode);
+    onToggleViewMode?.(mode);
+  };
+
+  // Google account popover state
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatusInfo>(() => getSyncStatus());
   const [isForceSyncing, setIsForceSyncing] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  // Dynamic sliding indicator for Top Taskbar
-  const navRef = useRef<HTMLElement>(null);
-  const gradebookTabRef = useRef<HTMLButtonElement>(null);
-  const notebookTabRef = useRef<HTMLButtonElement>(null);
-  const slabTabRef = useRef<HTMLButtonElement>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 4, width: 90 });
-
-  // Update sliding indicator whenever active tab or item counts change
-  useEffect(() => {
-    const tabMap = {
-      gradebook: gradebookTabRef.current,
-      notebook: notebookTabRef.current,
-      slab: slabTabRef.current,
-    };
-    const activeEl = tabMap[activeTab];
-    const navEl = navRef.current;
-    if (activeEl && navEl) {
-      const activeRect = activeEl.getBoundingClientRect();
-      const navRect = navEl.getBoundingClientRect();
-      setIndicatorStyle({
-        left: activeRect.left - navRect.left,
-        width: activeRect.width,
-      });
-    }
-  }, [activeTab, noteCount, slabCount]);
 
   // Subscribe to live sync status from gradebookService
   useEffect(() => {
@@ -88,11 +88,15 @@ export const Header: React.FC<HeaderProps> = ({
     return () => unsubscribe();
   }, []);
 
-  // Close dropdown on outside click
+  // Close menus on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (menuRef.current && !menuRef.current.contains(target)) {
         setIsUserMenuOpen(false);
+      }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(target)) {
+        setIsSearchOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -113,13 +117,36 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  // Filter matching classes by name or code
+  const trimmedQuery = searchQuery.trim().toLowerCase();
+  const matchingClasses = trimmedQuery
+    ? classes.filter((c) => {
+        return (
+          c.name.toLowerCase().includes(trimmedQuery) ||
+          (c.code && c.code.toLowerCase().includes(trimmedQuery))
+        );
+      })
+    : [];
+
+  const handleSelectClassItem = (classId: string) => {
+    if (onSelectClass) {
+      onSelectClass(classId);
+    }
+    onChangeTab('gradebook');
+    setSearchQuery('');
+    setIsSearchOpen(false);
+  };
+
   return (
-    <header className="sticky top-0 z-30 bg-[#FAFBFD]/95 dark:bg-[#0f0f10]/95 backdrop-blur-md transition-colors duration-250">
-      <div className="relative w-full px-3 sm:px-6 h-16 flex items-center justify-between">
-        {/* Left: Gemini Gradebook Branding (Matches Google Notebook branding layout) */}
+    <header className="sticky top-0 z-30 bg-[#FAFBFD]/95 dark:bg-[#0f0f10]/95 backdrop-blur-md transition-colors duration-250 select-none">
+      <div className="w-full px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
+        {/* Left: Gemini Gradebook Branding (Matches NotebookLM screenshot layout) */}
         <div
-          onClick={() => onChangeTab('gradebook')}
-          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none flex-shrink-0 z-20 group"
+          onClick={() => {
+            onChangeTab('gradebook');
+            onSelectOverview?.();
+          }}
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none flex-shrink-0 group"
           title="Gemini Gradebook"
         >
           <img
@@ -135,104 +162,198 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
         </div>
 
-        {/* Center: Primary Task Bar (Desktop only: hidden on mobile to eliminate clutter) */}
-        <nav
-          ref={navRef}
-          aria-label="Main taskbar tabs"
-          className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center p-1 bg-slate-100/90 dark:bg-[#18191b] rounded-xl border border-slate-200/80 dark:border-[#26282a] shadow-2xs z-10 select-none"
-        >
-          {/* Google Material 3 Animated Sliding Indicator */}
-          <div
-            className="absolute top-1 bottom-1 rounded-lg bg-white dark:bg-[#26282a] shadow-xs pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
-            style={{
-              left: `${indicatorStyle.left}px`,
-              width: `${indicatorStyle.width}px`,
-            }}
-          />
+        {/* Right: Search Gradebook, View Toggle, Settings, Apps Icon, and Google Account Avatar */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          {/* Search Gradebook Pill Input */}
+          <div className="relative" ref={searchContainerRef}>
+            <div className="relative flex items-center">
+              <Search className="w-4 h-4 text-slate-400 dark:text-[#9aa0a6] absolute left-3.5 pointer-events-none" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onFocus={() => setIsSearchOpen(true)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && matchingClasses.length > 0) {
+                    handleSelectClassItem(matchingClasses[0].id);
+                    searchInputRef.current?.blur();
+                  } else if (e.key === 'Escape') {
+                    setIsSearchOpen(false);
+                    searchInputRef.current?.blur();
+                  }
+                }}
+                placeholder="Search gradebook"
+                className="w-36 sm:w-56 md:w-64 lg:w-72 h-10 pl-9 pr-8 text-xs sm:text-sm bg-slate-100/90 dark:bg-[#18191b] hover:dark:bg-[#202123] focus:dark:bg-[#18191b] text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#9aa0a6] rounded-full border border-slate-200/80 dark:border-[#26282a] focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:focus:ring-[#8ab4f8]/50 transition-all shadow-2xs"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    searchInputRef.current?.focus();
+                  }}
+                  className="absolute right-3 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-[#e8eaed] cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
 
-          {/* Gradebook Tab */}
-          <button
-            ref={gradebookTabRef}
-            type="button"
-            onClick={() => onChangeTab('gradebook')}
-            className={`relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer ${
-              activeTab === 'gradebook'
-                ? 'text-blue-700 dark:text-[#8ab4f8]'
-                : 'text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed]'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5 stroke-[2.2]" />
-            <span>Gradebook</span>
-          </button>
+            {/* Search Dropdown Results Popup */}
+            {isSearchOpen && trimmedQuery.length > 0 && (
+              <div className="absolute right-0 sm:left-0 sm:right-auto w-72 sm:w-80 md:w-96 top-full mt-2 bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/90 dark:border-[#26282a] shadow-2xl p-2 z-50 animate-fade-scale overflow-hidden">
+                <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider border-b border-slate-100 dark:border-[#26282a]">
+                  Classes ({matchingClasses.length})
+                </div>
 
-          {/* Notebook Tab */}
-          <button
-            ref={notebookTabRef}
-            type="button"
-            onClick={() => onChangeTab('notebook')}
-            className={`relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer ${
-              activeTab === 'notebook'
-                ? 'text-indigo-700 dark:text-[#c58af9]'
-                : 'text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed]'
-            }`}
-          >
-            <BookMarked className="w-3.5 h-3.5 stroke-[2.2]" />
-            <span>Notebook</span>
-            {noteCount > 0 && (
-              <span className="inline-flex px-1.5 py-0.2 bg-indigo-100 dark:bg-purple-900/40 text-indigo-700 dark:text-purple-300 text-[10px] font-extrabold rounded-full">
-                {noteCount}
-              </span>
+                <div className="max-h-72 overflow-y-auto py-1 space-y-0.5">
+                  {matchingClasses.length > 0 ? (
+                    matchingClasses.map((c) => {
+                      const calc = calculateClassAverage(c);
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => handleSelectClassItem(c.id)}
+                          className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-slate-100/80 dark:hover:bg-[#202123] flex items-center justify-between cursor-pointer transition-colors group"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                            <span
+                              className="w-3 h-3 rounded-full flex-shrink-0 shadow-2xs"
+                              style={{ backgroundColor: c.color || '#3b82f6' }}
+                            />
+                            <div className="min-w-0">
+                              <div className="font-semibold text-xs sm:text-sm text-slate-900 dark:text-[#e8eaed] truncate group-hover:text-blue-600 dark:group-hover:text-[#8ab4f8]">
+                                {c.name}
+                              </div>
+                              {c.code && (
+                                <div className="text-[11px] text-slate-400 dark:text-[#9aa0a6] truncate">
+                                  {c.code}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <span className="text-xs font-bold text-slate-700 dark:text-[#e8eaed]">
+                              {calc.average.toFixed(1)}%
+                            </span>
+                            <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-[#8ab4f8]">
+                              {calc.letterGrade}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="py-6 px-3 text-center">
+                      <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">
+                        No classes found matching{' '}
+                        <span className="font-semibold text-slate-800 dark:text-[#e8eaed]">
+                          "{searchQuery}"
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
-          </button>
+          </div>
 
-          {/* Office Tab (renamed from Slab) */}
+          {/* Grid / List Layout Toggle Pill (Matches NotebookLM screenshot) */}
+          <div className="hidden sm:flex items-center bg-slate-100/90 dark:bg-[#18191b] border border-slate-200/80 dark:border-[#26282a] rounded-full p-1 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => handleSetViewMode('grid')}
+              className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-[#26282a] text-slate-900 dark:text-white shadow-xs'
+                  : 'text-slate-400 dark:text-[#9aa0a6] hover:text-slate-700 dark:hover:text-[#e8eaed]'
+              }`}
+              title="Grid view"
+              aria-label="Grid view"
+            >
+              <LayoutGrid className="w-4 h-4 stroke-[2]" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSetViewMode('list')}
+              className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-white dark:bg-[#26282a] text-slate-900 dark:text-white shadow-xs'
+                  : 'text-slate-400 dark:text-[#9aa0a6] hover:text-slate-700 dark:hover:text-[#e8eaed]'
+              }`}
+              title="List view"
+              aria-label="List view"
+            >
+              <List className="w-4 h-4 stroke-[2]" />
+            </button>
+          </div>
+
+          {/* Settings Gear Icon (Opens Firebase Config & Settings Modal) */}
           <button
-            ref={slabTabRef}
             type="button"
-            onClick={() => onChangeTab('slab')}
-            className={`relative z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer ${
-              activeTab === 'slab'
-                ? 'text-violet-700 dark:text-[#c58af9]'
-                : 'text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed]'
-            }`}
+            onClick={onOpenFirebaseConfig}
+            className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-[#18191b] text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed] transition-colors cursor-pointer google-btn-press"
+            title="Settings & Firebase"
+            aria-label="Settings"
           >
-            <BookCheck className="w-3.5 h-3.5 stroke-[2.2]" />
-            <span>Office</span>
-            {slabCount > 0 && (
-              <span className="inline-flex px-1.5 py-0.2 bg-violet-100 dark:bg-purple-900/40 text-violet-700 dark:text-purple-300 text-[10px] font-extrabold rounded-full">
-                {slabCount}
-              </span>
-            )}
+            <Settings className="w-5 h-5 stroke-[1.8]" />
           </button>
-        </nav>
 
-        {/* Right: Google Profile Button and Dropdown Menu */}
-        <div className="flex items-center gap-2 flex-shrink-0 z-20">
+          {/* Google Apps 9-Dot Launcher Icon */}
+          <button
+            type="button"
+            onClick={onOpenTranscript}
+            className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-[#18191b] text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed] transition-colors cursor-pointer google-btn-press"
+            title="Academic Tools & Transcript"
+            aria-label="Academic Tools"
+          >
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <circle cx="5" cy="5" r="2" />
+              <circle cx="12" cy="5" r="2" />
+              <circle cx="19" cy="5" r="2" />
+              <circle cx="5" cy="12" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="19" cy="12" r="2" />
+              <circle cx="5" cy="19" r="2" />
+              <circle cx="12" cy="19" r="2" />
+              <circle cx="19" cy="19" r="2" />
+            </svg>
+          </button>
+
+          {/* Google Account Profile Button with Cyan/Blue Gradient Ring */}
           <div className="relative" ref={menuRef}>
             <button
               type="button"
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center justify-center p-0.5 rounded-full hover:ring-3 hover:ring-slate-200 dark:hover:ring-[#26282a] focus:outline-hidden focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer google-btn-press"
+              className="flex items-center justify-center p-[2px] rounded-full bg-gradient-to-tr from-cyan-400 via-blue-500 to-indigo-500 hover:scale-105 focus:outline-hidden focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer google-btn-press shadow-xs flex-shrink-0"
               aria-label="Google Account"
               title={user ? (user.displayName || user.email || 'Google Account') : 'Google Account / Profile'}
             >
-              {user ? (
-                user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || 'Google Account'}
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-slate-200 dark:border-[#26282a]"
-                  />
+              <div className="rounded-full overflow-hidden bg-white dark:bg-[#0f0f10] p-[1.5px]">
+                {user ? (
+                  user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || 'Google Account'}
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center">
+                      {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                    </div>
+                  )
                 ) : (
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center shadow-xs">
-                    {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 dark:bg-[#18191b] text-slate-600 dark:text-[#e8eaed] flex items-center justify-center">
+                    <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500 dark:text-[#9aa0a6]" />
                   </div>
-                )
-              ) : (
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 dark:bg-[#202123] text-slate-600 dark:text-[#e8eaed] flex items-center justify-center border border-slate-200 dark:border-[#26282a]">
-                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 dark:text-[#9aa0a6]" />
-                </div>
-              )}
+                )}
+              </div>
             </button>
 
             {/* Google Account Popover Menu */}
