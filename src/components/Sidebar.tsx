@@ -7,7 +7,6 @@ import {
   BookMarked,
   BookCheck,
   FileText,
-  Sparkles,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem, NoteSource } from '../types/notebook';
@@ -164,9 +163,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] group google-btn-press"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-2xs">
-                  <Sparkles className="w-3 h-3 text-white stroke-[2.2]" />
-                </div>
+                <img
+                  src="/gemini-icon.png"
+                  alt="Gemini"
+                  className="w-5 h-5 object-contain flex-shrink-0 group-hover:scale-110 transition-transform duration-200"
+                />
                 <span className="group-hover:text-blue-700 dark:group-hover:text-[#8ab4f8] font-bold">Gemini</span>
               </div>
             </button>
