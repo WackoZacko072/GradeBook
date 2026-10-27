@@ -100,6 +100,16 @@ export const App: React.FC = () => {
   const [isAiAdvisorOpen, setIsAiAdvisorOpen] = useState(false);
   const [prefilledAdvisorPrompt, setPrefilledAdvisorPrompt] = useState<string | undefined>(undefined);
 
+  // Dashboard layout view mode (grid cards vs list rows)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('gemini_gradebook_view_mode') as 'grid' | 'list') || 'grid';
+  });
+
+  const handleToggleViewMode = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+    localStorage.setItem('gemini_gradebook_view_mode', mode);
+  };
+
   // Scroll ref for main content
   const mainContentRef = useRef<HTMLElement>(null);
 
@@ -355,6 +365,8 @@ export const App: React.FC = () => {
         onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
+        viewMode={viewMode}
+        onToggleViewMode={handleToggleViewMode}
       />
 
       {/* App Body: Full width flex layout */}
@@ -464,6 +476,7 @@ export const App: React.FC = () => {
                   onOpenAddClass={() => setIsAddModalOpen(true)}
                   onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
                   onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
+                  viewMode={viewMode}
                 />
               )}
             </div>

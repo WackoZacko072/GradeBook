@@ -1,13 +1,11 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
-  Search,
   Plus,
   BookOpen,
   FileText,
   Sliders,
   ChevronRight,
   HelpCircle,
-  X,
   ShieldCheck,
   HeartHandshake,
   GraduationCap,
@@ -17,8 +15,9 @@ import {
   calculateClassAverage,
   calculateOverallAverage,
   calculateCumulativeGPA,
+  validateCategoryWeights,
+  roundTo,
 } from '../utils/gradeCalculations';
-import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
   classes: ClassItem[];
@@ -26,17 +25,17 @@ interface DashboardProps {
   onOpenAddClass: () => void;
   onOpenFirebaseConfig?: () => void;
   onOpenAiAdvisor?: (prompt?: string) => void;
+  viewMode?: 'grid' | 'list';
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   classes,
   onSelectClass,
   onOpenAddClass,
-  onOpenFirebaseConfig,
+  onOpenFirebaseConfig: _onOpenFirebaseConfig,
   onOpenAiAdvisor: _onOpenAiAdvisor,
+  viewMode = 'grid',
 }) => {
-  const { user, isConfigured, signInWithGoogle } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
   const [showCalculationInfo, setShowCalculationInfo] = useState(false);
 
   // Overall calculations across all classes
@@ -56,99 +55,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
     );
   }, 0);
 
-  // Filter classes by search
-  const filteredClasses = classes.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const firstName = user?.displayName
-    ? user.displayName.split(' ')[0]
-    : user?.email
-    ? user.email.split('@')[0]
-    : null;
-
   return (
     <div className="space-y-8 animate-fade-scale select-none">
-      {/* 0. Guest Banner (if not logged in) */}
-      {!user && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200/80 dark:border-blue-800/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs transition-colors">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#18191b] shadow-2xs border border-blue-200/60 dark:border-blue-800/50 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.02 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-[#e8eaed]">
-                Want your own private gradebook synced to the cloud?
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-[#c4c7c5] mt-0.5">
-                Sign in with Google to create your personal account, save courses securely, and access them from any device.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={isConfigured ? signInWithGoogle : onOpenFirebaseConfig}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer flex-shrink-0 self-stretch sm:self-auto justify-center google-btn-press"
-          >
-            <span>Sign in with Google</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {/* 1. Header Title & Top Add Class Button */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div className="flex items-start gap-3.5 sm:gap-4">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-white via-slate-50 to-blue-50/40 dark:from-[#18191b] dark:via-[#18191b] dark:to-[#26282a] border border-slate-200/90 dark:border-[#26282a] p-2 sm:p-2.5 flex items-center justify-center flex-shrink-0 shadow-sm shadow-blue-500/10">
-            <img
-              src="/gemini-gradebook-logo.png"
-              alt="Gemini Gradebook"
-              className="w-full h-full object-contain filter drop-shadow-sm brightness-105"
-            />
-          </div>
-          <div>
-            <span className="block text-[11px] font-bold text-blue-600 dark:text-[#8ab4f8] uppercase tracking-widest mb-1">
-              {firstName ? `${firstName}'s Gradebook` : 'Gemini Gradebook'}
-            </span>
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
-              {firstName ? `Welcome back, ${firstName}.` : 'A clearer view of your grades.'}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-[#c4c7c5] mt-1">
-              {classes.length === 0
-                ? 'Your gradebook is clean and ready. Add your current courses to start tracking.'
-                : 'All your classes. One place to keep track.'}
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={onOpenAddClass}
-          className="self-start sm:self-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px] google-btn-press"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Add class</span>
-        </button>
-      </div>
-
-      {/* 2. Hero Banner & Stat Cards Grid */}
+      {/* 1. Hero Banner & Stat Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
         {/* Large Blue Hero Card (2 cols) */}
         <div className="lg:col-span-2 bg-gradient-to-r from-[#2052DE] via-[#2563EB] to-[#1D4ED8] dark:from-[#1e3a8a] dark:via-[#2563eb] dark:to-[#1e40af] text-white rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-xs min-h-[200px] sm:min-h-[220px] google-card">
@@ -190,7 +99,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <GraduationCap className="w-3.5 h-3.5 text-white" />
                 <span>GPA: {classes.length > 0 ? `${gpaInfo.gpa.toFixed(2)} / 4.0` : '--'}</span>
               </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-xs text-white text-xs font-medium border border-white/10 select-none">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-xs text-white text-xs font-medium border border-white/10 select-none">
                 <span>Letter: {classes.length > 0 ? overallCalc.letterGrade : '--'}</span>
               </div>
             </div>
@@ -233,11 +142,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* 3. Your Classes Section */}
+      {/* 2. Your Classes Section */}
       <div className="space-y-4">
-        {/* Section Header with Search (shown only if classes exist) */}
+        {/* Section Header with Add Class Button (Find a class search bar removed) */}
         {classes.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-slate-900 dark:text-[#e8eaed] tracking-tight">Your classes</h2>
               <span className="px-2 py-0.5 text-xs font-bold bg-slate-100 dark:bg-[#26282a] text-slate-600 dark:text-[#c4c7c5] rounded-lg">
@@ -245,25 +154,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </span>
             </div>
 
-            <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-slate-400 dark:text-[#80868b] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Find a class..."
-                className="w-full pl-9 pr-8 py-1.5 text-xs bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-xl placeholder-slate-400 dark:placeholder-[#80868b] text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-1 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] focus:border-blue-600 transition-all min-h-[36px]"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={onOpenAddClass}
+              className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer google-btn-press"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Add class</span>
+            </button>
           </div>
         )}
 
@@ -275,7 +173,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <BookOpen className="w-8 h-8 stroke-[2]" />
             </div>
             <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-[#e8eaed] tracking-tight">
-              {firstName ? `${firstName}'s Gradebook is Ready` : 'Your Gradebook is Clean & Ready'}
+              Your Gradebook is Clean & Ready
             </h3>
             <p className="text-sm text-slate-500 dark:text-[#c4c7c5] mt-2 max-w-md mx-auto leading-relaxed">
               You start with zero classes. Add your current courses to set up custom category weights, track assignments, and calculate exactly what you need on finals.
@@ -319,26 +217,96 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
-        ) : filteredClasses.length === 0 ? (
-          /* Search Filter Empty State */
-          <div className="bg-white dark:bg-[#18191b] rounded-2xl p-10 text-center border border-slate-200/80 dark:border-[#26282a] shadow-2xs">
-            <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center mb-3">
-              <Search className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]">No classes match "{searchQuery}"</h3>
-            <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1">Try another search term or clear the filter.</p>
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-lg cursor-pointer google-btn-press"
-            >
-              Clear filter
-            </button>
+        ) : viewMode === 'list' ? (
+          /* Class List Layout (Table Rows) */
+          <div className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] overflow-hidden shadow-2xs divide-y divide-slate-100 dark:divide-[#26282a]">
+            {classes.map((item) => {
+              const classCalc = calculateClassAverage(item);
+              const weightCheck = validateCategoryWeights(item.categories);
+              const gradedCount = item.categories.reduce(
+                (sum, cat) =>
+                  sum + cat.assessments.filter((a) => a.score !== null && a.score !== undefined && !isNaN(a.score)).length,
+                0
+              );
+              const accentColor = item.color || '#2563EB';
+              const targetDiff = item.targetGrade !== undefined ? roundTo(classCalc.average - item.targetGrade, 1) : null;
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => onSelectClass(item.id)}
+                  className="px-4 py-3.5 sm:px-5 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-[#202123] cursor-pointer transition-colors group"
+                >
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span
+                      className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex-shrink-0 shadow-2xs group-hover:scale-110 transition-transform"
+                      style={{ backgroundColor: accentColor }}
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-[#e8eaed] truncate group-hover:text-blue-600 dark:group-hover:text-[#8ab4f8]">
+                          {item.name}
+                        </h3>
+                        {item.code && (
+                          <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#26282a] text-slate-600 dark:text-[#9aa0a6] font-medium">
+                            {item.code}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-[#9aa0a6] mt-0.5">
+                        <span>
+                          {item.categories.length} {item.categories.length === 1 ? 'category' : 'categories'}
+                        </span>
+                        <span>•</span>
+                        <span>{gradedCount} graded</span>
+                        <span>•</span>
+                        <span>{item.credits ?? 3.0} credits</span>
+                        {item.targetGrade !== undefined && (
+                          <>
+                            <span>•</span>
+                            <span>Target: {item.targetGrade}%</span>
+                          </>
+                        )}
+                        {!weightCheck.isValid && (
+                          <>
+                            <span>•</span>
+                            <span className="text-amber-600 dark:text-amber-400 font-semibold">
+                              Weights {weightCheck.totalWeight}%
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0 pl-7 sm:pl-0">
+                    {targetDiff !== null && (
+                      <span
+                        className={`text-xs font-semibold ${
+                          targetDiff >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                        }`}
+                      >
+                        {targetDiff >= 0 ? `+${targetDiff}% vs target` : `${targetDiff}% vs target`}
+                      </span>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <span className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-[#e8eaed]">
+                        {classCalc.average.toFixed(1)}%
+                      </span>
+                      <span className="text-xs font-extrabold px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-[#8ab4f8]">
+                        {classCalc.letterGrade}
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-[#8ab4f8] group-hover:translate-x-0.5 transition-all ml-1" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           /* Class Cards Grid with Google Hover Lift */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredClasses.map((item) => {
+            {classes.map((item) => {
               const classCalc = calculateClassAverage(item);
               const gradedCount = item.categories.reduce(
                 (sum, cat) =>
@@ -442,7 +410,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
       </div>
 
-      {/* 4. Bottom Info: How your grades are calculated */}
+      {/* 3. Bottom Info: How your grades are calculated */}
       <div className="pt-2">
         <button
           type="button"
@@ -475,7 +443,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
       </div>
 
-      {/* 5. Minimal Footer */}
+      {/* 4. Minimal Footer */}
       <footer className="pt-8 pb-4 border-t border-slate-200/60 dark:border-[#26282a] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 dark:text-[#80868b]">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-slate-400 dark:text-[#8ab4f8]" />
