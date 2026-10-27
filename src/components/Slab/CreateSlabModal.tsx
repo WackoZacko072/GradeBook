@@ -12,11 +12,13 @@ import {
 } from 'lucide-react';
 import type { NoteItem, NoteSource } from '../../types/notebook';
 import type { SlabItem, SlabType } from '../../types/slab';
+import type { ClassItem } from '../../types/grade';
 import { generateSlabSet } from '../../utils/slabAiService';
 
 interface CreateSlabModalProps {
   isOpen: boolean;
   onClose: () => void;
+  classes?: ClassItem[];
   notes?: NoteItem[];
   sources?: NoteSource[];
   initialPrompt?: string;
@@ -35,6 +37,7 @@ const PROMPT_SUGGESTIONS = [
 export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
   isOpen,
   onClose,
+  classes = [],
   notes = [],
   sources = [],
   initialPrompt = '',
@@ -44,14 +47,23 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
 }) => {
   const [prompt, setPrompt] = useState(initialPrompt);
   const [slabType, setSlabType] = useState<SlabType>(initialType);
+  const [selectedClassNotebook, setSelectedClassNotebook] = useState<string>('all');
   const [selectedSourceIds, setSelectedSourceIds] = useState<string[]>(initialSourceIds);
-  const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
+  const [selectedNoteIds] = useState<string[]>([]);
   const [useAllSources, setUseAllSources] = useState(initialSourceIds.length === 0);
   const [itemCount, setItemCount] = useState(20);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  // Filter sources for currently chosen class notebook
+  const availableSources =
+    selectedClassNotebook === 'all'
+      ? sources
+      : sources.filter((s) => s.classId === selectedClassNotebook);
+
+  const selectedClassEntity = classes.find((c) => c.id === selectedClassNotebook);
 
   const handlePromptChange = (val: string) => {
     setPrompt(val);
@@ -85,12 +97,20 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
         prompt.match(/\b(?:create|make|give me|generate)\s+(\d+)\b/i);
       const effectiveCount = promptMatch ? Math.max(parseInt(promptMatch[1], 10), itemCount) : itemCount;
 
+      const targetSources = selectedClassNotebook === 'all'
+        ? sources
+        : sources.filter((s) => s.classId === selectedClassNotebook);
+
+      const effectiveSourceIds = useAllSources
+        ? (selectedClassNotebook === 'all' ? undefined : targetSources.map((s) => s.id))
+        : selectedSourceIds;
+
       const generated = await generateSlabSet({
         prompt,
         type: slabType,
         notes,
         sources,
-        selectedSourceIds: useAllSources ? undefined : selectedSourceIds,
+        selectedSourceIds: effectiveSourceIds,
         selectedNoteIds: useAllSources ? undefined : selectedNoteIds,
         count: effectiveCount,
       });
@@ -269,7 +289,70 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             </div>
           </div>
 
-          {/* 4. Grounding Sources (PDFs, Files & Notes) */}
+          {/* 4. Choose Class Notebook */}
+          {classes.length > 0 && (
+            <div>
+              <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-1.5">
+                Choose Class Notebook
+              </label>
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+                <button
+                  type="button"
+                  disabled={isGenerating}
+                  onClick={() => setSelectedClassNotebook('all')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
+                    selectedClassNotebook === 'all'
+                      ? 'bg-violet-600 text-white shadow-2xs'
+                      : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+                  }`}
+                >
+                  <span>All Classes</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                      selectedClassNotebook === 'all'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-100 dark:bg-[#353739]'
+                    }`}
+                  >
+                    {sources.length}
+                  </span>
+                </button>
+
+                {classes.map((cls) => {
+                  const count = sources.filter((s) => s.classId === cls.id).length;
+                  const isSelected = selectedClassNotebook === cls.id;
+                  return (
+                    <button
+                      key={cls.id}
+                      type="button"
+                      disabled={isGenerating}
+                      onClick={() => setSelectedClassNotebook(cls.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer google-btn-press ${
+                        isSelected
+                          ? 'bg-violet-600 text-white shadow-2xs'
+                          : 'bg-white dark:bg-[#1e1f20] text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#303134] border border-slate-200 dark:border-[#3c4043]'
+                      }`}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: cls.color || '#8B5CF6' }}
+                      />
+                      <span className="truncate max-w-[120px]">{cls.name}</span>
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                          isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-[#353739]'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 5. Grounding Sources (PDFs, Files & Notes) */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">
@@ -290,7 +373,9 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-violet-600 dark:text-[#c58af9] flex-shrink-0" />
                   <span>
-                    Analyzing all {sources.length > 0 ? sources.length : notes.length} sources and uploaded materials
+                    {selectedClassEntity
+                      ? `Analyzing all ${availableSources.length} sources from ${selectedClassEntity.name}`
+                      : `Analyzing all ${sources.length > 0 ? sources.length : notes.length} sources and uploaded materials`}
                   </span>
                 </div>
                 <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
@@ -299,12 +384,14 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
               </div>
             ) : (
               <div className="border border-slate-200 dark:border-[#3c4043] rounded-2xl p-2.5 max-h-44 overflow-y-auto space-y-1.5 bg-slate-50 dark:bg-[#1e1f20]">
-                {sources.length === 0 && notes.length === 0 ? (
+                {availableSources.length === 0 ? (
                   <p className="text-xs text-slate-400 dark:text-[#9aa0a6] p-2 text-center">
-                    No sources uploaded yet. Gemini will generate high-yield questions from your prompt!
+                    {selectedClassEntity
+                      ? `No sources uploaded in ${selectedClassEntity.name} yet.`
+                      : 'No sources uploaded yet.'} Gemini will generate high-yield questions from your prompt!
                   </p>
-                ) : sources.length > 0 ? (
-                  sources.map((s) => {
+                ) : (
+                  availableSources.map((s) => {
                     const isChecked = selectedSourceIds.includes(s.id);
                     return (
                       <div
@@ -326,40 +413,6 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                               {s.className}
                             </span>
                           )}
-                        </div>
-                        <div
-                          className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 ${
-                            isChecked
-                              ? 'bg-violet-600 border-violet-600 text-white'
-                              : 'border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#282a2c]'
-                          }`}
-                        >
-                          {isChecked && <Check className="w-3 h-3 stroke-[2.8]" />}
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  notes.map((n) => {
-                    const isChecked = selectedNoteIds.includes(n.id);
-                    return (
-                      <div
-                        key={n.id}
-                        onClick={() => {
-                          if (isGenerating) return;
-                          setSelectedNoteIds((prev) =>
-                            prev.includes(n.id) ? prev.filter((id) => id !== n.id) : [...prev, n.id]
-                          );
-                        }}
-                        className={`flex items-center justify-between p-2 rounded-xl text-xs cursor-pointer transition-colors ${
-                          isChecked
-                            ? 'bg-violet-100/70 dark:bg-violet-950/50 text-violet-900 dark:text-[#c58af9] font-semibold'
-                            : 'hover:bg-slate-100 dark:hover:bg-[#303134] text-slate-700 dark:text-[#c4c7c5]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <span className="text-sm">{n.icon || '📝'}</span>
-                          <span className="truncate">{n.title}</span>
                         </div>
                         <div
                           className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 ${

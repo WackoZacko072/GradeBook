@@ -112,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <BookMarked className="w-4 h-4 text-indigo-600 dark:text-[#c58af9]" />
-                <span>Sources</span>
+                <span>Notebook</span>
               </div>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
@@ -314,7 +314,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider">
-                Your Sources
+                Class Notebooks
               </span>
             </div>
 

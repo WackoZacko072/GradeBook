@@ -409,6 +409,7 @@ export const App: React.FC = () => {
                   slabs={slabs}
                   notes={notes}
                   sources={sources}
+                  classes={classes}
                   selectedSlabId={selectedSlabId}
                   initialCreateConfig={slabModalConfig}
                   isCreateModalForcedOpen={isCreateSlabForced}

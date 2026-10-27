@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import type { SlabItem, SlabType } from '../../types/slab';
 import type { NoteItem, NoteSource } from '../../types/notebook';
+import type { ClassItem } from '../../types/grade';
 import { MarkdownRenderer } from '../MarkdownRenderer';
 import { CreateSlabModal } from './CreateSlabModal';
 
@@ -26,6 +27,7 @@ interface SlabViewProps {
   slabs: SlabItem[];
   notes: NoteItem[];
   sources?: NoteSource[];
+  classes?: ClassItem[];
   selectedSlabId: string | null;
   onSelectSlab: (id: string | null) => void;
   onAddSlab: (slab: SlabItem) => void;
@@ -44,6 +46,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
   slabs,
   notes,
   sources = [],
+  classes = [],
   selectedSlabId,
   onSelectSlab,
   onAddSlab,
@@ -1039,6 +1042,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
           setIsCreateModalOpen(false);
           if (onCloseCreateModalForced) onCloseCreateModalForced();
         }}
+        classes={classes}
         notes={notes}
         sources={sources}
         initialPrompt={initialCreateConfig?.prompt}
