@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   X,
-  Sparkles,
   BookCheck,
   AlertCircle,
   FileText,
@@ -522,7 +521,11 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4 stroke-[2.2]" />
+                <img
+                  src="/gemini-sparkle-logo.png"
+                  alt="Gemini"
+                  className="w-4 h-4 object-contain"
+                />
                 <span>Generate Office Set</span>
                 <ChevronRight className="w-4 h-4" />
               </>

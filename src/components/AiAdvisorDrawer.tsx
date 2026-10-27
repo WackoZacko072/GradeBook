@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Sparkles,
   Send,
   Trash2,
   User,
@@ -694,8 +693,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
               {currentSession.messages.length === 0 ? (
                 /* Clean Gemini-Style Welcome Canvas */
                 <div className="py-12 sm:py-16 px-4 flex flex-col items-center text-center max-w-xl mx-auto animate-in fade-in zoom-in-95 duration-200">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 text-white flex items-center justify-center mb-4 shadow-md shadow-blue-500/20">
-                    <Sparkles className="w-7 h-7 stroke-[2.2]" />
+                  <div className="w-16 h-16 flex items-center justify-center mb-4">
+                    <img
+                      src="/gemini-sparkle-logo.png"
+                      alt="Gemini"
+                      className="w-16 h-16 object-contain filter drop-shadow-md"
+                    />
                   </div>
                   <h2 className="font-extrabold text-slate-900 dark:text-[#e8eaed] text-2xl tracking-tight">
                     Meet Gemini
@@ -713,8 +716,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                       className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       {msg.role === 'model' && (
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs">
-                          <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
+                        <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#303134] border border-slate-200/80 dark:border-[#3c4043] flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs p-1">
+                          <img
+                            src="/gemini-sparkle-logo.png"
+                            alt="Gemini"
+                            className="w-5.5 h-5.5 object-contain"
+                          />
                         </div>
                       )}
 
@@ -732,7 +739,11 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                             <MarkdownRenderer content={msg.content} />
                             <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 dark:border-[#3c4043] text-[11px] text-slate-400 dark:text-[#9aa0a6]">
                               <span className="flex items-center gap-1.5 text-slate-400 dark:text-[#9aa0a6]">
-                                <Sparkles className="w-3 h-3 text-blue-500 dark:text-blue-400" />
+                                <img
+                                  src="/gemini-sparkle-logo.png"
+                                  alt="Gemini"
+                                  className="w-3.5 h-3.5 object-contain"
+                                />
                                 <span>Gemini</span>
                               </span>
                               <button
@@ -768,8 +779,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   {/* Streaming live response bubble */}
                   {isLoading && streamingText && streamingText.length > 0 && (
                     <div className="flex gap-3 justify-start animate-in fade-in duration-150">
-                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs">
-                        <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#303134] border border-slate-200/80 dark:border-[#3c4043] flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs p-1">
+                        <img
+                          src="/gemini-sparkle-logo.png"
+                          alt="Gemini"
+                          className="w-5.5 h-5.5 object-contain"
+                        />
                       </div>
                       <div className="bg-white dark:bg-[#282a2c] border border-slate-200/90 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] p-5 sm:p-6 w-full max-w-3xl rounded-2xl rounded-bl-xs shadow-2xs leading-relaxed">
                         <MarkdownRenderer content={streamingText} />
@@ -781,8 +796,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   {/* Thinking skeleton before first token */}
                   {isLoading && (!streamingText || streamingText.length === 0) && (
                     <div className="flex gap-3 justify-start animate-in fade-in duration-150">
-                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs animate-pulse">
-                        <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#303134] border border-slate-200/80 dark:border-[#3c4043] flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs p-1 animate-pulse">
+                        <img
+                          src="/gemini-sparkle-logo.png"
+                          alt="Gemini"
+                          className="w-5.5 h-5.5 object-contain"
+                        />
                       </div>
                       <div className="bg-white dark:bg-[#282a2c] border border-slate-200 dark:border-[#3c4043] rounded-2xl rounded-bl-xs p-4 shadow-2xs">
                         <div className="flex items-center gap-2.5 text-slate-600 dark:text-[#c4c7c5] text-xs font-medium">
@@ -825,7 +844,11 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
 
               <div className="flex items-center justify-between gap-2 mt-2 px-1 text-[11px] text-slate-400 dark:text-[#9aa0a6]">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <img
+                    src="/gemini-sparkle-logo.png"
+                    alt="Gemini"
+                    className="w-3.5 h-3.5 object-contain"
+                  />
                   <span>Gemini • Academic Co-Pilot</span>
                   <span>&bull;</span>
                   <span>Shift + Enter for new line</span>

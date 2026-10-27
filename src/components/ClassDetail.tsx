@@ -301,11 +301,15 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                   `Give me an academic strategy for ${classItem.name}. My current grade is ${classCalc.average.toFixed(1)}% (${letterGradeInfo.letter}). Calculate what score I need on my upcoming assessments to hit my target of ${classItem.targetGrade || 90}%, and tell me which assignments have the highest leverage.`
                 )
               }
-              title="Ask AI Advisor about this course"
-              className="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer min-h-[44px]"
+              title="Ask Gemini about this course"
+              className="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer min-h-[44px] google-btn-press"
             >
-              <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
-              <span>Ask AI Advisor</span>
+              <img
+                src="/gemini-sparkle-logo.png"
+                alt="Gemini"
+                className="w-4 h-4 object-contain"
+              />
+              <span>Ask Gemini</span>
             </button>
 
             <button

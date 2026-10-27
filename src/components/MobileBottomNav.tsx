@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Sparkles, BookMarked, BookCheck } from 'lucide-react';
+import { BookOpen, BookMarked, BookCheck } from 'lucide-react';
 
 interface MobileBottomNavProps {
   activeTab: 'gradebook' | 'notebook' | 'slab';
@@ -110,8 +110,12 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         onClick={onOpenAiAdvisor}
         className="flex flex-col items-center justify-center gap-1 flex-1 py-1 cursor-pointer transition-colors text-blue-600 dark:text-[#8ab4f8] hover:text-blue-700 dark:hover:text-blue-300 font-semibold google-btn-press"
       >
-        <div className="p-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8]">
-          <Sparkles className="w-5 h-5 stroke-[2.2]" />
+        <div className="p-1 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 flex items-center justify-center w-8 h-8">
+          <img
+            src="/gemini-sparkle-logo.png"
+            alt="Gemini"
+            className="w-5.5 h-5.5 object-contain"
+          />
         </div>
         <span className="text-[11px] tracking-tight">Gemini</span>
       </button>
