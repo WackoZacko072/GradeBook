@@ -33,6 +33,7 @@ $centerY = [int](($minY + $maxY) / 2)
 $cropLeft = $centerX - [int]($cropSize / 2)
 $cropTop = $centerY - [int]($cropSize / 2)
 
+Write-Output "Processing user's neon triangle logo: $origWidth x $origHeight"
 Write-Output "Crop size: $cropSize x $cropSize centered at ($centerX, $centerY)"
 
 # 1. Output 512x512 High-Res transparent logo
@@ -54,7 +55,7 @@ for ($outY = 0; $outY -lt $outSize; $outY++) {
         $g = [double]$p.G
         $b = [double]$p.B
 
-        # Euclidean distance from background
+        # Euclidean distance from dark background (17, 33, 44)
         $dist = [Math]::Sqrt([Math]::Pow($r - $bgR, 2) + [Math]::Pow($g - $bgG, 2) + [Math]::Pow($b - $bgB, 2))
 
         if ($dist -lt 12.0) {
