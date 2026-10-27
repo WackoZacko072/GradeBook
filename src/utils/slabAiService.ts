@@ -7,10 +7,10 @@ import {
 } from './aiAdvisorService';
 
 const FALLBACK_MODELS: GeminiModel[] = [
+  'gemini-3.5-flash-lite',
   'gemini-3.5-flash',
   'gemini-3.6-flash',
   'gemini-3.8-flash',
-  'gemini-3.5-flash-lite',
 ];
 
 import type { NoteSource } from '../types/notebook';
@@ -84,7 +84,7 @@ async function callGeminiForSlab(systemPrompt: string, userPrompt: string): Prom
     throw new Error('Gemini API key is missing. Please check your settings.');
   }
 
-  const preferredModel = getSelectedGeminiModel() || 'gemini-3.5-flash';
+  const preferredModel = getSelectedGeminiModel() || 'gemini-3.5-flash-lite';
   const modelsToTry: GeminiModel[] = [
     preferredModel,
     ...FALLBACK_MODELS.filter((m) => m !== preferredModel),
@@ -215,7 +215,99 @@ export async function generateSlabSet(options: GenerateSlabOptions): Promise<Sla
   const parsedPromptCount = promptNumMatch ? parseInt(promptNumMatch[1], 10) : 0;
   const finalCount = parsedPromptCount > 0 ? Math.max(parsedPromptCount, count) : count;
 
-  const systemPrompt = `You are Slab AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
+  let parsed: any = null;
+
+  // High-Speed Parallel Generation for 16+ items (e.g. 20, 25, 30 cards/questions)
+  if (finalCount >= 16) {
+    const countA = Math.ceil(finalCount / 2);
+    const countB = Math.floor(finalCount / 2);
+
+    const makeBatchSystemPrompt = (batchNum: number, batchCount: number, focusTopic: string) => `You are Slab AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
+Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) strictly grounded in the student's class sources and uploaded files.
+
+CANADIAN ENGLISH & SPELLING:
+- Use Canadian English conventions (e.g., colour, behaviour, centre, analyse).
+
+MATHEMATICAL & SCIENTIFIC NOTATION:
+- ALWAYS format formulas, scientific units, equations, and mathematical derivations in standard LaTeX ($...$ for inline, $$...$$ for display).
+
+OUTPUT FORMAT:
+Output ONLY a single valid JSON object strictly matching this schema:
+{
+  "title": "A concise, descriptive, professional name for this study set",
+  "description": "A 1-sentence overview of the concepts tested in this set",
+  "flashcards": [
+    {
+      "front": "Concept, term, question, or theorem to recall",
+      "back": "Clear, comprehensive definition or answer with LaTeX formulas and key steps if applicable"
+    }
+  ],
+  "mcqs": [
+    {
+      "question": "Clear, high-yield multiple-choice question stem with LaTeX if relevant",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctIndex": 0,
+      "explanation": "Detailed pedagogical explanation explaining why the correct choice is true and why distractors are false"
+    }
+  ]
+}
+
+RULES:
+1. PARALLEL BATCH REQUIREMENT: This is BATCH ${batchNum} of 2. You MUST generate EXACTLY ${batchCount} items in the target array.
+   ${focusTopic}
+   - If 'flashcards', output EXACTLY ${batchCount} items in the "flashcards" array and an empty "mcqs" array.
+   - If 'mcq', output EXACTLY ${batchCount} items in the "mcqs" array and an empty "flashcards" array.
+   - If 'both', output ~${Math.ceil(batchCount / 2)} items in "flashcards" and ~${Math.floor(batchCount / 2)} in "mcqs".
+2. Base questions directly on the provided class sources and files.`;
+
+    const makeBatchUserPrompt = (batchNum: number, batchCount: number, focusTopic: string) => `STUDENT REQUEST / PROMPT: "${prompt}" (BATCH ${batchNum}: ${focusTopic})
+REQUESTED TYPE: ${type}
+TARGET ITEM COUNT: ${batchCount} (CRITICAL: Output EXACTLY ${batchCount} items!)
+
+GROUNDING SOURCES (Notes & Uploaded Files):
+${context}`;
+
+    const sysA = makeBatchSystemPrompt(1, countA, 'Focus on core definitions, fundamental laws, and essential foundational formulas.');
+    const usrA = makeBatchUserPrompt(1, countA, 'Focus on core definitions, fundamental laws, and essential foundational formulas.');
+
+    const sysB = makeBatchSystemPrompt(2, countB, 'Focus on practical applications, problem-solving techniques, edge cases, and high-yield exam questions.');
+    const usrB = makeBatchUserPrompt(2, countB, 'Focus on practical applications, problem-solving techniques, edge cases, and high-yield exam questions.');
+
+    try {
+      const [resA, resB] = await Promise.all([
+        callGeminiForSlab(sysA, usrA),
+        callGeminiForSlab(sysB, usrB),
+      ]);
+
+      const parsedA = extractJsonObject(resA);
+      const parsedB = extractJsonObject(resB);
+
+      if (parsedA && parsedB) {
+        parsed = {
+          title: parsedA.title || parsedB.title || 'Study Set',
+          description: parsedA.description || parsedB.description,
+          flashcards: [
+            ...(Array.isArray(parsedA.flashcards) ? parsedA.flashcards : []),
+            ...(Array.isArray(parsedB.flashcards) ? parsedB.flashcards : []),
+          ],
+          mcqs: [
+            ...(Array.isArray(parsedA.mcqs) ? parsedA.mcqs : []),
+            ...(Array.isArray(parsedB.mcqs) ? parsedB.mcqs : []),
+          ],
+        };
+      } else if (parsedA) {
+        parsed = parsedA;
+      } else if (parsedB) {
+        parsed = parsedB;
+      }
+    } catch (parallelErr) {
+      console.warn('Parallel generation fallback to single query:', parallelErr);
+    }
+  }
+
+  // Fallback to single generation if count < 16 or parallel failed
+  if (!parsed) {
+    const systemPrompt = `You are Slab AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
 Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) strictly grounded in the student's class sources and uploaded files.
 
 CANADIAN ENGLISH & SPELLING:
@@ -252,15 +344,16 @@ RULES:
    - If 'both', output ~${Math.ceil(finalCount / 2)} items in "flashcards" and ~${Math.floor(finalCount / 2)} in "mcqs".
 2. Base questions directly on the provided class sources and files. If the user prompt asks for specific topics (e.g. 'Chapter 3 MCQs'), tailor the questions precisely.`;
 
-  const userPrompt = `STUDENT REQUEST / PROMPT: "${prompt}"
+    const userPrompt = `STUDENT REQUEST / PROMPT: "${prompt}"
 REQUESTED TYPE: ${type}
 TARGET ITEM COUNT: ${finalCount} (CRITICAL: Output EXACTLY ${finalCount} items, do not stop at 10!)
 
 GROUNDING SOURCES (Notes & Uploaded Files):
 ${context}`;
 
-  const rawReply = await callGeminiForSlab(systemPrompt, userPrompt);
-  const parsed = extractJsonObject(rawReply);
+    const rawReply = await callGeminiForSlab(systemPrompt, userPrompt);
+    parsed = extractJsonObject(rawReply);
+  }
 
   if (!parsed || (!Array.isArray(parsed.flashcards) && !Array.isArray(parsed.mcqs))) {
     throw new Error('Gemini did not return a valid study set structure. Please try adjusting your prompt.');

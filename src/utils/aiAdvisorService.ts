@@ -10,7 +10,7 @@ import {
 export const GEMINI_STORAGE_KEY = 'gradebook_gemini_api_key';
 export const GEMINI_MODEL_STORAGE_KEY = 'gradebook_gemini_model';
 
-export type GeminiModel = 'gemini-3.5-flash' | 'gemini-3.6-flash' | 'gemini-3.8-flash' | 'gemini-3.5-flash-lite';
+export type GeminiModel = 'gemini-3.5-flash-lite' | 'gemini-3.5-flash' | 'gemini-3.6-flash' | 'gemini-3.8-flash';
 
 export interface ChatMessage {
   id: string;
@@ -23,12 +23,12 @@ export interface ChatMessage {
 const BUILTIN_KEY_ENCODED = 'QVEuQWI4Uk42SjZidEc5WlExenNLcnpzMVNsUW1lanhISWhVdGNJbFZlbDJ3QzYwalF0SFE=';
 const BUILTIN_GEMINI_KEY = typeof atob === 'function' ? atob(BUILTIN_KEY_ENCODED) : '';
 
-// Supported modern models in priority order
+// Supported modern models in priority order (Fastest lite model first for all users)
 const FALLBACK_MODELS: GeminiModel[] = [
+  'gemini-3.5-flash-lite',
   'gemini-3.5-flash',
   'gemini-3.6-flash',
   'gemini-3.8-flash',
-  'gemini-3.5-flash-lite',
 ];
 
 /**
@@ -86,7 +86,7 @@ export function getSelectedGeminiModel(): GeminiModel {
   } catch {
     // ignore
   }
-  return 'gemini-3.5-flash';
+  return 'gemini-3.5-flash-lite';
 }
 
 export function saveSelectedGeminiModel(model: GeminiModel): void {
@@ -371,7 +371,7 @@ export async function sendSlateAiMessage(
     return `### ⚠️ Slate AI Unavailable\n\nNo Gemini API key is configured. Please make sure \`VITE_GEMINI_API_KEY\` is set in your environment variables.`;
   }
 
-  const startingModel = preferredModel || getSelectedGeminiModel() || 'gemini-3.5-flash';
+  const startingModel = preferredModel || getSelectedGeminiModel() || 'gemini-3.5-flash-lite';
   const modelsToTry: GeminiModel[] = [
     startingModel,
     ...FALLBACK_MODELS.filter((m) => m !== startingModel),
@@ -513,8 +513,201 @@ export async function sendSlateAiMessage(
 }
 
 /**
-  * Backwards-compatible wrapper for sendSlateAiMessage
-  */
+ * Real-time streaming caller for Slate AI chat with Server-Sent Events (SSE).
+ * Starts delivering tokens in ~200ms instead of waiting for full generation.
+ */
+export async function streamSlateAiMessage(
+  userPrompt: string,
+  history: ChatMessage[],
+  classes: ClassItem[],
+  notes: NoteItem[] = [],
+  onChunk: (accumulatedText: string) => void,
+  preferredModel?: GeminiModel,
+  sources: NoteSource[] = []
+): Promise<string> {
+  const apiKey = getGeminiApiKey();
+
+  if (!apiKey) {
+    const errText = `### ⚠️ Slate AI Unavailable\n\nNo Gemini API key is configured. Please make sure \`VITE_GEMINI_API_KEY\` is set in your environment variables.`;
+    onChunk(errText);
+    return errText;
+  }
+
+  const startingModel = preferredModel || getSelectedGeminiModel() || 'gemini-3.5-flash-lite';
+  const modelsToTry: GeminiModel[] = [
+    startingModel,
+    ...FALLBACK_MODELS.filter((m) => m !== startingModel),
+  ];
+
+  const systemInstructionText = buildSlateAiSystemPrompt(classes, notes, sources);
+
+  const sanitizedContents: Array<{ role: 'user' | 'model'; parts: [{ text: string }] }> = [];
+
+  for (const msg of history) {
+    const text = msg.content?.trim();
+    if (!text) continue;
+    if (text.includes('Gemini API Key Required') || text.includes('API Key Blocked by Google')) continue;
+
+    const role: 'user' | 'model' = msg.role === 'user' ? 'user' : 'model';
+    if (sanitizedContents.length === 0 && role !== 'user') continue;
+
+    if (sanitizedContents.length > 0 && sanitizedContents[sanitizedContents.length - 1].role === role) {
+      sanitizedContents[sanitizedContents.length - 1].parts[0].text += `\n\n${text}`;
+    } else {
+      sanitizedContents.push({ role, parts: [{ text }] });
+    }
+  }
+
+  if (sanitizedContents.length > 0 && sanitizedContents[sanitizedContents.length - 1].role === 'user') {
+    sanitizedContents[sanitizedContents.length - 1].parts[0].text += `\n\n${userPrompt}`;
+  } else {
+    sanitizedContents.push({
+      role: 'user',
+      parts: [{ text: userPrompt }],
+    });
+  }
+
+  const payload = {
+    systemInstruction: {
+      parts: [{ text: systemInstructionText }],
+    },
+    contents: sanitizedContents,
+    generationConfig: {
+      temperature: 0.6,
+      maxOutputTokens: 2500,
+    },
+  };
+
+  let lastError: Error | null = null;
+  let isPermissionOrBlocked = false;
+
+  for (const model of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => null);
+        const errMsg = errJson?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+
+        if (response.status === 404) {
+          console.warn(`Model ${model} returned 404, attempting fallback...`);
+          lastError = new Error(`Model ${model} not available on this endpoint.`);
+          continue;
+        }
+
+        if (response.status === 400 && (errMsg.includes('API_KEY_INVALID') || errMsg.includes('API key not valid'))) {
+          throw new Error('INVALID_API_KEY');
+        }
+
+        if (response.status === 403 && (errMsg.includes('blocked') || errMsg.includes('PERMISSION_DENIED'))) {
+          isPermissionOrBlocked = true;
+          lastError = new Error(errMsg);
+          continue;
+        }
+
+        if (response.status === 429) {
+          throw new Error('QUOTA_EXCEEDED');
+        }
+
+        lastError = new Error(errMsg);
+        continue;
+      }
+
+      if (!response.body) {
+        throw new Error('Response body is null');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let accumulatedText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+          const jsonStr = trimmed.slice(5).trim();
+          if (!jsonStr || jsonStr === '[DONE]') continue;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const textChunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (textChunk) {
+              accumulatedText += textChunk;
+              onChunk(accumulatedText);
+            }
+          } catch {
+            // Ignore incomplete chunks
+          }
+        }
+      }
+
+      // Check trailing buffer
+      if (buffer.trim().startsWith('data:')) {
+        const jsonStr = buffer.trim().slice(5).trim();
+        if (jsonStr && jsonStr !== '[DONE]') {
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const textChunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (textChunk) {
+              accumulatedText += textChunk;
+              onChunk(accumulatedText);
+            }
+          } catch {
+            // Ignore
+          }
+        }
+      }
+
+      if (accumulatedText.trim().length > 0) {
+        saveSelectedGeminiModel(model);
+        return accumulatedText;
+      }
+
+      lastError = new Error('Empty stream received.');
+    } catch (err: any) {
+      if (err.message === 'QUOTA_EXCEEDED' || err.message === 'INVALID_API_KEY') {
+        throw err;
+      }
+      lastError = err;
+    }
+  }
+
+  // Graceful fallback to non-streaming if network blocked SSE
+  try {
+    const fallbackResponse = await sendSlateAiMessage(userPrompt, history, classes, notes, startingModel, sources);
+    onChunk(fallbackResponse);
+    return fallbackResponse;
+  } catch (err: any) {
+    if (isPermissionOrBlocked) {
+      const msg = `### ⚠️ Gemini API Blocked\n\nThe request was blocked by Google's API (\`API_KEY_SERVICE_BLOCKED\`). Please check that your Gemini API key has access to the Generative Language API.`;
+      onChunk(msg);
+      return msg;
+    }
+    const msg = `### ⚠️ Unable to Reach Gemini AI\n${lastError?.message || err?.message || 'Unknown network error'}.\n\nPlease check your internet connection and try again.`;
+    onChunk(msg);
+    return msg;
+  }
+}
+
+/**
+ * Backwards-compatible wrapper for sendSlateAiMessage
+ */
 export async function sendAdvisorMessage(
   userPrompt: string,
   history: ChatMessage[],

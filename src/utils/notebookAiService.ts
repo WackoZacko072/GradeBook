@@ -13,10 +13,10 @@ import {
 
 // Priority order: latest stable flash models with working endpoints
 const FALLBACK_MODELS: GeminiModel[] = [
+  'gemini-3.5-flash-lite',
   'gemini-3.5-flash',
   'gemini-3.6-flash',
   'gemini-3.8-flash',
-  'gemini-3.5-flash-lite',
 ];
 
 /**
@@ -57,7 +57,7 @@ async function callGemini(systemPrompt: string, userPrompt: string): Promise<str
     throw new Error('Gemini API key is missing. Please check your settings or environment configuration.');
   }
 
-  const preferredModel = getSelectedGeminiModel() || 'gemini-3.5-flash';
+  const preferredModel = getSelectedGeminiModel() || 'gemini-3.5-flash-lite';
   const modelsToTry: GeminiModel[] = [
     preferredModel,
     ...FALLBACK_MODELS.filter((m) => m !== preferredModel),

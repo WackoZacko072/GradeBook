@@ -21,7 +21,7 @@ import type { ClassItem } from '../types/grade';
 import type { NoteItem, NoteSource } from '../types/notebook';
 import type { SlabItem } from '../types/slab';
 import {
-  sendSlateAiMessage,
+  streamSlateAiMessage,
   type ChatMessage,
 } from '../utils/aiAdvisorService';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -123,6 +123,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
 
   const [inputPrompt, setInputPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingText, setStreamingText] = useState<string | null>(null);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
@@ -153,12 +154,12 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     }
   }, [sessions]);
 
-  // Scroll to bottom on new message
+  // Scroll to bottom on new message or live streaming token
   useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [currentSession.messages, isLoading, isOpen]);
+  }, [currentSession.messages, isLoading, streamingText, isOpen]);
 
   // Handle prefilled prompt from other components
   useEffect(() => {
@@ -301,11 +302,23 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     updateSessionMessages(currentSession.id, updatedMessages, newTitle);
     setInputPrompt('');
     setIsLoading(true);
+    setStreamingText('');
     setErrorBanner(null);
     if (window.innerWidth < 768) setIsSidebarOpen(false);
 
     try {
-      const reply = await sendSlateAiMessage(prompt, currentSession.messages, classes, notes, undefined, sources);
+      const reply = await streamSlateAiMessage(
+        prompt,
+        currentSession.messages,
+        classes,
+        notes,
+        (accumulated) => {
+          setStreamingText(accumulated);
+        },
+        undefined,
+        sources
+      );
+
       const aiMessage: ChatMessage = {
         id: 'msg_' + (Date.now() + 1),
         role: 'model',
@@ -324,6 +337,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
       setErrorBanner(msg);
     } finally {
       setIsLoading(false);
+      setStreamingText(null);
     }
   };
 
@@ -758,7 +772,21 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                     </div>
                   ))}
 
-                  {isLoading && (
+                  {/* Streaming live response bubble */}
+                  {isLoading && streamingText && streamingText.length > 0 && (
+                    <div className="flex gap-3 justify-start animate-in fade-in duration-150">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs">
+                        <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
+                      </div>
+                      <div className="bg-white dark:bg-[#282a2c] border border-slate-200/90 dark:border-[#3c4043] text-slate-800 dark:text-[#e8eaed] p-5 sm:p-6 w-full max-w-3xl rounded-2xl rounded-bl-xs shadow-2xs leading-relaxed">
+                        <MarkdownRenderer content={streamingText} />
+                        <span className="inline-block w-2 h-4 ml-1 bg-blue-500 rounded-xs animate-pulse align-middle" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Thinking skeleton before first token */}
+                  {isLoading && (!streamingText || streamingText.length === 0) && (
                     <div className="flex gap-3 justify-start animate-in fade-in duration-150">
                       <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs animate-pulse">
                         <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
