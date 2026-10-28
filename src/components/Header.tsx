@@ -577,7 +577,7 @@ export const Header: React.FC<HeaderProps> = ({
                         href="https://about.google/products/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-7 h-7 rounded-full bg-[#2a2b2e] hover:bg-[#383a3e] flex items-center justify-center text-[#c4c7c5] transition-colors cursor-pointer"
+                        className="w-12 h-8 rounded-full bg-[#3c4043] hover:bg-[#4a4e52] flex items-center justify-center text-[#e3e3e3] transition-colors cursor-pointer"
                         title="Edit favorites"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -605,7 +605,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </a>
 
-                      {/* 2. Drive */}
+                      {/* 2. Drive (Rounded gradient triangle matching screenshot) */}
                       <a
                         href="https://drive.google.com"
                         target="_blank"
@@ -613,13 +613,40 @@ export const Header: React.FC<HeaderProps> = ({
                         className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 87.3 78" className="w-9 h-9">
-                            <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
-                            <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
-                            <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
-                            <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
-                            <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
-                            <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <defs>
+                              <linearGradient id="gg-drive-green" x1="0%" y1="100%" x2="80%" y2="0%">
+                                <stop offset="0%" stopColor="#5ec8ff" />
+                                <stop offset="45%" stopColor="#00b359" />
+                                <stop offset="100%" stopColor="#00a651" />
+                              </linearGradient>
+                              <linearGradient id="gg-drive-blue" x1="0%" y1="30%" x2="100%" y2="90%">
+                                <stop offset="0%" stopColor="#1a78ff" />
+                                <stop offset="70%" stopColor="#3b82f6" />
+                                <stop offset="100%" stopColor="#999cff" />
+                              </linearGradient>
+                              <linearGradient id="gg-drive-yellow" x1="20%" y1="0%" x2="80%" y2="100%">
+                                <stop offset="0%" stopColor="#ffd633" />
+                                <stop offset="100%" stopColor="#fbbc04" />
+                              </linearGradient>
+                            </defs>
+                            {/* Top Green Lobe */}
+                            <path
+                              fill="url(#gg-drive-green)"
+                              d="M17.2 9.5C19.2 6 23.8 5 27.5 6.8c1.8.9 3.3 2.5 4.3 4.3l3.2 5.6-15.5 8.8H9.2l8-16z"
+                            />
+                            {/* Bottom-Left Blue Lobe */}
+                            <path
+                              fill="url(#gg-drive-blue)"
+                              d="M9.2 25.5h10.3l8.8 15.5H14.5c-4.2 0-7.8-2.8-8.8-6.8-.6-2.5 0-5.2 1.5-7.4l2-1.3z"
+                            />
+                            {/* Right Yellow Lobe */}
+                            <path
+                              fill="url(#gg-drive-yellow)"
+                              d="M35 16.7l6.8 11.8c2.2 3.8.9 8.7-2.9 10.9-1.2.7-2.6 1.1-4 1.1h-6.6l-4.3-15 11-8.8z"
+                            />
+                            {/* Center dark triangle cutout */}
+                            <path fill="#1b1c1e" d="M19.5 25.5h9l-4.5 7.8-4.5-7.8z" />
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -627,7 +654,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </a>
 
-                      {/* 3. Gmail */}
+                      {/* 3. Gmail (Smooth gradient M ribbon matching screenshot) */}
                       <a
                         href="https://mail.google.com"
                         target="_blank"
@@ -635,12 +662,41 @@ export const Header: React.FC<HeaderProps> = ({
                         className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="52 42 88 66" className="w-9 h-9">
-                            <path fill="#4285f4" d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6" />
-                            <path fill="#34a853" d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15" />
-                            <path fill="#fbbc04" d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2" />
-                            <path fill="#ea4335" d="M72 74V48l24 18 24-18v26L96 92" />
-                            <path fill="#c5221f" d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2" />
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <defs>
+                              <linearGradient id="gg-gmail-left" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#ff6ca8" />
+                                <stop offset="35%" stopColor="#ff4438" />
+                                <stop offset="100%" stopColor="#ff3b30" />
+                              </linearGradient>
+                              <linearGradient id="gg-gmail-right" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#ffca22" />
+                                <stop offset="38%" stopColor="#00b359" />
+                                <stop offset="72%" stopColor="#00a8ff" />
+                                <stop offset="100%" stopColor="#1a6bff" />
+                              </linearGradient>
+                              <linearGradient id="gg-gmail-v" x1="0%" y1="30%" x2="100%" y2="30%">
+                                <stop offset="0%" stopColor="#ff6ca8" />
+                                <stop offset="35%" stopColor="#ff4438" />
+                                <stop offset="70%" stopColor="#ff5e1a" />
+                                <stop offset="100%" stopColor="#ffca22" />
+                              </linearGradient>
+                            </defs>
+                            {/* Left vertical leg */}
+                            <path
+                              fill="url(#gg-gmail-left)"
+                              d="M5 13.5C5 10.2 8.8 8.3 11.5 10.3L15.5 13.3V36c0 2.2-1.8 4-4 4h-3c-1.9 0-3.5-1.6-3.5-3.5V13.5z"
+                            />
+                            {/* Right vertical leg */}
+                            <path
+                              fill="url(#gg-gmail-right)"
+                              d="M43 13.5c0-3.3-3.8-5.2-6.5-3.2l-4 3V36c0 2.2 1.8 4 4 4h3c1.9 0 3.5-1.6 3.5-3.5V13.5z"
+                            />
+                            {/* Center M chevron ribbon */}
+                            <path
+                              fill="url(#gg-gmail-v)"
+                              d="M6.4 10.8c1.6-1.9 4.4-2.2 6.4-.7L24 18.6l11.2-8.5c2-1.5 4.8-1.2 6.4.7 1.6 1.9 1.2 4.8-.8 6.3l-14.2 10.8c-1.5 1.2-3.7 1.2-5.2 0L7.2 17.1c-2-1.5-2.4-4.4-.8-6.3z"
+                            />
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -669,7 +725,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </a>
 
-                      {/* 5. Gemini */}
+                      {/* 5. Gemini (4-color gradient star matching screenshot) */}
                       <a
                         href="https://gemini.google.com"
                         target="_blank"
@@ -677,14 +733,44 @@ export const Header: React.FC<HeaderProps> = ({
                         className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <img src="/gemini-icon.png" alt="Gemini" className="w-9 h-9 object-contain" />
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <defs>
+                              <radialGradient id="gg-gemini-tl" cx="22%" cy="22%" r="55%">
+                                <stop offset="0%" stopColor="#ff5252" />
+                                <stop offset="55%" stopColor="#ea4335" stopOpacity="0.85" />
+                                <stop offset="100%" stopColor="#4285f4" stopOpacity="0" />
+                              </radialGradient>
+                              <radialGradient id="gg-gemini-bl" cx="22%" cy="78%" r="55%">
+                                <stop offset="0%" stopColor="#34a853" />
+                                <stop offset="45%" stopColor="#fbbc04" stopOpacity="0.85" />
+                                <stop offset="100%" stopColor="#4285f4" stopOpacity="0" />
+                              </radialGradient>
+                              <linearGradient id="gg-gemini-base" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#669df6" />
+                                <stop offset="55%" stopColor="#4285f4" />
+                                <stop offset="100%" stopColor="#1a73e8" />
+                              </linearGradient>
+                            </defs>
+                            <path
+                              fill="url(#gg-gemini-base)"
+                              d="M24 3C24 14.6 14.6 24 3 24c11.6 0 21 9.4 21 21 0-11.6 9.4-21 21-21-11.6 0-21-9.4-21-21z"
+                            />
+                            <path
+                              fill="url(#gg-gemini-tl)"
+                              d="M24 3C24 14.6 14.6 24 3 24c11.6 0 21 9.4 21 21 0-11.6 9.4-21 21-21-11.6 0-21-9.4-21-21z"
+                            />
+                            <path
+                              fill="url(#gg-gemini-bl)"
+                              d="M24 3C24 14.6 14.6 24 3 24c11.6 0 21 9.4 21 21 0-11.6 9.4-21 21-21-11.6 0-21-9.4-21-21z"
+                            />
+                          </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           Gemini
                         </span>
                       </a>
 
-                      {/* 6. Maps */}
+                      {/* 6. Maps (Smooth gradient pin matching screenshot) */}
                       <a
                         href="https://maps.google.com"
                         target="_blank"
@@ -693,25 +779,28 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <defs>
+                              <linearGradient id="gg-maps-vert" x1="15%" y1="10%" x2="65%" y2="95%">
+                                <stop offset="0%" stopColor="#ff3b30" />
+                                <stop offset="38%" stopColor="#ffb81a" />
+                                <stop offset="72%" stopColor="#00b359" />
+                                <stop offset="100%" stopColor="#00a651" />
+                              </linearGradient>
+                              <radialGradient id="gg-maps-tr" cx="72%" cy="18%" r="58%">
+                                <stop offset="0%" stopColor="#2684ff" />
+                                <stop offset="48%" stopColor="#8c6bff" stopOpacity="0.85" />
+                                <stop offset="100%" stopColor="#00b359" stopOpacity="0" />
+                              </radialGradient>
+                            </defs>
                             <path
-                              fill="#1a73e8"
-                              d="M29.76 6.23A14.88 14.88 0 0 0 24 5c-4.56 0-8.64 2.04-11.38 5.26L21.9 18l7.86-11.77z"
+                              fill="url(#gg-maps-vert)"
+                              fillRule="evenodd"
+                              d="M24 4C14.6 4 7 11.6 7 21c0 10.8 13.8 21.5 15.8 23 .7.5 1.7.5 2.4 0C27.2 42.5 41 31.8 41 21c0-9.4-7.6-17-17-17zm0 10.2a6.8 6.8 0 1 1 0 13.6 6.8 6.8 0 0 1 0-13.6z"
                             />
                             <path
-                              fill="#ea4335"
-                              d="M12.62 10.26A14.91 14.91 0 0 0 9 20c0 2.91.58 5.28 1.54 7.4L21.9 18l-9.28-7.74z"
-                            />
-                            <path
-                              fill="#4285f4"
-                              d="M24 14.5a5.5 5.5 0 0 1 5.5 5.5c0 1.35-.49 2.59-1.3 3.55l10.25-12.2A14.94 14.94 0 0 0 29.76 6.23L20.47 17.3A5.48 5.48 0 0 1 24 14.5z"
-                            />
-                            <path
-                              fill="#fbbc04"
-                              d="M24 25.5a5.5 5.5 0 0 1-5.5-5.5c0-1.01.28-1.95.75-2.76L10.54 27.4c1.54 3.4 4.1 6.13 6.73 9.57l10.93-12.97A5.48 5.48 0 0 1 24 25.5z"
-                            />
-                            <path
-                              fill="#34a853"
-                              d="M27.32 39.67c4.94-7.73 11.68-11.24 11.68-19.67 0-2.4-.57-4.66-1.55-6.65L17.27 36.97c1.3 1.71 2.61 3.55 3.65 5.58.78 1.52 1.37 2.45 2.08 2.45s1.3-.93 2.08-2.45c.68-1.33 1.44-2.61 2.24-3.88z"
+                              fill="url(#gg-maps-tr)"
+                              fillRule="evenodd"
+                              d="M24 4C14.6 4 7 11.6 7 21c0 10.8 13.8 21.5 15.8 23 .7.5 1.7.5 2.4 0C27.2 42.5 41 31.8 41 21c0-9.4-7.6-17-17-17zm0 10.2a6.8 6.8 0 1 1 0 13.6 6.8 6.8 0 0 1 0-13.6z"
                             />
                           </svg>
                         </div>
@@ -720,7 +809,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </a>
 
-                      {/* 7. Search */}
+                      {/* 7. Search (Smooth gradient Google G logo) */}
                       <a
                         href="https://google.com"
                         target="_blank"
@@ -728,11 +817,31 @@ export const Header: React.FC<HeaderProps> = ({
                         className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 24 24" className="w-8 h-8">
-                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.02 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <defs>
+                              <linearGradient id="gg-search-top" x1="80%" y1="0%" x2="0%" y2="85%">
+                                <stop offset="0%" stopColor="#ea4335" />
+                                <stop offset="55%" stopColor="#ff5252" />
+                                <stop offset="100%" stopColor="#fbbc04" />
+                              </linearGradient>
+                              <linearGradient id="gg-search-bot" x1="0%" y1="20%" x2="90%" y2="90%">
+                                <stop offset="0%" stopColor="#fbbc04" />
+                                <stop offset="50%" stopColor="#34a853" />
+                                <stop offset="100%" stopColor="#4285f4" />
+                              </linearGradient>
+                            </defs>
+                            <path
+                              fill="url(#gg-search-top)"
+                              d="M24 11.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 4.4 30.4 2 24 2 12.8 2 3.4 9.6 1 20l8 6.2c1.8-8.4 9.2-14.7 15-14.7z"
+                            />
+                            <path
+                              fill="url(#gg-search-bot)"
+                              d="M9 26.2l-8-6.2C.3 22 0 23 0 24c0 12.2 9.8 22 22 22 6.2 0 11.8-2.2 15.8-6l-7.6-5.9c-2.1 1.4-4.9 2.3-8.2 2.3-7.6 0-13.9-5.1-15.9-12.1L9 26.2z"
+                            />
+                            <path
+                              fill="#4285f4"
+                              d="M45.6 20H24v8.8h12.4c-.9 3.4-3.1 6.1-6.2 7.8l7.6 5.9C42.6 38.1 46 31.7 46 24c0-1.4-.1-2.7-.4-4z"
+                            />
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -740,7 +849,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </a>
 
-                      {/* 8. Calendar */}
+                      {/* 8. Calendar (Pinched squircle badge with sky-blue cap, lavender glow & white 31) */}
                       <a
                         href="https://calendar.google.com"
                         target="_blank"
@@ -749,19 +858,26 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 48 48" className="w-9 h-9">
-                            <path fill="#ffffff" d="M14 14h20v20H14z" />
-                            <path fill="#4285f4" d="M34 6H10a4 4 0 0 0-4 4v24h8V14h20V6z" />
-                            <path fill="#1967d2" d="M34 6h4a4 4 0 0 1 4 4v4h-8V6z" />
-                            <path fill="#fbbc04" d="M34 14h8v20h-8V14z" />
-                            <path fill="#188038" d="M6 34h8v8h-4a4 4 0 0 1-4-4v-4z" />
-                            <path fill="#34a853" d="M14 34h20v8H14v-8z" />
-                            <path fill="#ea4335" d="M34 42v-8h8l-8 8z" />
+                            <defs>
+                              <linearGradient id="gg-cal-bg" x1="50%" y1="0%" x2="50%" y2="100%">
+                                <stop offset="0%" stopColor="#8c88ff" />
+                                <stop offset="30%" stopColor="#4285f4" />
+                                <stop offset="100%" stopColor="#1e78ff" />
+                              </linearGradient>
+                            </defs>
+                            {/* Top sky-blue calendar page edge */}
+                            <rect x="13" y="5" width="22" height="10" rx="4" fill="#9be0ff" />
+                            {/* Main pinched squircle calendar body */}
+                            <path
+                              fill="url(#gg-cal-bg)"
+                              d="M15 8h18c4.4 0 8 3.6 8 8 0 3.2-.8 5.8-.8 9s.8 5.8.8 9c0 4.4-3.6 8-8 8H15c-4.4 0-8-3.6-8-8 0-3.2.8-5.8.8-9s-.8-5.8-.8-9c0-4.4 3.6-8 8-8z"
+                            />
                             <text
                               x="24"
-                              y="29.5"
-                              fill="#1a73e8"
-                              fontSize="15.5"
-                              fontWeight="700"
+                              y="31.5"
+                              fill="#ffffff"
+                              fontSize="18.5"
+                              fontWeight="500"
                               fontFamily="'Google Sans', Roboto, Arial, sans-serif"
                               textAnchor="middle"
                             >
@@ -774,7 +890,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </a>
 
-                      {/* 9. News */}
+                      {/* 9. News (Top green card, left tilted yellow card, right tilted red card, front blue G= card) */}
                       <a
                         href="https://news.google.com"
                         target="_blank"
@@ -783,13 +899,46 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 48 48" className="w-9 h-9">
-                            <rect x="13" y="6" width="22" height="16" rx="2.5" fill="#0f9d58" />
-                            <rect x="9" y="10.5" width="30" height="20" rx="2.5" fill="#fbbc04" />
-                            <rect x="4" y="15" width="40" height="26" rx="3.5" fill="#4285f4" />
-                            <rect x="9" y="21" width="11" height="14" rx="1.5" fill="#ea4335" />
-                            <rect x="24" y="21" width="15" height="3" rx="1.5" fill="#ffffff" />
-                            <rect x="24" y="26.5" width="15" height="3" rx="1.5" fill="#ffffff" />
-                            <rect x="24" y="32" width="10" height="3" rx="1.5" fill="#ffffff" />
+                            {/* Back centered green card */}
+                            <rect x="12" y="6.5" width="24" height="14" rx="2" fill="#00a651" />
+                            {/* Left tilted yellow card */}
+                            <rect
+                              x="6"
+                              y="12"
+                              width="24"
+                              height="17"
+                              rx="2"
+                              fill="#ffbe26"
+                              transform="rotate(-16 18 20)"
+                            />
+                            {/* Right tilted red card */}
+                            <rect
+                              x="19"
+                              y="13"
+                              width="23"
+                              height="18"
+                              rx="2"
+                              fill="#f24b3f"
+                              transform="rotate(14 30 22)"
+                            />
+                            {/* Front Blue Card */}
+                            <rect x="8" y="16.5" width="31" height="23.5" rx="2.5" fill="#377ef6" />
+                            {/* White G on left */}
+                            <text
+                              x="16.8"
+                              y="33"
+                              fill="#ffffff"
+                              fontSize="14"
+                              fontWeight="700"
+                              fontFamily="'Google Sans', Roboto, Arial, sans-serif"
+                              textAnchor="middle"
+                            >
+                              G
+                            </text>
+                            {/* 3 White Horizontal Lines on right */}
+                            <rect x="24.5" y="22.5" width="10" height="2.4" rx="1.2" fill="#ffffff" />
+                            <rect x="24.5" y="27.2" width="10" height="2.4" rx="1.2" fill="#ffffff" />
+                            <rect x="24.5" y="32" width="10" height="2.4" rx="1.2" fill="#ffffff" />
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -801,7 +950,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                   {/* Below Favorites: More Google apps */}
                   <div className="grid grid-cols-3 gap-y-2 gap-x-1 pt-1 pb-1">
-                    {/* 10. Photos */}
+                    {/* 10. Photos (Smooth gradient 4-petal pinwheel matching screenshot) */}
                     <a
                       href="https://photos.google.com"
                       target="_blank"
@@ -810,10 +959,35 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <path fill="#fbbc04" d="M24 5c-5.25 0-9.5 4.25-9.5 9.5S18.75 24 24 24V5z" />
-                          <path fill="#ea4335" d="M43 24c0-5.25-4.25-9.5-9.5-9.5S24 18.75 24 24h19z" />
-                          <path fill="#4285f4" d="M24 43c5.25 0 9.5-4.25 9.5-9.5S29.25 24 24 24v19z" />
-                          <path fill="#34a853" d="M5 24c0 5.25 4.25 9.5 9.5 9.5S24 29.25 24 24H5z" />
+                          <defs>
+                            <linearGradient id="gg-photos-top" x1="50%" y1="100%" x2="50%" y2="0%">
+                              <stop offset="0%" stopColor="#ff66b2" />
+                              <stop offset="55%" stopColor="#ff4438" />
+                              <stop offset="100%" stopColor="#ff3b30" />
+                            </linearGradient>
+                            <linearGradient id="gg-photos-right" x1="0%" y1="50%" x2="100%" y2="50%">
+                              <stop offset="0%" stopColor="#9999ff" />
+                              <stop offset="55%" stopColor="#4285f4" />
+                              <stop offset="100%" stopColor="#1a78ff" />
+                            </linearGradient>
+                            <linearGradient id="gg-photos-bottom" x1="50%" y1="0%" x2="50%" y2="100%">
+                              <stop offset="0%" stopColor="#66ccff" />
+                              <stop offset="50%" stopColor="#00b359" />
+                              <stop offset="100%" stopColor="#00994d" />
+                            </linearGradient>
+                            <linearGradient id="gg-photos-left" x1="100%" y1="50%" x2="0%" y2="50%">
+                              <stop offset="0%" stopColor="#ffdd44" />
+                              <stop offset="100%" stopColor="#ffbe1a" />
+                            </linearGradient>
+                          </defs>
+                          {/* Top Red-Pink Petal (bulges right) */}
+                          <path fill="url(#gg-photos-top)" d="M24 4c5.5 0 10 4.5 10 10s-4.5 10-10 10V4z" />
+                          {/* Right Lavender-Blue Petal (bulges down) */}
+                          <path fill="url(#gg-photos-right)" d="M44 24c0 5.5-4.5 10-10 10s-10-4.5-10-10h20z" />
+                          {/* Bottom Cyan-Green Petal (bulges left) */}
+                          <path fill="url(#gg-photos-bottom)" d="M24 44c-5.5 0-10-4.5-10-10s4.5-10 10-10v20z" />
+                          {/* Left Yellow Petal (bulges up) */}
+                          <path fill="url(#gg-photos-left)" d="M4 24c0-5.5 4.5-10 10-10s10 4.5 10 10H4z" />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -821,7 +995,7 @@ export const Header: React.FC<HeaderProps> = ({
                       </span>
                     </a>
 
-                    {/* 11. Meet */}
+                    {/* 11. Meet (Yellow body with large top-left curve, pink right glow, white dot & orange lens) */}
                     <a
                       href="https://meet.google.com"
                       target="_blank"
@@ -829,16 +1003,26 @@ export const Header: React.FC<HeaderProps> = ({
                       className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <svg viewBox="0 0 87.5 72" className="w-9 h-9">
-                          <path fill="#00832d" d="M49.5 36l8.53 9.75 11.47 7.33 2-17.02-2-16.64-11.69 6.44z" />
-                          <path fill="#0066da" d="M0 51.5V66c0 3.315 2.685 6 6 6h14.5l3-10.96-3-9.54-9.95-3z" />
-                          <path fill="#e94235" d="M20.5 0L0 20.5l10.55 3 9.95-3 2.95-9.41z" />
-                          <path fill="#2684fc" d="M20.5 20.5H0v31h20.5z" />
+                        <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <defs>
+                            <radialGradient id="gg-meet-glow" cx="95%" cy="55%" r="55%">
+                              <stop offset="0%" stopColor="#ffb3d1" />
+                              <stop offset="55%" stopColor="#ffd026" stopOpacity="0.9" />
+                              <stop offset="100%" stopColor="#ffca1a" stopOpacity="1" />
+                            </radialGradient>
+                          </defs>
+                          {/* Right Orange Lens Trapezoid */}
                           <path
-                            fill="#00ac47"
-                            d="M82.6 8.68L69.5 19.42v33.66l13.16 10.79c1.97 1.54 4.85.135 4.85-2.37V11c0-2.535-2.945-3.925-4.91-2.32zM49.5 36v15.5h-29V72h43c3.315 0 6-2.685 6-6V53.08z"
+                            fill="#fca120"
+                            d="M31 18.5l9.5-5.8c1.5-.9 3.5.2 3.5 2v18.6c0 1.8-2 2.9-3.5 2L31 29.5v-11z"
                           />
-                          <path fill="#ffba00" d="M63.5 0h-43v20.5h29V36l20-16.57V6c0-3.315-2.685-6-6-6z" />
+                          {/* Left Camera Body (large rounded top-left corner) */}
+                          <path
+                            fill="url(#gg-meet-glow)"
+                            d="M16 9.5h11.5c2.8 0 5 2.2 5 5v19c0 2.8-2.2 5-5 5H10c-2.8 0-5-2.2-5-5V20.5c0-6.1 4.9-11 11-11z"
+                          />
+                          {/* Crisp white circle at bottom-left */}
+                          <circle cx="12" cy="31.5" r="3" fill="#ffffff" />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -855,9 +1039,9 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <path fill="#d2e3fc" d="M18 12h22a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H24l-6-16V12z" />
-                          <path fill="#174ea6" d="M24 44l5-8h-9l4 8z" />
-                          <path fill="#4285f4" d="M8 4h18l8 32H8a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" />
+                          <path fill="#e8eaed" d="M18 11h22a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H24l-6-16V11z" />
+                          <path fill="#174ea6" d="M24 43l5-8h-9l4 8z" />
+                          <path fill="#4285f4" d="M8 5h18l8 30H8a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4z" />
                           <text
                             x="16.5"
                             y="25.5"
@@ -875,7 +1059,7 @@ export const Header: React.FC<HeaderProps> = ({
                             fill="#5f6368"
                             fontSize="13.5"
                             fontWeight="700"
-                            fontFamily="'Noto Sans', sans-serif"
+                            fontFamily="'Google Sans', 'Noto Sans', sans-serif"
                             textAnchor="middle"
                           >
                             文
@@ -887,39 +1071,37 @@ export const Header: React.FC<HeaderProps> = ({
                       </span>
                     </a>
 
-                    {/* 13. Play */}
+                    {/* 13. Vids / Play (Stacked purple-blue cards with play button matching screenshot) */}
                     <a
-                      href="https://play.google.com"
+                      href="https://docs.google.com/videos"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <path
-                            fill="#4285f4"
-                            d="M8.5 5.8C7.9 6.4 7.5 7.4 7.5 8.6v30.8c0 1.2.4 2.2 1 2.8l.15.14L26 24.9v-.4L8.65 5.66 8.5 5.8z"
-                          />
-                          <path
-                            fill="#fbbc04"
-                            d="M31.8 30.7L26 24.9v-.4l5.8-5.8.13.08 6.85 3.9c1.96 1.11 1.96 2.93 0 4.04l-6.85 3.9-.13.08z"
-                          />
-                          <path
-                            fill="#ea4335"
-                            d="M31.93 30.62L26 24.7 8.5 42.2c.65.68 1.71.77 2.91.09l20.52-11.67z"
-                          />
-                          <path
-                            fill="#34a853"
-                            d="M31.93 18.78L11.41 7.11c-1.2-.68-2.26-.59-2.91.09L26 24.7l5.93-5.92z"
-                          />
+                          <defs>
+                            <linearGradient id="gg-vids-front" x1="0%" y1="50%" x2="100%" y2="50%">
+                              <stop offset="0%" stopColor="#6ba8ff" />
+                              <stop offset="100%" stopColor="#726bff" />
+                            </linearGradient>
+                          </defs>
+                          {/* Back-left light periwinkle card */}
+                          <rect x="6" y="13" width="20" height="22" rx="6" fill="#d8e2ff" />
+                          {/* Middle-left lavender card */}
+                          <rect x="10" y="10" width="22" height="28" rx="6.5" fill="#b3c5ff" />
+                          {/* Front blue-violet rounded card */}
+                          <rect x="14.5" y="7" width="25.5" height="34" rx="7.5" fill="url(#gg-vids-front)" />
+                          {/* White Play Triangle */}
+                          <path fill="#ffffff" d="M24 18.5v11l8.5-5.5-8.5-5.5z" />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
-                        Play
+                        Vids
                       </span>
                     </a>
 
-                    {/* 14. Sheets */}
+                    {/* 14. Sheets (Green-to-cyan gradient horizontal card with dark green right tab & white cross) */}
                     <a
                       href="https://sheets.google.com"
                       target="_blank"
@@ -928,15 +1110,20 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <path
-                            fill="#0f9d58"
-                            d="M12 4h16l12 12v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z"
-                          />
-                          <path fill="#87ceac" d="M28 4l12 12H31a3 3 0 0 1-3-3V4z" />
-                          <path
-                            fill="#ffffff"
-                            d="M14 21h20v15H14V21zm2.5 2.5v4h6v-4h-6zm8.5 0v4h6.5v-4H25zm-8.5 6.5v4h6v-4h-6zm8.5 0v4h6.5v-4H25z"
-                          />
+                          <defs>
+                            <linearGradient id="gg-sheets-bg" x1="0%" y1="50%" x2="100%" y2="50%">
+                              <stop offset="0%" stopColor="#00b359" />
+                              <stop offset="55%" stopColor="#00b862" />
+                              <stop offset="100%" stopColor="#6bd0ff" />
+                            </linearGradient>
+                          </defs>
+                          {/* Right dark green tab */}
+                          <rect x="35" y="13" width="8" height="22" rx="3.5" fill="#008a45" />
+                          {/* Main horizontal green-to-cyan rounded rectangle */}
+                          <rect x="5" y="10" width="34" height="28" rx="5.5" fill="url(#gg-sheets-bg)" />
+                          {/* White intersecting grid cross */}
+                          <rect x="8.5" y="17" width="19" height="3" rx="1.5" fill="#ffffff" />
+                          <rect x="12.5" y="13" width="3" height="17" rx="1.5" fill="#ffffff" />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -944,7 +1131,7 @@ export const Header: React.FC<HeaderProps> = ({
                       </span>
                     </a>
 
-                    {/* 15. Docs */}
+                    {/* 15. Docs (Blue-to-lavender folded document with light sky-blue corner & two white bars) */}
                     <a
                       href="https://docs.google.com"
                       target="_blank"
@@ -953,14 +1140,21 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <defs>
+                            <linearGradient id="gg-docs-bg" x1="50%" y1="0%" x2="30%" y2="100%">
+                              <stop offset="0%" stopColor="#1e78ff" />
+                              <stop offset="68%" stopColor="#3b82f6" />
+                              <stop offset="100%" stopColor="#a8a4ff" />
+                            </linearGradient>
+                          </defs>
                           <path
-                            fill="#4285f4"
-                            d="M12 4h16l12 12v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z"
+                            fill="url(#gg-docs-bg)"
+                            d="M14 5h13l12 12v20a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6V11a6 6 0 0 1 6-6z"
                           />
-                          <path fill="#a0c2f9" d="M28 4l12 12H31a3 3 0 0 1-3-3V4z" />
-                          <rect x="14" y="22" width="20" height="2.6" rx="1.3" fill="#ffffff" />
-                          <rect x="14" y="27.5" width="20" height="2.6" rx="1.3" fill="#ffffff" />
-                          <rect x="14" y="33" width="13" height="2.6" rx="1.3" fill="#ffffff" />
+                          {/* Light sky-blue folded corner */}
+                          <path fill="#74bfff" d="M27 5l12 12h-8a4 4 0 0 1-4-4V5z" />
+                          <rect x="15" y="28.5" width="14.5" height="3" rx="1.5" fill="#ffffff" />
+                          <rect x="15" y="34.5" width="10" height="3" rx="1.5" fill="#ffffff" />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
