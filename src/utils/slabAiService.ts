@@ -8,13 +8,13 @@ import {
 } from './aiAdvisorService';
 
 const FAST_MODELS: GeminiModel[] = [
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash',
   'gemini-3.5-flash-lite',
   'gemini-3.5-flash',
   'gemini-3.6-flash',
   'gemini-3.8-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
 ];
 
 /**
@@ -89,7 +89,7 @@ async function callGeminiForSlab(systemPrompt: string, userPrompt: string): Prom
     throw new Error('Gemini API key is missing. Please check your settings.');
   }
 
-  const preferredModel = getSelectedGeminiModel() || 'gemini-3.5-flash-lite';
+  const preferredModel = getSelectedGeminiModel() || 'gemini-2.5-flash';
   const modelsToTry: GeminiModel[] = [
     preferredModel,
     ...FAST_MODELS.filter((m) => m !== preferredModel),
@@ -338,25 +338,50 @@ function sanitizeLatexString(text: string): string {
   );
 }
 
+function buildDifficultyInstruction(difficulty: 'easy' | 'medium' | 'hard'): string {
+  if (difficulty === 'easy') {
+    return `DIFFICULTY LEVEL: EASY (Foundational Recall & Direct Recognition)
+- COGNITIVE LEVEL: Bloom's Taxonomy Level 1-2 (Remembering & Basic Understanding).
+- FLASHCARDS: Ask direct, single-concept definitional questions ("What is...", "Define...", "State the basic formula/unit for..."). Keep answers concise (1-2 clear sentences) and easy to grasp.
+- MCQs: Ask straightforward, single-step recognition questions testing core vocabulary, fundamental facts, and basic formulas. Do NOT include multi-step calculations or trick questions. Make the 3 distractors clearly distinct concepts so a beginner who reviewed the terms can identify the right answer.`;
+  }
+
+  if (difficulty === 'hard') {
+    return `DIFFICULTY LEVEL: HARD (Advanced Synthesis, Multi-Step Problem Solving & Edge Cases)
+- COGNITIVE LEVEL: Bloom's Taxonomy Level 5-6 (Evaluation, Multi-Step Analysis & Synthesis).
+- STRICT RULE: DO NOT generate simple "What is X?" or "Define Y" questions. Every single item MUST challenge a top student preparing for a difficult final exam.
+- FLASHCARDS: Focus on complex multi-step derivations/scenarios, boundary conditions ("Under what exact conditions does law/method X fail and why?"), subtle conceptual distinctions, second-order effects ("If parameter A doubles while B is constrained, how does Y change?"), and synthesis combining multiple concepts from the sources.
+- MCQs: Write rigorous, multi-step analytical or quantitative exam questions, experimental perturbation scenarios, non-obvious edge cases, or "Which of the following MUST be true if..." problems. All 4 options must look highly plausible, and the 3 distractors must represent realistic analytical traps (e.g., common sign/factor errors, inverted relationships, or overlooking a key constraint).`;
+  }
+
+  return `DIFFICULTY LEVEL: MEDIUM (Standard Midterm Exam Application)
+- COGNITIVE LEVEL: Bloom's Taxonomy Level 3-4 (Application & Conceptual Analysis).
+- FLASHCARDS: Go beyond one-line definitions—ask "How" and "Why" questions, cause-and-effect mechanisms, comparisons between two related concepts, and standard 1-to-2 step formula applications.
+- MCQs: Write realistic university/high-school midterm questions that require applying a concept or formula to a concrete scenario or solving a 1-to-2 step problem. Distractors should reflect common student misconceptions.`;
+}
+
 function buildSystemPromptForBatch(
-  batchType: SlabType,
+  batchType: 'flashcards' | 'mcq',
   batchCount: number,
-  difficultyInstruction: string,
-  focusGuidance?: string
+  difficulty: 'easy' | 'medium' | 'hard',
+  avoidTopics?: string[]
 ): string {
+  const difficultyInstruction = buildDifficultyInstruction(difficulty);
   const schemaRule =
     batchType === 'flashcards'
-      ? `- Generate EXACTLY ${batchCount} items in "flashcards" and an empty "mcqs": [] array.`
-      : batchType === 'mcq'
-      ? `- Generate EXACTLY ${batchCount} items in "mcqs" and an empty "flashcards": [] array.`
-      : `- Generate ${Math.ceil(batchCount / 2)} items in "flashcards" and ${Math.floor(batchCount / 2)} items in "mcqs".`;
+      ? `- You MUST generate EXACTLY ${batchCount} items in the "flashcards" array (items 1 through ${batchCount}) and an empty "mcqs": [] array. Do NOT stop at 8 or fewer items!`
+      : `- You MUST generate EXACTLY ${batchCount} items in the "mcqs" array (items 1 through ${batchCount}) and an empty "flashcards": [] array. Do NOT stop at 8 or fewer items!`;
+
+  const avoidClause =
+    avoidTopics && avoidTopics.length > 0
+      ? `\nDO NOT DUPLICATE THESE EXISTING QUESTIONS/FRONTS:\n${avoidTopics.map((t, i) => `${i + 1}. ${t}`).join('\n')}\n`
+      : '';
 
   return `You are Gemini Office AI, an expert exam preparation engine and cognitive study assistant.
-Generate a high-yield study set (Flashcards and/or Multiple Choice Questions) grounded in the student's materials.
+Generate a high-yield study set grounded in the student's materials that strictly matches the requested DIFFICULTY LEVEL and EXACT ITEM COUNT.
 
 ${difficultyInstruction}
-${focusGuidance ? `\nBATCH FOCUS: ${focusGuidance}` : ''}
-
+${avoidClause}
 CANADIAN ENGLISH & NOTATION:
 - Use Canadian English spelling (e.g., colour, behaviour, centre, analyse).
 - Format mathematical and scientific formulas using inline LaTeX ($...$). Escape backslashes in JSON strings (e.g., "\\\\frac{a}{b}").
@@ -368,29 +393,91 @@ Return ONLY a valid JSON object matching this schema:
   "description": "Brief 1-sentence description",
   "flashcards": [
     {
-      "front": "Concept, term, question, or theorem to recall",
-      "back": "Clear, comprehensive definition or answer with key steps"
+      "front": "Question, scenario, or concept prompt matching the ${difficulty.toUpperCase()} difficulty level",
+      "back": "Clear, complete answer or step-by-step explanation matching the ${difficulty.toUpperCase()} difficulty level"
     }
   ],
   "mcqs": [
     {
-      "question": "Clear multiple-choice question stem",
+      "question": "Clear multiple-choice question stem matching the ${difficulty.toUpperCase()} difficulty level",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctIndex": 0,
-      "explanation": "Concise explanation of why the correct option is right"
+      "explanation": "Concise explanation of why the correct option is right and why distractors are wrong"
     }
   ]
 }
 
-RULES:
+CRITICAL RULES:
 ${schemaRule}
+- Count carefully from 1 to ${batchCount} before closing the JSON array so the array length is strictly ${batchCount}.
+- DIFFICULTY OVERRIDE: Even if the student prompt mentions generic words like "definitions" or "key concepts", you MUST strictly enforce the ${difficulty.toUpperCase()} difficulty level rules above for every single item.
 - Every MCQ must have 4 distinct options and a valid correctIndex (0-3).
 - Output pure valid JSON only.`;
 }
 
+async function generateItemsForSingleType(
+  singleType: 'flashcards' | 'mcq',
+  targetCount: number,
+  effectivePrompt: string,
+  difficulty: 'easy' | 'medium' | 'hard',
+  context: string
+): Promise<{ title?: string; description?: string; items: any[] }> {
+  const sysPrompt = buildSystemPromptForBatch(singleType, targetCount, difficulty);
+  const usrPrompt = `STUDENT REQUEST: "${effectivePrompt}"
+TYPE: ${singleType}
+REQUIRED EXACT ITEM COUNT: ${targetCount} items (You MUST output all ${targetCount} items in the "${singleType}" array — do not stop early!)
+REQUIRED DIFFICULTY: ${difficulty.toUpperCase()}
+
+STUDENT SOURCES & NOTES:
+${context}`;
+
+  const rawJson = await callGeminiForSlab(sysPrompt, usrPrompt);
+  const parsed = extractJsonObject(rawJson);
+  if (!parsed) {
+    throw new Error('Could not parse study set response. Please try again.');
+  }
+
+  const key = singleType === 'flashcards' ? 'flashcards' : 'mcqs';
+  let items: any[] = Array.isArray(parsed[key]) ? parsed[key] : [];
+
+  // If the model stopped early (e.g. returned 8 items when 12 or 16 were requested), fetch the remaining items
+  if (items.length < targetCount) {
+    const missingCount = targetCount - items.length;
+    const existingPrompts = items
+      .map((it: any) => String(it.front || it.question || '').slice(0, 120))
+      .filter(Boolean);
+
+    try {
+      const topUpSys = buildSystemPromptForBatch(singleType, missingCount, difficulty, existingPrompts);
+      const topUpUsr = `STUDENT REQUEST: "${effectivePrompt}"
+TYPE: ${singleType}
+REQUIRED EXACT ITEM COUNT: Generate ${missingCount} ADDITIONAL unique ${difficulty.toUpperCase()}-level items to complete the set of ${targetCount}.
+REQUIRED DIFFICULTY: ${difficulty.toUpperCase()}
+
+STUDENT SOURCES & NOTES:
+${context}`;
+
+      const topUpRaw = await callGeminiForSlab(topUpSys, topUpUsr);
+      const topUpParsed = extractJsonObject(topUpRaw);
+      const extraItems = topUpParsed && Array.isArray(topUpParsed[key]) ? topUpParsed[key] : [];
+      if (extraItems.length > 0) {
+        items = [...items, ...extraItems];
+      }
+    } catch (topUpErr) {
+      console.warn(`Top-up generation for ${singleType} skipped:`, topUpErr);
+    }
+  }
+
+  return {
+    title: parsed.title,
+    description: parsed.description,
+    items: items.slice(0, targetCount),
+  };
+}
+
 /**
- * Generates an interactive Office study set (Flashcards, MCQs, or Both) quickly and reliably.
- * Uses parallel concurrent batching for larger sets or 'both' mode to cut latency in half.
+ * Generates an interactive Office study set (Flashcards, MCQs, or Both) with exact item counts
+ * and strictly differentiated difficulty levels (Easy, Medium, Hard).
  */
 export async function generateSlabSet(options: GenerateSlabOptions): Promise<SlabItem> {
   const {
@@ -409,129 +496,84 @@ export async function generateSlabSet(options: GenerateSlabOptions): Promise<Sla
   const effectivePrompt =
     prompt && prompt.trim().length > 0
       ? prompt.trim()
-      : `Core concepts, definitions, formulas, and exam review questions${className ? ` for ${className}` : ''}`;
+      : `Course study set${className ? ` for ${className}` : ''}`;
 
   const { context, noteNames } = buildSourceContext(notes, selectedNoteIds, sources, selectedSourceIds);
 
-  const difficultyInstruction =
-    difficulty === 'easy'
-      ? 'DIFFICULTY: EASY. Focus on fundamental definitions, core terminology, and foundational formulas.'
-      : difficulty === 'hard'
-      ? 'DIFFICULTY: HARD. Focus on challenging analytical questions, edge cases, multi-step problem solving, and synthesis.'
-      : 'DIFFICULTY: MEDIUM. Balanced exam-level difficulty covering core concepts and practical problem solving.';
+  // Strictly respect the Quantity selector count (8 = Less, 12 = Standard, 16 = More)
+  const targetCount = Math.min(Math.max(count || 12, 6), 24);
 
-  // Parse prompt if user explicitly asked for a specific number (e.g. "15 flashcards")
-  const promptNumMatch =
-    effectivePrompt.match(/\b(\d+)\s*(?:flashcards?|cards?|mcqs?|questions?|items?)\b/i) ||
-    effectivePrompt.match(/\b(?:create|make|give me|generate)\s+(\d+)\b/i);
-  const parsedPromptCount = promptNumMatch ? parseInt(promptNumMatch[1], 10) : 0;
-  const targetCount = Math.min(Math.max(parsedPromptCount > 0 ? parsedPromptCount : count || 12, 6), 24);
+  let rawFlashcards: any[] = [];
+  let rawMcqs: any[] = [];
+  let setTitle = '';
+  let setDescription = '';
 
-  let parsed: any = null;
+  if (type === 'flashcards') {
+    const res = await generateItemsForSingleType('flashcards', targetCount, effectivePrompt, difficulty, context);
+    rawFlashcards = res.items;
+    setTitle = res.title || '';
+    setDescription = res.description || '';
+  } else if (type === 'mcq') {
+    const res = await generateItemsForSingleType('mcq', targetCount, effectivePrompt, difficulty, context);
+    rawMcqs = res.items;
+    setTitle = res.title || '';
+    setDescription = res.description || '';
+  } else {
+    // 'both': generate targetCount flashcards AND targetCount MCQs
+    const [fcSettled, mcqSettled] = await Promise.allSettled([
+      generateItemsForSingleType('flashcards', targetCount, effectivePrompt, difficulty, context),
+      generateItemsForSingleType('mcq', targetCount, effectivePrompt, difficulty, context),
+    ]);
 
-  // Fast Parallel Generation:
-  // 1) If type === 'both', generate Flashcards and MCQs concurrently in 2 parallel calls.
-  // 2) If targetCount >= 12, split into 2 parallel calls of ~half size so generation finishes in ~2 seconds.
-  if (type === 'both' || targetCount >= 12) {
-    const isBoth = type === 'both';
-    const countA = Math.ceil(targetCount / 2);
-    const countB = Math.max(1, Math.floor(targetCount / 2));
+    if (fcSettled.status === 'fulfilled') {
+      rawFlashcards = fcSettled.value.items;
+      setTitle = fcSettled.value.title || '';
+      setDescription = fcSettled.value.description || '';
+    } else {
+      // Retry sequentially if concurrent request hit burst limit
+      const fcRetry = await generateItemsForSingleType('flashcards', targetCount, effectivePrompt, difficulty, context);
+      rawFlashcards = fcRetry.items;
+      setTitle = fcRetry.title || '';
+      setDescription = fcRetry.description || '';
+    }
 
-    const typeA: SlabType = isBoth ? 'flashcards' : type;
-    const typeB: SlabType = isBoth ? 'mcq' : type;
-
-    const focusA = isBoth
-      ? 'Generate high-yield active recall flashcards covering core concepts, definitions, and formulas.'
-      : 'Part 1 of 2: Focus on foundational concepts, definitions, principles, and core formulas.';
-    const focusB = isBoth
-      ? 'Generate exam-style multiple-choice questions testing conceptual application and problem solving.'
-      : 'Part 2 of 2: Focus on practical application scenarios, problem-solving, comparisons, and edge cases (avoid duplicating Part 1).';
-
-    const sysA = buildSystemPromptForBatch(typeA, countA, difficultyInstruction, focusA);
-    const usrA = `STUDENT REQUEST: "${effectivePrompt}"\nTYPE: ${typeA}\nTARGET COUNT: ${countA} items\nDIFFICULTY: ${difficulty}\n\nSTUDENT SOURCES & NOTES:\n${context}`;
-
-    const sysB = buildSystemPromptForBatch(typeB, countB, difficultyInstruction, focusB);
-    const usrB = `STUDENT REQUEST: "${effectivePrompt}"\nTYPE: ${typeB}\nTARGET COUNT: ${countB} items\nDIFFICULTY: ${difficulty}\n\nSTUDENT SOURCES & NOTES:\n${context}`;
-
-    try {
-      const results = await Promise.allSettled([
-        callGeminiForSlab(sysA, usrA),
-        callGeminiForSlab(sysB, usrB),
-      ]);
-
-      const parsedA = results[0].status === 'fulfilled' ? extractJsonObject(results[0].value) : null;
-      const parsedB = results[1].status === 'fulfilled' ? extractJsonObject(results[1].value) : null;
-
-      if (parsedA && parsedB) {
-        parsed = {
-          title: parsedA.title || parsedB.title || 'Study Set',
-          description: parsedA.description || parsedB.description,
-          flashcards: [
-            ...(Array.isArray(parsedA.flashcards) ? parsedA.flashcards : []),
-            ...(Array.isArray(parsedB.flashcards) ? parsedB.flashcards : []),
-          ],
-          mcqs: [
-            ...(Array.isArray(parsedA.mcqs) ? parsedA.mcqs : []),
-            ...(Array.isArray(parsedB.mcqs) ? parsedB.mcqs : []),
-          ],
-        };
-      } else if (parsedA && !isBoth) {
-        parsed = parsedA;
-      } else if (parsedB && !isBoth) {
-        parsed = parsedB;
-      }
-    } catch (parallelErr) {
-      console.warn('Parallel Office generation fallback to single request:', parallelErr);
+    if (mcqSettled.status === 'fulfilled') {
+      rawMcqs = mcqSettled.value.items;
+      if (!setTitle) setTitle = mcqSettled.value.title || '';
+      if (!setDescription) setDescription = mcqSettled.value.description || '';
+    } else {
+      // Retry sequentially if concurrent request hit burst limit
+      const mcqRetry = await generateItemsForSingleType('mcq', targetCount, effectivePrompt, difficulty, context);
+      rawMcqs = mcqRetry.items;
+      if (!setTitle) setTitle = mcqRetry.title || '';
+      if (!setDescription) setDescription = mcqRetry.description || '';
     }
   }
 
-  // Single-request generation (for smaller sets or if parallel batching fell back)
-  if (!parsed) {
-    const systemPrompt = buildSystemPromptForBatch(type, targetCount, difficultyInstruction);
-    const userPrompt = `STUDENT REQUEST: "${effectivePrompt}"
-TYPE: ${type}
-TARGET COUNT: ${targetCount} items
-DIFFICULTY: ${difficulty}
-
-STUDENT SOURCES & NOTES:
-${context}`;
-
-    const rawJson = await callGeminiForSlab(systemPrompt, userPrompt);
-    parsed = extractJsonObject(rawJson);
-  }
-
-  if (!parsed) {
-    throw new Error('Could not parse study set response. Please try again.');
-  }
-
   // Format flashcards
-  const flashcards: FlashcardItem[] = Array.isArray(parsed.flashcards)
-    ? parsed.flashcards.map((f: any, idx: number) => ({
-        id: `fc_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
-        front: sanitizeLatexString(String(f.front || f.question || f.term || `Concept ${idx + 1}`)),
-        back: sanitizeLatexString(String(f.back || f.answer || f.definition || 'No answer provided')),
-      }))
-    : [];
+  const flashcards: FlashcardItem[] = rawFlashcards.map((f: any, idx: number) => ({
+    id: `fc_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+    front: sanitizeLatexString(String(f.front || f.question || f.term || `Concept ${idx + 1}`)),
+    back: sanitizeLatexString(String(f.back || f.answer || f.definition || 'No answer provided')),
+  }));
 
   // Format MCQs
-  const mcqs: MultipleChoiceQuestion[] = Array.isArray(parsed.mcqs)
-    ? parsed.mcqs.map((q: any, idx: number) => {
-        const rawOptions = Array.isArray(q.options) && q.options.length >= 2 ? q.options : ['True', 'False'];
-        const sanitizedOptions = rawOptions.map((opt: any) => sanitizeLatexString(String(opt)));
-        let correctIdx = typeof q.correctIndex === 'number' ? q.correctIndex : 0;
-        if (correctIdx < 0 || correctIdx >= sanitizedOptions.length) {
-          correctIdx = 0;
-        }
+  const mcqs: MultipleChoiceQuestion[] = rawMcqs.map((q: any, idx: number) => {
+    const rawOptions = Array.isArray(q.options) && q.options.length >= 2 ? q.options : ['True', 'False'];
+    const sanitizedOptions = rawOptions.map((opt: any) => sanitizeLatexString(String(opt)));
+    let correctIdx = typeof q.correctIndex === 'number' ? q.correctIndex : 0;
+    if (correctIdx < 0 || correctIdx >= sanitizedOptions.length) {
+      correctIdx = 0;
+    }
 
-        return {
-          id: `mcq_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
-          question: sanitizeLatexString(String(q.question || `Question ${idx + 1}`)),
-          options: sanitizedOptions,
-          correctIndex: correctIdx,
-          explanation: sanitizeLatexString(String(q.explanation || 'Review course concepts for more details.')),
-        };
-      })
-    : [];
+    return {
+      id: `mcq_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+      question: sanitizeLatexString(String(q.question || `Question ${idx + 1}`)),
+      options: sanitizedOptions,
+      correctIndex: correctIdx,
+      explanation: sanitizeLatexString(String(q.explanation || 'Review course concepts for more details.')),
+    };
+  });
 
   if (flashcards.length === 0 && mcqs.length === 0) {
     throw new Error('Gemini generated an empty set. Please adjust your prompt and try again.');
@@ -546,8 +588,8 @@ ${context}`;
 
   return {
     id: `slab_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
-    title: parsed.title?.trim() || effectivePrompt.slice(0, 40) || 'Study Set',
-    description: parsed.description?.trim() || `Generated from ${noteNames.length} sources`,
+    title: setTitle.trim() || effectivePrompt.slice(0, 40) || 'Study Set',
+    description: setDescription.trim() || `Generated from ${noteNames.length} sources`,
     type: determinedType,
     prompt: effectivePrompt,
     difficulty,

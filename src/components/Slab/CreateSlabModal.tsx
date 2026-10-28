@@ -111,11 +111,15 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
     e.preventDefault();
     if (isGenerating) return;
 
-    const finalPrompt =
-      prompt.trim() ||
-      (selectedClassEntity
-        ? `Key concepts, definitions, formulas, and exam review questions for ${selectedClassEntity.name}`
-        : 'Key concepts, definitions, formulas, and applications from my course materials');
+    const classScope = selectedClassEntity ? ` for ${selectedClassEntity.name}` : ' from my course materials';
+    const defaultPromptByDifficulty =
+      difficulty === 'easy'
+        ? `Foundational definitions, core terminology, and basic concept identification${classScope}`
+        : difficulty === 'hard'
+          ? `Advanced multi-step synthesis, challenging edge cases, complex problem-solving, and deep analytical questions${classScope}`
+          : `Exam-standard conceptual applications, key mechanisms, and practical problem-solving questions${classScope}`;
+
+    const finalPrompt = prompt.trim() || defaultPromptByDifficulty;
 
     setIsGenerating(true);
     setError(null);
@@ -306,14 +310,24 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
               Quantity
             </label>
             <span className="text-xs font-semibold text-blue-600 dark:text-[#8ab4f8]">
-              {quantity === 'less' ? '~8 items' : quantity === 'more' ? '~16 items' : '~12 items'}
+              {quantity === 'less'
+                ? slabType === 'both'
+                  ? '8 cards + 8 MCQs'
+                  : '8 items'
+                : quantity === 'more'
+                  ? slabType === 'both'
+                    ? '16 cards + 16 MCQs'
+                    : '16 items'
+                  : slabType === 'both'
+                    ? '12 cards + 12 MCQs'
+                    : '12 items'}
             </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {[
-              { id: 'less' as const, label: 'Less', desc: '~8 items' },
-              { id: 'standard' as const, label: 'Standard', desc: '~12 items' },
-              { id: 'more' as const, label: 'More', desc: '~16 items' },
+              { id: 'less' as const, label: 'Less', desc: slabType === 'both' ? '8 of each' : '8 items' },
+              { id: 'standard' as const, label: 'Standard', desc: slabType === 'both' ? '12 of each' : '12 items' },
+              { id: 'more' as const, label: 'More', desc: slabType === 'both' ? '16 of each' : '16 items' },
             ].map((q) => {
               const isSelected = quantity === q.id;
               return (
