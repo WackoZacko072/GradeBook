@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, BookOpen, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { ModalPortal } from './ModalPortal';
 import type { ClassItem, Category } from '../types/grade';
 import { roundTo } from '../utils/gradeCalculations';
 
@@ -150,38 +151,38 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
   const isFormValid = className.trim().length > 0 && (template !== 'custom' || isCustomValid);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <ModalPortal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidth="max-w-2xl"
       aria-labelledby="add-class-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-opacity animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-lg bg-white dark:bg-[#1e1f20] rounded-3xl shadow-2xl border border-slate-200/50 dark:border-white/10 p-6 sm:p-7 transform transition-all animate-fade-scale max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-2xl">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 id="add-class-title" className="text-lg font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
-                Add New Class
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">
-                Configure course name and weighted grading categories
-              </p>
-            </div>
+      <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#252628] flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-2xl">
+            <BookOpen className="w-5 h-5 stroke-[2.2]" />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-full transition-colors cursor-pointer google-btn-press"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div>
+            <h2 id="add-class-title" className="text-lg sm:text-xl font-bold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+              Add New Class
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-0.5">
+              Configure course name and weighted grading categories
+            </p>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close modal"
+          className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-full transition-colors cursor-pointer google-btn-press"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-7 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div className="sm:col-span-3">
               <label htmlFor="class-name-input" className="block text-xs font-semibold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider mb-2">
@@ -375,24 +376,25 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
             </div>
           )}
 
-          <div className="pt-2 flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer min-h-[44px] google-btn-press"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!isFormValid}
-              className="w-full sm:w-auto px-6 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-full transition-all shadow-sm cursor-pointer min-h-[44px] google-btn-press"
-            >
-              Create Class
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+
+        <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#252628] flex items-center justify-end gap-3 flex-shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#28292a] rounded-xl transition-colors cursor-pointer google-btn-press"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={!isFormValid}
+            className="px-6 py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm cursor-pointer min-h-[44px] google-btn-press"
+          >
+            Create Class
+          </button>
+        </div>
+      </form>
+    </ModalPortal>
   );
 };

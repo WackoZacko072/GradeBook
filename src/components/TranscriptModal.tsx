@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Calendar,
 } from 'lucide-react';
+import { ModalPortal } from './ModalPortal';
 import type { ClassItem } from '../types/grade';
 import {
   calculateClassAverage,
@@ -83,17 +84,12 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-md overflow-y-auto animate-fade-in"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
+    <ModalPortal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidth="max-w-4xl"
       aria-labelledby="transcript-modal-title"
     >
-      <div
-        className="bg-white dark:bg-[#1e1f20] rounded-3xl shadow-2xl border border-slate-200/50 dark:border-white/10 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden my-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
         {/* Modal Top Header Bar */}
         <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-white/5 flex-shrink-0">
           <div className="flex items-center gap-2.5">
@@ -406,7 +402,6 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </ModalPortal>
   );
 };

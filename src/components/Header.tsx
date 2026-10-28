@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { ModalPortal } from './ModalPortal';
 import {
   subscribeToSyncStatus,
   getSyncStatus,
@@ -1111,62 +1112,66 @@ export const Header: React.FC<HeaderProps> = ({
       </header>
 
       {/* Gradebook Calculation & Help Modal */}
-      {isHelpModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-fade-in">
-          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl border border-slate-200/50 dark:border-white/10 shadow-2xl w-full max-w-lg p-6 sm:p-7 animate-scale-up space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#26282a] pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 stroke-[2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-base text-slate-900 dark:text-[#e8eaed]">How Grades Are Calculated</h3>
-                  <p className="text-xs text-slate-400 dark:text-[#9aa0a6]">Official Academic Calculation Rules</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsHelpModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-[#26282a] cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <ModalPortal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        maxWidth="max-w-2xl"
+        aria-labelledby="help-modal-title"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-white/5 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center border border-blue-100 dark:border-blue-900/50">
+              <GraduationCap className="w-5 h-5 stroke-[2]" />
             </div>
-
-            <div className="space-y-3 text-xs text-slate-600 dark:text-[#c4c7c5] max-h-96 overflow-y-auto pr-1">
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
-                <h4 className="font-bold text-slate-900 dark:text-[#e8eaed] mb-1">1. Weighted Category Averages</h4>
-                <p>Each category (e.g. Homework 20%, Exams 50%) computes the arithmetic mean of its graded items. Ungraded or blank scores never count as zeros.</p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
-                <h4 className="font-bold text-slate-900 dark:text-[#e8eaed] mb-1">2. Unstarted / Empty Categories</h4>
-                <p>Empty categories default to 100% contribution so that early in the semester, unfinished categories do not artificially depress your grade.</p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
-                <h4 className="font-bold text-slate-900 dark:text-[#e8eaed] mb-1">3. Cumulative GPA Scale</h4>
-                <p>Weighted GPA is calculated on the standard 4.0 scale (A+ / A = 4.0, A- = 3.7, B+ = 3.3, B = 3.0, B- = 2.7, C+ = 2.3, C = 2.0, D = 1.0, F = 0.0) weighted by course credit hours.</p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
-                <h4 className="font-bold text-slate-900 dark:text-[#e8eaed] mb-1">4. Cloud Synchronization</h4>
-                <p>Sign in with your Google Account anytime to enable real-time device synchronization through Cloud Firestore.</p>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setIsHelpModalOpen(false)}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs cursor-pointer google-btn-press"
-              >
-                Got it
-              </button>
+            <div>
+              <h3 id="help-modal-title" className="font-bold text-base text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+                How Grades Are Calculated
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">Official Academic Calculation Rules</p>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setIsHelpModalOpen(false)}
+            className="w-9 h-9 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#202123] flex items-center justify-center transition-colors cursor-pointer google-btn-press"
+            aria-label="Close dialog"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      )}
+
+        <div className="p-6 space-y-3.5 text-xs text-slate-600 dark:text-[#c4c7c5] max-h-[60vh] overflow-y-auto">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
+            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">1. Weighted Category Averages</h4>
+            <p className="leading-relaxed">Each category (e.g. Homework 20%, Exams 50%) computes the arithmetic mean of its graded items. Ungraded or blank scores never count as zeros.</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
+            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">2. Unstarted / Empty Categories</h4>
+            <p className="leading-relaxed">Empty categories default to 100% contribution so that early in the semester, unfinished categories do not artificially depress your grade.</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
+            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">3. Cumulative GPA Scale</h4>
+            <p className="leading-relaxed">Weighted GPA is calculated on the standard 4.0 scale (A+ / A = 4.0, A- = 3.7, B+ = 3.3, B = 3.0, B- = 2.7, C+ = 2.3, C = 2.0, D = 1.0, F = 0.0) weighted by course credit hours.</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
+            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">4. Cloud Synchronization</h4>
+            <p className="leading-relaxed">Sign in with your Google Account anytime to enable real-time device synchronization through Cloud Firestore.</p>
+          </div>
+        </div>
+
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/5 flex justify-end flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsHelpModalOpen(false)}
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs cursor-pointer transition-all google-btn-press shadow-sm"
+          >
+            Got it
+          </button>
+        </div>
+      </ModalPortal>
     </>
   );
 };

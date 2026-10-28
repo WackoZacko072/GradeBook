@@ -25,6 +25,7 @@ import {
   gradeLongAnswerSubmission,
 } from '../../utils/notebookAiService';
 import { LatexRenderer } from '../LatexRenderer';
+import { ModalPortal } from '../ModalPortal';
 
 interface QuestionBankViewProps {
   noteTitle: string;
@@ -616,152 +617,150 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       )}
 
       {/* Manual Add MC Modal */}
-      {isAddMcModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
-            onClick={() => setIsAddMcModalOpen(false)}
-          />
-          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Add Multiple Choice Question</h3>
-            <form onSubmit={handleSaveManualMc} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Question Prompt (LaTeX formulas supported via $...$):
-                </label>
-                <textarea
-                  rows={2}
-                  required
-                  value={newMcQuestion}
-                  onChange={(e) => setNewMcQuestion(e.target.value)}
-                  placeholder="e.g. Find the derivative of $f(x) = 3x^2 + 5x$..."
-                  className="w-full p-2.5 border border-slate-200 rounded-xl"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block font-bold text-slate-700">Options (Select the correct one):</label>
-                {newMcOptions.map((opt, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="correctOption"
-                      checked={newMcCorrect === i}
-                      onChange={() => setNewMcCorrect(i)}
-                      className="w-4 h-4 text-blue-600 cursor-pointer"
-                    />
-                    <span className="font-bold text-slate-500 w-4">{String.fromCharCode(65 + i)}:</span>
-                    <input
-                      type="text"
-                      required
-                      value={opt}
-                      onChange={(e) => {
-                        const next = [...newMcOptions];
-                        next[i] = e.target.value;
-                        setNewMcOptions(next);
-                      }}
-                      placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                      className="flex-1 p-2 border border-slate-200 rounded-lg text-xs"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Explanation (Optional):</label>
-                <textarea
-                  rows={2}
-                  value={newMcExplanation}
-                  onChange={(e) => setNewMcExplanation(e.target.value)}
-                  placeholder="Explain why the answer is correct with $LaTeX$ steps..."
-                  className="w-full p-2.5 border border-slate-200 rounded-xl"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAddMcModalOpen(false)}
-                  className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold cursor-pointer"
-                >
-                  Save Question
-                </button>
-              </div>
-            </form>
+      <ModalPortal
+        isOpen={isAddMcModalOpen}
+        onClose={() => setIsAddMcModalOpen(false)}
+        maxWidth="max-w-2xl"
+        className="p-6 space-y-5"
+      >
+        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+          Add Multiple Choice Question
+        </h3>
+        <form onSubmit={handleSaveManualMc} className="space-y-4 text-xs sm:text-sm">
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">
+              Question Prompt (LaTeX formulas supported via $...$):
+            </label>
+            <textarea
+              rows={3}
+              required
+              value={newMcQuestion}
+              onChange={(e) => setNewMcQuestion(e.target.value)}
+              placeholder="e.g. Find the derivative of $f(x) = 3x^2 + 5x$..."
+              className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+            />
           </div>
-        </div>
-      )}
+
+          <div className="space-y-2.5">
+            <label className="block font-bold text-slate-700 dark:text-[#e8eaed]">Options (Select the correct one):</label>
+            {newMcOptions.map((opt, i) => (
+              <div key={i} className="flex items-center gap-2.5">
+                <input
+                  type="radio"
+                  name="correctOption"
+                  checked={newMcCorrect === i}
+                  onChange={() => setNewMcCorrect(i)}
+                  className="w-4 h-4 text-blue-600 cursor-pointer"
+                />
+                <span className="font-bold text-slate-500 dark:text-[#9aa0a6] w-5">{String.fromCharCode(65 + i)}:</span>
+                <input
+                  type="text"
+                  required
+                  value={opt}
+                  onChange={(e) => {
+                    const next = [...newMcOptions];
+                    next[i] = e.target.value;
+                    setNewMcOptions(next);
+                  }}
+                  placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                  className="flex-1 p-2.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl text-xs sm:text-sm"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">Explanation (Optional):</label>
+            <textarea
+              rows={2}
+              value={newMcExplanation}
+              onChange={(e) => setNewMcExplanation(e.target.value)}
+              placeholder="Explain why the answer is correct with $LaTeX$ steps..."
+              className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-[#26282a]">
+            <button
+              type="button"
+              onClick={() => setIsAddMcModalOpen(false)}
+              className="px-4 py-2 text-xs sm:text-sm text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold cursor-pointer google-btn-press shadow-xs"
+            >
+              Save Question
+            </button>
+          </div>
+        </form>
+      </ModalPortal>
 
       {/* Manual Add LA Modal */}
-      {isAddLaModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
-            onClick={() => setIsAddLaModalOpen(false)}
-          />
-          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Add Long Answer Question</h3>
-            <form onSubmit={handleSaveManualLa} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Question Prompt:</label>
-                <textarea
-                  rows={2}
-                  required
-                  value={newLaQuestion}
-                  onChange={(e) => setNewLaQuestion(e.target.value)}
-                  placeholder="e.g. Derive the kinematic equation for position..."
-                  className="w-full p-2.5 border border-slate-200 rounded-xl"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Model Sample Answer:</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={newLaSampleAnswer}
-                  onChange={(e) => setNewLaSampleAnswer(e.target.value)}
-                  placeholder="Step-by-step complete solution with $LaTeX$..."
-                  className="w-full p-2.5 border border-slate-200 rounded-xl"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Key Rubric Points (One per line):</label>
-                <textarea
-                  rows={3}
-                  value={newLaRubric}
-                  onChange={(e) => setNewLaRubric(e.target.value)}
-                  placeholder="e.g. Defines initial conditions&#10;Integrates acceleration&#10;Accounts for integration constant"
-                  className="w-full p-2.5 border border-slate-200 rounded-xl"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAddLaModalOpen(false)}
-                  className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold cursor-pointer"
-                >
-                  Save Question
-                </button>
-              </div>
-            </form>
+      <ModalPortal
+        isOpen={isAddLaModalOpen}
+        onClose={() => setIsAddLaModalOpen(false)}
+        maxWidth="max-w-2xl"
+        className="p-6 space-y-5"
+      >
+        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+          Add Long Answer Question
+        </h3>
+        <form onSubmit={handleSaveManualLa} className="space-y-4 text-xs sm:text-sm">
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">Question Prompt:</label>
+            <textarea
+              rows={3}
+              required
+              value={newLaQuestion}
+              onChange={(e) => setNewLaQuestion(e.target.value)}
+              placeholder="e.g. Derive the kinematic equation for position..."
+              className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden"
+            />
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">Model Sample Answer:</label>
+            <textarea
+              rows={4}
+              required
+              value={newLaSampleAnswer}
+              onChange={(e) => setNewLaSampleAnswer(e.target.value)}
+              placeholder="Step-by-step complete solution with $LaTeX$..."
+              className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden font-mono text-xs sm:text-sm leading-relaxed"
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">Key Rubric Points (One per line):</label>
+            <textarea
+              rows={3}
+              value={newLaRubric}
+              onChange={(e) => setNewLaRubric(e.target.value)}
+              placeholder="e.g. Defines initial conditions&#10;Integrates acceleration&#10;Accounts for integration constant"
+              className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-[#26282a]">
+            <button
+              type="button"
+              onClick={() => setIsAddLaModalOpen(false)}
+              className="px-4 py-2 text-xs sm:text-sm text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold cursor-pointer google-btn-press shadow-xs"
+            >
+              Save Question
+            </button>
+          </div>
+        </form>
+      </ModalPortal>
     </div>
   );
 };

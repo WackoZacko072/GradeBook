@@ -21,6 +21,7 @@ import {
   ChevronDown,
   LayoutTemplate,
 } from 'lucide-react';
+import { ModalPortal } from '../ModalPortal';
 import type { NoteItem, NoteSource } from '../../types/notebook';
 import type { ClassItem } from '../../types/grade';
 import { MarkdownRenderer } from '../MarkdownRenderer';
@@ -833,42 +834,41 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
       </div>
 
       {/* Delete Confirmation Modal */}
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
-            onClick={() => setIsDeleteModalOpen(false)}
-          />
-          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 animate-fade-scale">
-            <div className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
-              <Trash2 className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Delete this note?</h3>
-            <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1.5 leading-relaxed">
-              Are you sure you want to delete <span className="font-bold text-slate-800 dark:text-[#e8eaed]">"{note.title}"</span>? This will permanently remove its notes and attached class files.
-            </p>
-            <div className="mt-5 flex items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsDeleteModalOpen(false)}
-                className="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl cursor-pointer google-btn-press"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onDeleteNote(note.id);
-                  onBack();
-                }}
-                className="px-4 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs cursor-pointer google-btn-press"
-              >
-                Delete Note
-              </button>
-            </div>
-          </div>
+      <ModalPortal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        maxWidth="max-w-md"
+        className="p-6 text-center"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-3">
+          <Trash2 className="w-6 h-6 stroke-[2.2]" />
         </div>
-      )}
+        <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+          Delete this note?
+        </h3>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-1.5 leading-relaxed">
+          Are you sure you want to delete <span className="font-bold text-slate-800 dark:text-[#e8eaed]">"{note.title}"</span>? This will permanently remove its notes and attached class files.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsDeleteModalOpen(false)}
+            className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl cursor-pointer google-btn-press"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onDeleteNote(note.id);
+              onBack();
+            }}
+            className="px-5 py-2 text-xs sm:text-sm font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs cursor-pointer google-btn-press"
+          >
+            Delete Note
+          </button>
+        </div>
+      </ModalPortal>
     </div>
   );
 };

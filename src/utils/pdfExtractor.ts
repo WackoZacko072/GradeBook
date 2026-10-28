@@ -1,20 +1,17 @@
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Configure the PDF.js worker
-if (typeof window !== 'undefined') {
-  try {
-    // Point to matching CDN worker version for Vite browser compatibility
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version || '4.10.38'}/pdf.worker.min.mjs`;
-  } catch (err) {
-    console.warn('Could not set pdfjs workerSrc:', err);
-  }
-}
-
 /**
  * Extracts plain text from an uploaded PDF file in the browser.
  */
 export async function extractTextFromPdf(file: File): Promise<string> {
   try {
+    const pdfjsLib = await import('pdfjs-dist');
+    if (typeof window !== 'undefined') {
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version || '4.10.38'}/pdf.worker.min.mjs`;
+      } catch (err) {
+        console.warn('Could not set pdfjs workerSrc:', err);
+      }
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const loadingTask = pdfjsLib.getDocument({
       data: new Uint8Array(arrayBuffer),

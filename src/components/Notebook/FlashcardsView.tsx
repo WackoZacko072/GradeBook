@@ -12,10 +12,12 @@ import {
   Loader2,
   LayoutGrid,
   Maximize2,
+  X,
 } from 'lucide-react';
 import type { FlashcardItem, NoteSource } from '../../types/notebook';
 import { generateFlashcards } from '../../utils/notebookAiService';
 import { LatexRenderer } from '../LatexRenderer';
+import { ModalPortal } from '../ModalPortal';
 
 interface FlashcardsViewProps {
   noteTitle: string;
@@ -410,62 +412,71 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
       )}
 
       {/* Manual Add Card Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
+      <ModalPortal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        maxWidth="max-w-xl"
+        className="p-6 space-y-5"
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+            Add New Flashcard
+          </h3>
+          <button
+            type="button"
             onClick={() => setIsAddModalOpen(false)}
-          />
-          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-4">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Add New Flashcard</h3>
-            <form onSubmit={handleSaveManualCard} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Front (Term, Concept, or Question - LaTeX supported via $...$):
-                </label>
-                <textarea
-                  rows={2}
-                  required
-                  value={newFront}
-                  onChange={(e) => setNewFront(e.target.value)}
-                  placeholder="e.g. Work-Energy Theorem ($W_{\text{net}} = \Delta K$)..."
-                  className="w-full p-2.5 border border-slate-200 rounded-xl"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Back (Definition, Formula, or Explanation - LaTeX supported):
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  value={newBack}
-                  onChange={(e) => setNewBack(e.target.value)}
-                  placeholder="e.g. The net work done on an object equals the change in its kinetic energy: $$W = \frac{1}{2}m v_f^2 - \frac{1}{2}m v_i^2$$"
-                  className="w-full p-2.5 border border-slate-200 rounded-xl"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-3.5 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold cursor-pointer"
-                >
-                  Save Flashcard
-                </button>
-              </div>
-            </form>
-          </div>
+            className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      )}
+
+        <form onSubmit={handleSaveManualCard} className="space-y-4 text-xs sm:text-sm">
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">
+              Front (Term, Concept, or Question — LaTeX supported via $...$):
+            </label>
+            <textarea
+              rows={3}
+              required
+              value={newFront}
+              onChange={(e) => setNewFront(e.target.value)}
+              placeholder="e.g. Work-Energy Theorem ($W_{\text{net}} = \Delta K$)..."
+              className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">
+              Back (Definition, Formula, or Explanation — LaTeX supported):
+            </label>
+            <textarea
+              rows={4}
+              required
+              value={newBack}
+              onChange={(e) => setNewBack(e.target.value)}
+              placeholder="e.g. The net work done on an object equals the change in its kinetic energy: $$W = \frac{1}{2}m v_f^2 - \frac{1}{2}m v_i^2$$"
+              className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-500 font-mono text-xs sm:text-sm leading-relaxed"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-[#26282a]">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="px-4 py-2 text-xs sm:text-sm text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-[#8ab4f8] dark:text-[#0f0f10] text-white rounded-xl text-xs sm:text-sm font-bold cursor-pointer google-btn-press shadow-xs"
+            >
+              Save Flashcard
+            </button>
+          </div>
+        </form>
+      </ModalPortal>
     </div>
   );
 };

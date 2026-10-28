@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sliders, Plus, Trash2, ArrowUp, ArrowDown, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ModalPortal } from './ModalPortal';
 import type { Category } from '../types/grade';
 import { roundTo, equalizeCategoryWeights } from '../utils/gradeCalculations';
 
@@ -92,40 +93,39 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <ModalPortal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidth="max-w-2xl"
       aria-labelledby="manage-weights-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-opacity animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-xl bg-white dark:bg-[#1e1f20] rounded-3xl shadow-2xl border border-slate-200/50 dark:border-white/10 p-6 sm:p-7 transform transition-all animate-fade-scale max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-2xl">
-              <Sliders className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 id="manage-weights-title" className="text-lg font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
-                Configure Categories & Weights
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">
-                Category weights must total exactly 100%
-              </p>
-            </div>
+      {/* Header */}
+      <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#252628] flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-2xl">
+            <Sliders className="w-5 h-5 stroke-[2.2]" />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close modal"
-            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-full transition-colors cursor-pointer google-btn-press"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div>
+            <h2 id="manage-weights-title" className="text-lg sm:text-xl font-bold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+              Configure Categories & Weights
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-0.5">
+              Category weights must total exactly 100%
+            </p>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close modal"
+          className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-full transition-colors cursor-pointer google-btn-press"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-        {/* Content Body */}
-        <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
+      {/* Content Body */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-5 sm:p-6 space-y-4">
           {/* Status Banner */}
           <div
             className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs font-semibold ${
@@ -241,8 +241,8 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
           </button>
         </div>
 
-        {/* Footer */}
-        <div className="pt-4 border-t border-slate-100 dark:border-[#26282a] flex flex-col-reverse sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+        {/* Sticky Footer */}
+        <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#252628] flex flex-col-reverse sm:flex-row items-center justify-between gap-3 flex-shrink-0">
           <span className="text-xs text-slate-400 dark:text-[#9aa0a6]">
             Changes only apply once weights total 100%.
           </span>
@@ -250,7 +250,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 sm:flex-initial px-5 py-2.5 text-sm font-medium text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer min-h-[44px] google-btn-press"
+              className="flex-1 sm:flex-initial px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#28292a] rounded-xl transition-colors cursor-pointer google-btn-press"
             >
               Cancel
             </button>
@@ -258,13 +258,12 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
               type="button"
               disabled={!isValid}
               onClick={handleSave}
-              className="flex-1 sm:flex-initial px-6 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-full transition-all shadow-sm cursor-pointer min-h-[44px] google-btn-press"
+              className="flex-1 sm:flex-initial px-6 py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm cursor-pointer min-h-[44px] google-btn-press"
             >
               Save Configuration
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </ModalPortal>
   );
 };

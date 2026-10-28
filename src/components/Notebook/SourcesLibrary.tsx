@@ -14,6 +14,7 @@ import {
   BookOpen,
   FilePlus,
 } from 'lucide-react';
+import { ModalPortal } from '../ModalPortal';
 import type { NoteSource } from '../../types/notebook';
 import type { ClassItem } from '../../types/grade';
 import { extractTextFromPdf } from '../../utils/pdfExtractor';
@@ -563,165 +564,172 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* ===================================================================== */}
       {/* CREATE NOTE MODAL (Friendly name for copied text / note creation)      */}
       {/* ===================================================================== */}
-      {isCreateNoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/50 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
-            <div className="p-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center">
-                  <FilePlus className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">
-                    Create Note
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">
-                    Paste copied text or write study notes for {activeClass ? activeClass.name : 'this class'}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsCreateNoteModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <ModalPortal
+        isOpen={isCreateNoteModalOpen}
+        onClose={() => setIsCreateNoteModalOpen(false)}
+        maxWidth="max-w-3xl"
+      >
+        <div className="p-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center">
+              <FilePlus className="w-5 h-5 stroke-[2.2]" />
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#e8eaed]">
+                Create Note
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6]">
+                Paste copied text or write study notes for {activeClass ? activeClass.name : 'this class'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsCreateNoteModalOpen(false)}
+            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSaveNote} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <div className="p-5 sm:p-7 space-y-5 overflow-y-auto flex-1 min-h-0">
+            <div>
+              <label className="block text-xs sm:text-sm font-bold text-slate-800 dark:text-[#e8eaed] mb-1.5">
+                Note Title
+              </label>
+              <input
+                type="text"
+                required
+                autoFocus
+                value={noteTitle}
+                onChange={(e) => setNoteTitle(e.target.value)}
+                placeholder="e.g. Lecture 3: Key Formulas & Mechanisms"
+                className="w-full text-sm sm:text-base p-3.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl focus:bg-white dark:focus:bg-[#0f0f10] focus:outline-hidden focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-[#e8eaed]"
+              />
             </div>
 
-            <form onSubmit={handleSaveNote} className="p-5 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-1">
-                  Note Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoFocus
-                  value={noteTitle}
-                  onChange={(e) => setNoteTitle(e.target.value)}
-                  placeholder="e.g. Lecture 3: Key Formulas & Mechanisms"
-                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl focus:bg-white dark:focus:bg-[#0f0f10] focus:outline-hidden focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-[#e8eaed]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-1">
-                  Note Content (or Paste Copied Text)
-                </label>
-                <textarea
-                  required
-                  rows={8}
-                  value={noteContent}
-                  onChange={(e) => setNoteContent(e.target.value)}
-                  placeholder="Type notes or paste copied text, lecture transcripts, study summaries, or textbook sections here..."
-                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl focus:bg-white dark:focus:bg-[#0f0f10] focus:outline-hidden focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-[#e8eaed] leading-relaxed font-mono"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateNoteModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-[#8ab4f8] dark:text-[#202124] rounded-xl transition-all shadow-xs cursor-pointer google-btn-press"
-                >
-                  Create Note
-                </button>
-              </div>
-            </form>
+            <div>
+              <label className="block text-xs sm:text-sm font-bold text-slate-800 dark:text-[#e8eaed] mb-1.5">
+                Note Content (or Paste Copied Text)
+              </label>
+              <textarea
+                required
+                rows={10}
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                placeholder="Type notes or paste copied text, lecture transcripts, study summaries, or textbook sections here..."
+                className="w-full text-sm sm:text-base p-3.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl focus:bg-white dark:focus:bg-[#0f0f10] focus:outline-hidden focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-[#e8eaed] leading-relaxed font-mono"
+              />
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="flex items-center justify-end gap-3 p-4 sm:p-5 border-t border-slate-100 dark:border-[#26282a] bg-slate-50/70 dark:bg-[#252628] flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsCreateNoteModalOpen(false)}
+              className="px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-[#8ab4f8] dark:text-[#202124] rounded-xl transition-all shadow-xs cursor-pointer google-btn-press"
+            >
+              Create Note
+            </button>
+          </div>
+        </form>
+      </ModalPortal>
 
       {/* ===================================================================== */}
       {/* QUICK ADD CLASS MODAL                                                 */}
       {/* ===================================================================== */}
-      {isAddClassModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/50 dark:border-white/10 p-6 space-y-4 animate-fade-scale">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">
-                Create Class
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsAddClassModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateClass} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-1">
-                  Class Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoFocus
-                  value={newClassName}
-                  onChange={(e) => setNewClassName(e.target.value)}
-                  placeholder="e.g. ECON 101, MATH 200, BIOL 111"
-                  className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-1.5">
-                  Class Color
-                </label>
-                <div className="flex items-center gap-2">
-                  {['#2563EB', '#7C3AED', '#059669', '#DC2626', '#D97706', '#0891B2'].map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setNewClassColor(color)}
-                      style={{ backgroundColor: color }}
-                      className={`w-7 h-7 rounded-full border-2 transition-transform cursor-pointer ${
-                        newClassColor === color ? 'scale-115 border-white shadow-md' : 'border-transparent'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddClassModalOpen(false)}
-                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs google-btn-press"
-                >
-                  Add Class
-                </button>
-              </div>
-            </form>
-          </div>
+      <ModalPortal
+        isOpen={isAddClassModalOpen}
+        onClose={() => setIsAddClassModalOpen(false)}
+        maxWidth="max-w-md"
+        className="p-6 space-y-4"
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">
+            Create Class
+          </h3>
+          <button
+            type="button"
+            onClick={() => setIsAddClassModalOpen(false)}
+            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      )}
+
+        <form onSubmit={handleCreateClass} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-1">
+              Class Name
+            </label>
+            <input
+              type="text"
+              required
+              autoFocus
+              value={newClassName}
+              onChange={(e) => setNewClassName(e.target.value)}
+              placeholder="e.g. ECON 101, MATH 200, BIOL 111"
+              className="w-full text-xs sm:text-sm p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-1.5">
+              Class Color
+            </label>
+            <div className="flex items-center gap-2">
+              {['#2563EB', '#7C3AED', '#059669', '#DC2626', '#D97706', '#0891B2'].map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setNewClassColor(color)}
+                  style={{ backgroundColor: color }}
+                  className={`w-7 h-7 rounded-full border-2 transition-transform cursor-pointer ${
+                    newClassColor === color ? 'scale-115 border-white shadow-md' : 'border-transparent'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsAddClassModalOpen(false)}
+              className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs google-btn-press"
+            >
+              Add Class
+            </button>
+          </div>
+        </form>
+      </ModalPortal>
 
       {/* ===================================================================== */}
       {/* PREVIEW EXTRACTED CONTENT MODAL                                       */}
       {/* ===================================================================== */}
-      {previewingSource && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200/50 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
-            <div className="p-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5">
+      <ModalPortal
+        isOpen={!!previewingSource}
+        onClose={() => setPreviewingSource(null)}
+        maxWidth="max-w-4xl"
+      >
+        {previewingSource && (
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="p-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5 flex-shrink-0">
               <div>
-                <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed] truncate max-w-md">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#e8eaed] truncate max-w-md">
                   {previewingSource.name}
                 </h3>
                 <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-[#9aa0a6] mt-0.5">
@@ -751,48 +759,53 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
               </div>
             </div>
 
-            <div className="p-5 overflow-y-auto flex-1 font-mono text-xs sm:text-[13px] leading-relaxed text-slate-800 dark:text-[#e8eaed] whitespace-pre-wrap select-text">
+            <div className="p-5 sm:p-7 overflow-y-auto flex-1 font-mono text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-[#e8eaed] whitespace-pre-wrap select-text">
               {previewingSource.content}
             </div>
 
-            <div className="p-4 border-t border-slate-100 dark:border-[#26282a] bg-slate-50/70 dark:bg-[#242526] flex items-center justify-between">
+            <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-[#26282a] bg-slate-50/70 dark:bg-[#242526] flex items-center justify-between flex-shrink-0">
               <span className="text-xs text-slate-400 dark:text-[#9aa0a6]">
                 Added {new Date(previewingSource.addedAt).toLocaleDateString()}
               </span>
               <button
                 type="button"
                 onClick={() => setPreviewingSource(null)}
-                className="px-4 py-1.5 bg-slate-200 dark:bg-[#202123] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs font-bold cursor-pointer"
+                className="px-5 py-2 bg-slate-200 dark:bg-[#202123] text-slate-700 dark:text-[#e8eaed] rounded-xl text-xs sm:text-sm font-bold cursor-pointer"
               >
                 Close
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </ModalPortal>
 
       {/* ===================================================================== */}
       {/* DELETE CONFIRMATION DIALOG                                            */}
       {/* ===================================================================== */}
-      {sourceToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/50 dark:border-white/10 p-6 space-y-4 animate-fade-scale text-center">
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center mx-auto">
+      <ModalPortal
+        isOpen={!!sourceToDelete}
+        onClose={() => setSourceToDelete(null)}
+        maxWidth="max-w-md"
+        className="p-6 text-center"
+      >
+        {sourceToDelete && (
+          <div>
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center mx-auto mb-3">
               <Trash2 className="w-6 h-6 stroke-[2.2]" />
             </div>
             <div>
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">
+              <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]">
                 Delete Source?
               </h3>
-              <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-1.5">
                 Are you sure you want to remove &quot;{sourceToDelete.name}&quot;? This cannot be undone.
               </p>
             </div>
-            <div className="flex items-center justify-center gap-2 pt-1">
+            <div className="flex items-center justify-center gap-3 pt-5">
               <button
                 type="button"
                 onClick={() => setSourceToDelete(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs sm:text-sm font-bold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -802,14 +815,14 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                   onDeleteSource(sourceToDelete.id);
                   setSourceToDelete(null);
                 }}
-                className="px-5 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-xs cursor-pointer google-btn-press"
+                className="px-5 py-2 text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-xs cursor-pointer google-btn-press"
               >
                 Delete
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </ModalPortal>
     </div>
   );
 };

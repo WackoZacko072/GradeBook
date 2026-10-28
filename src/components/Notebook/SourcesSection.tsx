@@ -9,6 +9,7 @@ import {
   X,
   FileCode,
 } from 'lucide-react';
+import { ModalPortal } from '../ModalPortal';
 import type { NoteSource } from '../../types/notebook';
 
 interface SourcesSectionProps {
@@ -218,84 +219,83 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
       )}
 
       {/* Paste Text Modal */}
-      {isPasteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
+      <ModalPortal
+        isOpen={isPasteModalOpen}
+        onClose={() => setIsPasteModalOpen(false)}
+        maxWidth="max-w-2xl"
+      >
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10 flex-shrink-0 bg-slate-50/70 dark:bg-white/5">
+          <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]">Add Text Source</h3>
+          <button
+            type="button"
             onClick={() => setIsPasteModalOpen(false)}
-          />
-          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-scale">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">Add Text Source</h3>
-              <button
-                type="button"
-                onClick={() => setIsPasteModalOpen(false)}
-                className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg google-btn-press"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg google-btn-press"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSavePastedSource} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 min-h-0 text-xs sm:text-sm">
+            <div>
+              <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">
+                Source Title / Name:
+              </label>
+              <input
+                type="text"
+                required
+                value={pasteTitle}
+                onChange={(e) => setPasteTitle(e.target.value)}
+                placeholder="e.g. Chapter 4 Reading Excerpt, Lecture 2 Slides..."
+                className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden"
+              />
             </div>
 
-            <form onSubmit={handleSavePastedSource} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1">
-                  Source Title / Name:
-                </label>
-                <input
-                  type="text"
-                  value={pasteTitle}
-                  onChange={(e) => setPasteTitle(e.target.value)}
-                  placeholder="e.g. Chapter 4 Reading Excerpt, Lecture 2 Slides..."
-                  className="w-full p-2.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl focus:outline-hidden"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1">
-                  Source Content (Paste any article, reading, or notes):
-                </label>
-                <textarea
-                  rows={8}
-                  required
-                  value={pasteContent}
-                  onChange={(e) => setPasteContent(e.target.value)}
-                  placeholder="Paste lecture notes, study guide text, textbook definitions..."
-                  className="w-full p-2.5 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl text-xs font-mono focus:outline-hidden"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#26282a]">
-                <button
-                  type="button"
-                  onClick={() => setIsPasteModalOpen(false)}
-                  className="px-3.5 py-2 text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl font-semibold cursor-pointer google-btn-press"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold cursor-pointer google-btn-press"
-                >
-                  Add Source
-                </button>
-              </div>
-            </form>
+            <div>
+              <label className="block font-bold text-slate-700 dark:text-[#e8eaed] mb-1.5">
+                Source Content (Paste any article, reading, or notes):
+              </label>
+              <textarea
+                rows={10}
+                required
+                value={pasteContent}
+                onChange={(e) => setPasteContent(e.target.value)}
+                placeholder="Paste lecture notes, study guide text, textbook definitions..."
+                className="w-full p-3 bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-xl text-xs sm:text-sm font-mono focus:outline-hidden leading-relaxed"
+              />
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="flex items-center justify-end gap-2.5 p-4 border-t border-slate-100 dark:border-[#26282a] bg-slate-50/70 dark:bg-[#252628] flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsPasteModalOpen(false)}
+              className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] rounded-xl cursor-pointer google-btn-press"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold cursor-pointer google-btn-press shadow-xs"
+            >
+              Add Source
+            </button>
+          </div>
+        </form>
+      </ModalPortal>
 
       {/* View Source Modal */}
-      {viewingSource && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
-            onClick={() => setViewingSource(null)}
-          />
-          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-3 max-h-[85vh] flex flex-col animate-fade-scale">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-[#26282a] flex-shrink-0">
-              <div className="flex items-center gap-2 truncate">
+      <ModalPortal
+        isOpen={!!viewingSource}
+        onClose={() => setViewingSource(null)}
+        maxWidth="max-w-4xl"
+      >
+        {viewingSource && (
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-[#26282a] flex-shrink-0 bg-slate-50/70 dark:bg-white/5">
+              <div className="flex items-center gap-2.5 truncate">
                 <FileCode className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                <h3 className="font-extrabold text-slate-900 dark:text-[#e8eaed] text-sm truncate">
+                <h3 className="font-bold text-slate-900 dark:text-[#e8eaed] text-base truncate">
                   {viewingSource.name}
                 </h3>
               </div>
@@ -304,27 +304,27 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
                 onClick={() => setViewingSource(null)}
                 className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] rounded-lg cursor-pointer google-btn-press"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#0f0f10] p-4 rounded-xl border border-slate-200/80 dark:border-[#26282a] text-xs font-mono text-slate-700 dark:text-[#c4c7c5] whitespace-pre-wrap leading-relaxed">
+            <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50 dark:bg-[#0f0f10] p-5 sm:p-6 text-xs sm:text-sm font-mono text-slate-700 dark:text-[#c4c7c5] whitespace-pre-wrap leading-relaxed">
               {viewingSource.content}
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-[#26282a] flex-shrink-0 text-xs text-slate-400 dark:text-[#9aa0a6]">
+            <div className="flex items-center justify-between p-4 border-t border-slate-100 dark:border-[#26282a] flex-shrink-0 text-xs sm:text-sm text-slate-400 dark:text-[#9aa0a6] bg-slate-50/70 dark:bg-[#252628]">
               <span>{viewingSource.content.length.toLocaleString()} characters &bull; {viewingSource.fileSize}</span>
               <button
                 type="button"
                 onClick={() => setViewingSource(null)}
-                className="px-3 py-1.5 bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] text-slate-700 dark:text-[#e8eaed] font-bold rounded-lg cursor-pointer google-btn-press"
+                className="px-4 py-2 bg-slate-200/80 dark:bg-[#202123] hover:bg-slate-300 dark:hover:bg-[#26282a] text-slate-800 dark:text-[#e8eaed] font-bold rounded-xl cursor-pointer google-btn-press text-xs sm:text-sm"
               >
                 Close
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </ModalPortal>
     </div>
   );
 };

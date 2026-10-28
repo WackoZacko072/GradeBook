@@ -12,6 +12,7 @@ import {
   Database,
   RefreshCw,
 } from 'lucide-react';
+import { ModalPortal } from './ModalPortal';
 import {
   getStoredFirebaseConfig,
   saveClientFirebaseConfig,
@@ -127,10 +128,14 @@ service cloud.firestore {
   const consoleRulesUrl = `https://console.firebase.google.com/project/${projectId || 'gradebook-cbd26'}/firestore/rules`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-[#1e1f20] rounded-3xl shadow-2xl border border-slate-200/50 dark:border-white/10 w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5">
+    <ModalPortal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidth="max-w-3xl"
+      aria-labelledby="firebase-modal-title"
+    >
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/20 dark:border-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <Database className="w-5 h-5" />
@@ -402,9 +407,8 @@ service cloud.firestore {
                 <span>Save Keys</span>
               </button>
             )}
-          </div>
         </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 };

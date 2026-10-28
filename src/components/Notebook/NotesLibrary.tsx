@@ -11,6 +11,7 @@ import {
   Layers,
   X,
 } from 'lucide-react';
+import { ModalPortal } from '../ModalPortal';
 import type { NoteItem } from '../../types/notebook';
 import type { ClassItem } from '../../types/grade';
 
@@ -368,25 +369,28 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
       )}
 
       {/* Delete Note Confirmation Dialog */}
-      {noteToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-md"
-            onClick={() => setNoteToDelete(null)}
-          />
-          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 animate-fade-scale">
-            <div className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
-              <Trash2 className="w-5 h-5" />
+      <ModalPortal
+        isOpen={!!noteToDelete}
+        onClose={() => setNoteToDelete(null)}
+        maxWidth="max-w-md"
+        className="p-6 text-center"
+      >
+        {noteToDelete && (
+          <div>
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-3">
+              <Trash2 className="w-6 h-6 stroke-[2.2]" />
             </div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Delete this note?</h3>
-            <p className="text-xs text-slate-500 dark:text-[#c4c7c5] mt-1.5 leading-relaxed">
+            <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+              Delete this note?
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-[#c4c7c5] mt-1.5 leading-relaxed">
               Are you sure you want to delete <span className="font-bold text-slate-800 dark:text-white">"{noteToDelete.title}"</span>? This will permanently remove its notes, sources, question bank, and flashcards.
             </p>
-            <div className="mt-5 flex items-center justify-end gap-2.5">
+            <div className="mt-6 flex items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={() => setNoteToDelete(null)}
-                className="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#26282a] rounded-xl cursor-pointer google-btn-press"
+                className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-[#26282a] rounded-xl cursor-pointer google-btn-press"
               >
                 Cancel
               </button>
@@ -396,14 +400,14 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
                   onDeleteNote(noteToDelete.id);
                   setNoteToDelete(null);
                 }}
-                className="px-4 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs cursor-pointer google-btn-press"
+                className="px-5 py-2 text-xs sm:text-sm font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-xs cursor-pointer google-btn-press"
               >
                 Delete Note
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </ModalPortal>
     </div>
   );
 };
