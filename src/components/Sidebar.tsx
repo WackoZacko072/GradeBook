@@ -480,11 +480,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <img
                 src="/gemini-gradebook-logo.png"
                 alt="Gemini Gradebook"
-                className="w-[22px] h-[22px] object-contain flex-shrink-0"
+                className="w-[25px] h-[25px] object-contain flex-shrink-0 -translate-y-[0.5px]"
               />
               <span
-                className="font-semibold text-[20px] leading-none text-slate-900 dark:text-white tracking-[-0.02em]"
-                style={{ fontFamily: "'Google Sans', 'Google Sans Text', 'Inter', sans-serif" }}
+                className="font-medium text-[21px] leading-none text-slate-900 dark:text-[#f8f9fa] tracking-[-0.015em]"
+                style={{ fontFamily: "'Google Sans', 'Outfit', 'Inter', sans-serif" }}
               >
                 Gemini Gradebook
               </span>

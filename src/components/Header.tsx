@@ -196,9 +196,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <header className="sticky top-0 z-30 bg-[#FAFBFD]/95 dark:bg-[#0f0f10]/95 backdrop-blur-md transition-colors duration-250 select-none">
-        <div className="w-full px-4 sm:px-8 h-16 flex items-center justify-between gap-3">
-          {/* Left: Gemini Gradebook Branding (shifted inwards, no hamburger icon) */}
-          <div className="flex items-center min-w-0 flex-shrink pl-1 sm:pl-2">
+        <div className="w-full px-5 sm:px-7 h-16 flex items-center justify-between gap-3">
+          {/* Left: Gemini Gradebook Branding matching Google NotebookLM lockup */}
+          <div className="flex items-center min-w-0 flex-shrink">
             <div
               onClick={() => {
                 onChangeTab('gradebook');
@@ -210,11 +210,11 @@ export const Header: React.FC<HeaderProps> = ({
               <img
                 src="/gemini-gradebook-logo.png"
                 alt="Gemini Gradebook"
-                className="w-[22px] h-[22px] sm:w-[25px] sm:h-[25px] object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
+                className="w-[25px] h-[25px] sm:w-[27px] sm:h-[27px] object-contain flex-shrink-0 -translate-y-[0.5px] group-hover:scale-105 transition-transform duration-200"
               />
               <span
-                className="text-[20px] sm:text-[24px] font-semibold tracking-[-0.02em] leading-none text-slate-900 dark:text-white antialiased select-none truncate"
-                style={{ fontFamily: "'Google Sans', 'Google Sans Text', 'Inter', sans-serif" }}
+                className="text-[21px] sm:text-[23px] font-medium tracking-[-0.015em] leading-none text-slate-900 dark:text-[#f8f9fa] antialiased select-none truncate"
+                style={{ fontFamily: "'Google Sans', 'Outfit', 'Inter', sans-serif" }}
               >
                 Gemini Gradebook
               </span>
