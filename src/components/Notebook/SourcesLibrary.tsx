@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Upload,
   FileText,
@@ -552,9 +552,9 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* CREATE NOTE MODAL (Friendly name for copied text / note creation)      */}
       {/* ===================================================================== */}
       {isCreateNoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
-            <div className="p-5 border-b border-slate-100 dark:border-[#26282a] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl max-w-xl w-full shadow-2xl border border-slate-200/50 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
+            <div className="p-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center">
                   <FilePlus className="w-4 h-4 stroke-[2.2]" />
@@ -631,8 +631,8 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* QUICK ADD CLASS MODAL                                                 */}
       {/* ===================================================================== */}
       {isAddClassModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] p-5 space-y-4 animate-fade-scale">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/50 dark:border-white/10 p-6 space-y-4 animate-fade-scale">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">
                 Create Class
@@ -705,9 +705,9 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* PREVIEW EXTRACTED CONTENT MODAL                                       */}
       {/* ===================================================================== */}
       {previewingSource && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
-            <div className="p-5 border-b border-slate-100 dark:border-[#26282a] flex items-center justify-between bg-slate-50/70 dark:bg-[#242526]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200/50 dark:border-white/10 overflow-hidden flex flex-col max-h-[90vh] animate-fade-scale">
+            <div className="p-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed] truncate max-w-md">
                   {previewingSource.name}
@@ -763,8 +763,8 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       {/* DELETE CONFIRMATION DIALOG                                            */}
       {/* ===================================================================== */}
       {sourceToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#18191b] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/80 dark:border-[#26282a] p-5 space-y-4 animate-fade-scale text-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl max-w-sm w-full shadow-2xl border border-slate-200/50 dark:border-white/10 p-6 space-y-4 animate-fade-scale text-center">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6 stroke-[2.2]" />
             </div>

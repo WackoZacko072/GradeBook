@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   HelpCircle,
-  Sparkles,
   Plus,
   Trash2,
   CheckCircle2,
@@ -282,9 +281,9 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
             {isGenerating ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <Sparkles className="w-3.5 h-3.5" />
+              <img src="/gemini-icon.png" alt="Gemini" className="w-3.5 h-3.5 object-contain" />
             )}
-            <span>{isGenerating ? 'Generating...' : 'AI Generate'}</span>
+            <span>{isGenerating ? 'Generating...' : 'Generate with Gemini'}</span>
           </button>
         </div>
       </div>
@@ -339,7 +338,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                 onClick={handleGenerateMc}
                 className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-2xs cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <img src="/gemini-icon.png" alt="Gemini" className="w-3.5 h-3.5 object-contain" />
                 <span>Generate with Gemini</span>
               </button>
             </div>
@@ -474,7 +473,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                 onClick={handleGenerateLa}
                 className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-2xs cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5" />
+                <img src="/gemini-icon.png" alt="Gemini" className="w-3.5 h-3.5 object-contain" />
                 <span>Generate with Gemini</span>
               </button>
             </div>
@@ -620,11 +619,11 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       {isAddMcModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
             onClick={() => setIsAddMcModalOpen(false)}
           />
-          <div className="relative bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-200 z-10 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-extrabold text-slate-900">Add Multiple Choice Question</h3>
+          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Add Multiple Choice Question</h3>
             <form onSubmit={handleSaveManualMc} className="space-y-3 text-xs">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
@@ -703,11 +702,11 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
       {isAddLaModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
             onClick={() => setIsAddLaModalOpen(false)}
           />
-          <div className="relative bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-200 z-10 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-extrabold text-slate-900">Add Long Answer Question</h3>
+          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Add Long Answer Question</h3>
             <form onSubmit={handleSaveManualLa} className="space-y-3 text-xs">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Question Prompt:</label>

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Sliders, Plus, Trash2, ArrowUp, ArrowDown, AlertCircle, CheckCircle2 } from 'lucide-react';
 import type { Category } from '../types/grade';
 import { roundTo, equalizeCategoryWeights } from '../utils/gradeCalculations';
@@ -96,17 +96,17 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="manage-weights-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-opacity animate-in fade-in duration-150"
     >
-      <div className="w-full max-w-xl bg-white dark:bg-[#18191b] rounded-2xl shadow-xl border border-slate-100 dark:border-[#26282a] p-6 transform transition-all animate-fade-scale max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-xl bg-white dark:bg-[#1e1f20] rounded-3xl shadow-2xl border border-slate-200/50 dark:border-white/10 p-6 sm:p-7 transform transition-all animate-fade-scale max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-[#26282a] flex-shrink-0">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-xl">
+            <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] rounded-2xl">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="manage-weights-title" className="text-lg font-bold text-slate-900 dark:text-[#e8eaed]">
+              <h2 id="manage-weights-title" className="text-lg font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
                 Configure Categories & Weights
               </h2>
               <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">
@@ -118,7 +118,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close modal"
-            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-xl transition-colors cursor-pointer google-btn-press"
+            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-full transition-colors cursor-pointer google-btn-press"
           >
             <X className="w-5 h-5" />
           </button>
@@ -250,7 +250,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 sm:flex-initial px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-[#c4c7c5] bg-slate-100 dark:bg-[#202123] hover:bg-slate-200 dark:hover:bg-[#26282a] rounded-xl transition-colors cursor-pointer min-h-[44px] google-btn-press"
+              className="flex-1 sm:flex-initial px-5 py-2.5 text-sm font-medium text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer min-h-[44px] google-btn-press"
             >
               Cancel
             </button>
@@ -258,7 +258,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
               type="button"
               disabled={!isValid}
               onClick={handleSave}
-              className="flex-1 sm:flex-initial px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm shadow-blue-500/20 cursor-pointer min-h-[44px] google-btn-press"
+              className="flex-1 sm:flex-initial px-6 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed rounded-full transition-all shadow-sm cursor-pointer min-h-[44px] google-btn-press"
             >
               Save Configuration
             </button>

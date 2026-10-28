@@ -1,9 +1,8 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   Trash2,
   Check,
-  Sparkles,
   Eye,
   Edit3,
   Columns,
@@ -418,11 +417,10 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 const effectiveSubject = currentClass ? currentClass.name : (title || 'my notes');
                 onOpenSlateAi(`Look at my ${effectiveSubject} notes and create a mcq`);
               }}
-              title="Create MCQs or Ask Slate AI about this note"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer min-h-[36px] google-btn-press"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-medium shadow-xs transition-all cursor-pointer min-h-[36px] google-btn-press"
             >
-              <Sparkles className="w-3.5 h-3.5 text-white stroke-[2.2]" />
-              <span>Ask Slate AI</span>
+              <img src="/gemini-icon.png" alt="Gemini" className="w-3.5 h-3.5 object-contain" />
+              <span>Ask Gemini</span>
             </button>
           )}
 
@@ -543,7 +541,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               onClick={() => onOpenSlateAi(`Look at my ${currentClass.name} notes and create a mcq`)}
               className="text-[11px] text-blue-600 dark:text-[#8ab4f8] hover:text-blue-800 dark:hover:text-blue-300 font-semibold hover:underline flex items-center gap-1 ml-auto cursor-pointer"
             >
-              <Sparkles className="w-3 h-3" />
+              <img src="/gemini-icon.png" alt="Gemini" className="w-3 h-3 object-contain" />
               Create MCQs for {currentClass.name}
             </button>
           )}
@@ -838,14 +836,14 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-2xs"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
             onClick={() => setIsDeleteModalOpen(false)}
           />
-          <div className="relative bg-white dark:bg-[#18191b] rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 dark:border-[#26282a] z-10 animate-fade-scale">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
+          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 animate-fade-scale">
+            <div className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
               <Trash2 className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">Delete this note?</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Delete this note?</h3>
             <p className="text-xs text-slate-500 dark:text-[#9aa0a6] mt-1.5 leading-relaxed">
               Are you sure you want to delete <span className="font-bold text-slate-800 dark:text-[#e8eaed]">"{note.title}"</span>? This will permanently remove its notes and attached class files.
             </p>

@@ -1,9 +1,8 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Plus,
   BookOpen,
   Calendar,
-  Sparkles,
   Search,
   Filter,
   Trash2,
@@ -86,10 +85,10 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
             <button
               type="button"
               onClick={() => onOpenSlateAi('Look at my notes and create a mcq quiz')}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all cursor-pointer min-h-[40px] google-btn-press"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs sm:text-sm font-medium rounded-full shadow-xs transition-all cursor-pointer min-h-[40px] google-btn-press"
             >
-              <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
-              <span>Ask Slate AI</span>
+              <img src="/gemini-icon.png" alt="Gemini" className="w-4 h-4 object-contain" />
+              <span>Ask Gemini</span>
             </button>
           )}
 
@@ -350,7 +349,7 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
                         }}
                         className="text-[10px] font-bold text-blue-600 dark:text-[#8ab4f8] hover:text-blue-800 dark:hover:text-[#a8c7fa] flex items-center gap-1 hover:underline cursor-pointer"
                       >
-                        <Sparkles className="w-3 h-3" />
+                        <img src="/gemini-icon.png" alt="Gemini" className="w-3 h-3 object-contain" />
                         Create MCQ
                       </button>
                     )}
@@ -366,14 +365,14 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
       {noteToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-slate-900/60 dark:bg-black/60 backdrop-blur-2xs"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
             onClick={() => setNoteToDelete(null)}
           />
-          <div className="relative bg-white dark:bg-[#18191b] rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 dark:border-[#26282a] z-10 animate-fade-scale">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
+          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 animate-fade-scale">
+            <div className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
               <Trash2 className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">Delete this note?</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Delete this note?</h3>
             <p className="text-xs text-slate-500 dark:text-[#c4c7c5] mt-1.5 leading-relaxed">
               Are you sure you want to delete <span className="font-bold text-slate-800 dark:text-white">"{noteToDelete.title}"</span>? This will permanently remove its notes, sources, question bank, and flashcards.
             </p>

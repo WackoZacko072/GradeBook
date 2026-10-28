@@ -1,19 +1,16 @@
 import type { SlabItem, SlabType } from '../types/slab';
-import type { NoteItem, FlashcardItem, MultipleChoiceQuestion } from '../types/notebook';
+import type { NoteItem, FlashcardItem, MultipleChoiceQuestion, NoteSource } from '../types/notebook';
 import {
   getGeminiApiKey,
   getSelectedGeminiModel,
   type GeminiModel,
 } from './aiAdvisorService';
 
-const FALLBACK_MODELS: GeminiModel[] = [
+const FAST_MODELS: GeminiModel[] = [
   'gemini-3.5-flash-lite',
   'gemini-3.5-flash',
-  'gemini-3.6-flash',
   'gemini-3.8-flash',
 ];
-
-import type { NoteSource } from '../types/notebook';
 
 /**
  * Builds rich combined context from the student's selected sources (PDFs, files, pasted notes) and notes.
@@ -36,7 +33,7 @@ function buildSourceContext(
     for (const src of targetSources) {
       sourceNames.push(src.name);
       chunks.push(
-        `--- CLASS SOURCE: ${src.name} (Class: ${src.className || 'General'}, Type: ${src.type}) ---\n${src.content.slice(0, 12000)}`
+        `--- CLASS SOURCE: ${src.name} (Class: ${src.className || 'General'}, Type: ${src.type}) ---\n${src.content.slice(0, 8000)}`
       );
     }
   }
@@ -51,13 +48,7 @@ function buildSourceContext(
       sourceNames.push(note.title);
       chunks.push(`--- NOTE TITLE: ${note.title} (Class: ${note.className || 'General'}) ---`);
       if (note.content && note.content.trim()) {
-        chunks.push(`NOTE CONTENT:\n${note.content.trim()}`);
-      }
-
-      if (note.sources && note.sources.length > 0) {
-        for (const s of note.sources) {
-          chunks.push(`[File: ${s.name} (${s.type})]:\n${s.content.slice(0, 4000)}`);
-        }
+        chunks.push(`NOTE CONTENT:\n${note.content.trim().slice(0, 4000)}`);
       }
     }
   }
@@ -76,7 +67,7 @@ function buildSourceContext(
 }
 
 /**
- * Low-level Gemini API caller for Slab generation
+ * Low-level Gemini API caller for fast Office set generation
  */
 async function callGeminiForSlab(systemPrompt: string, userPrompt: string): Promise<string> {
   const apiKey = getGeminiApiKey();
@@ -87,7 +78,7 @@ async function callGeminiForSlab(systemPrompt: string, userPrompt: string): Prom
   const preferredModel = getSelectedGeminiModel() || 'gemini-3.5-flash-lite';
   const modelsToTry: GeminiModel[] = [
     preferredModel,
-    ...FALLBACK_MODELS.filter((m) => m !== preferredModel),
+    ...FAST_MODELS.filter((m) => m !== preferredModel),
   ];
 
   let lastError: any = null;
@@ -106,11 +97,9 @@ async function callGeminiForSlab(systemPrompt: string, userPrompt: string): Prom
         },
       ],
       generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 8192,
-        thinkingConfig: {
-          thinkingBudget: 0,
-        },
+        temperature: 0.2,
+        maxOutputTokens: 4096,
+        responseMimeType: 'application/json',
       },
     };
 
@@ -133,6 +122,13 @@ async function callGeminiForSlab(systemPrompt: string, userPrompt: string): Prom
           lastError = new Error('QUOTA_EXCEEDED');
           continue;
         }
+        // 503 high demand or 404: try next fallback model immediately
+        if (status === 503 || status === 404) {
+          console.warn(`Model ${model} returned ${status}, switching model...`);
+          lastError = new Error(`Gemini (${model}): ${errMsg}`);
+          continue;
+        }
+
         lastError = new Error(`Gemini (${model}): ${errMsg}`);
         continue;
       }
@@ -156,11 +152,11 @@ async function callGeminiForSlab(systemPrompt: string, userPrompt: string): Prom
     }
   }
 
-  throw lastError || new Error('Failed to reach Gemini API.');
+  throw lastError || new Error('Failed to reach Gemini API. Please try again.');
 }
 
 /**
- * Extracts a JSON object from Gemini markdown backticks
+ * Extracts a JSON object from Gemini response
  */
 function extractJsonObject(raw: string): any {
   let cleaned = raw.trim();
@@ -206,20 +202,16 @@ export interface GenerateSlabOptions {
 function sanitizeLatexString(text: string): string {
   if (!text) return '';
   return text
-    // Normalize double-escaped backslashes in commands: \\frac -> \frac
     .replace(/\\\\([a-zA-Z]+)/g, '\\$1')
-    // Normalize display math delimiters \[ and \] to $$
     .replace(/\\\[/g, '$$')
     .replace(/\\\]/g, '$$')
-    // Normalize inline math delimiters \( and \) to $
     .replace(/\\\(/g, '$')
     .replace(/\\\)/g, '$')
-    // Clean up spaces right after opening $ or before closing $
     .replace(/\$\s+([^$\n]+?)\s+\$/g, '$$1$');
 }
 
 /**
- * Generates an interactive Slab study set (Flashcards, MCQs, or Both) grounded in the student's sources and notes.
+ * Generates an interactive Office study set (Flashcards, MCQs, or Both) quickly and reliably.
  */
 export async function generateSlabSet(options: GenerateSlabOptions): Promise<SlabItem> {
   const {
@@ -229,221 +221,108 @@ export async function generateSlabSet(options: GenerateSlabOptions): Promise<Sla
     sources,
     selectedNoteIds,
     selectedSourceIds,
-    count = 20,
+    count = 12,
     difficulty = 'medium',
     classId,
     className,
   } = options;
+
   const { context, noteNames } = buildSourceContext(notes, selectedNoteIds, sources, selectedSourceIds);
 
   const difficultyInstruction =
     difficulty === 'easy'
-      ? 'DIFFICULTY LEVEL: EASY. Focus on foundational terminology, fundamental definitions, key properties, and clear straightforward recognition.'
+      ? 'Focus on fundamental definitions, core terminology, and foundational formulas.'
       : difficulty === 'hard'
-      ? 'DIFFICULTY LEVEL: HARD. Focus on challenging conceptual synthesis, edge cases, multi-step problem solving, tricky distractors, and rigorous analytical questions.'
-      : 'DIFFICULTY LEVEL: MEDIUM (STANDARD). Balanced exam-level difficulty combining core concepts with practical application scenarios.';
+      ? 'Focus on challenging analytical questions, edge cases, multi-step problem solving, and synthesis.'
+      : 'Balanced exam-level difficulty covering core concepts and practical problem solving.';
 
-  // Parse prompt for requested count (e.g. "create 20 flashcards", "give me 25 questions", "make 20", etc.)
-  const promptNumMatch =
-    prompt.match(/\b(\d+)\s*(?:flashcards?|cards?|mcqs?|questions?|items?)\b/i) ||
-    prompt.match(/\b(?:create|make|give me|generate)\s+(\d+)\b/i);
+  // Target count: standard 10-15 items for rapid generation under 2-3 seconds
+  const targetCount = Math.min(Math.max(count || 12, 6), 18);
 
-  const parsedPromptCount = promptNumMatch ? parseInt(promptNumMatch[1], 10) : 0;
-  const finalCount = parsedPromptCount > 0 ? Math.max(parsedPromptCount, count) : count;
-
-  let parsed: any = null;
-
-  // High-Speed Parallel Generation for 16+ items (e.g. 20, 25, 30 cards/questions)
-  if (finalCount >= 16) {
-    const countA = Math.ceil(finalCount / 2);
-    const countB = Math.floor(finalCount / 2);
-
-    const makeBatchSystemPrompt = (batchNum: number, batchCount: number, focusTopic: string) => `You are Gemini Office AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
-Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) based on the student's class sources and uploaded files.
-
-CANADIAN ENGLISH & SPELLING:
-- Use Canadian English conventions (e.g., colour, behaviour, centre, analyse).
+  const systemPrompt = `You are an expert exam preparation engine and cognitive study assistant.
+Generate a concise, high-yield study set (Flashcards and/or Multiple Choice Questions) based on the student's materials.
 
 ${difficultyInstruction}
 
-QUESTION DIVERSITY & CONCEPTUAL EXTENSION:
-- Do NOT simply copy text word-for-word from the sources.
-- Formulate creative, diverse questions that are SIMILAR TO and EXTEND the concepts from the sources (e.g. realistic application scenarios, analogous problems, variation of parameters, counterexamples).
-- Provide a wide variety of questions testing genuine conceptual understanding rather than rote memorization.
+MATHEMATICAL & SCIENTIFIC NOTATION:
+Format math and scientific formulas using standard inline LaTeX: $formula$.
 
-MATHEMATICAL & SCIENTIFIC NOTATION (LATEX):
-- Format ALL mathematical variables, formulas, chemical equations, units, and expressions in clean, standard KaTeX-compatible LaTeX:
-  - Use $...$ for inline formulas (e.g., $E = mc^2$, $\\Delta G$, $\\frac{a}{b}$).
-  - Use $$...$$ for standalone display equations.
-  - DO NOT output broken or pseudo-latex syntax (such as dangling backslashes, unclosed brackets, or quadruple backslashes).
-  - When writing regular non-math text, use clean plain text without unnecessary backslashes or symbols.
-
-OUTPUT FORMAT:
-Output ONLY a single valid JSON object strictly matching this schema:
+JSON SCHEMA:
+Return ONLY a valid JSON object matching this schema:
 {
-  "title": "A concise, descriptive, professional name for this study set",
-  "description": "A 1-sentence overview of the concepts tested in this set",
+  "title": "Concise, descriptive title for this set",
+  "description": "Brief 1-sentence description",
   "flashcards": [
     {
       "front": "Concept, term, question, or theorem to recall",
-      "back": "Clear, comprehensive definition or answer with LaTeX formulas and key steps if applicable"
+      "back": "Clear, comprehensive definition or answer with steps"
     }
   ],
   "mcqs": [
     {
-      "question": "Clear, high-yield multiple-choice question stem with LaTeX if relevant",
+      "question": "Clear multiple choice question",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctIndex": 0,
-      "explanation": "Detailed pedagogical explanation explaining why the correct choice is true and why distractors are false"
+      "explanation": "Brief explanation of why the correct option is right"
     }
   ]
 }
 
 RULES:
-1. PARALLEL BATCH REQUIREMENT: This is BATCH ${batchNum} of 2. You MUST generate EXACTLY ${batchCount} items in the target array.
-   ${focusTopic}
-   - If 'flashcards', output EXACTLY ${batchCount} items in the "flashcards" array and an empty "mcqs" array.
-   - If 'mcq', output EXACTLY ${batchCount} items in the "mcqs" array and an empty "flashcards" array.
-   - If 'both', output ~${Math.ceil(batchCount / 2)} items in "flashcards" and ~${Math.floor(batchCount / 2)} in "mcqs".
-2. Base questions directly on the concepts in the provided class sources and files, generating wide variety.`;
+- If type is 'flashcards', generate ${targetCount} flashcards and an empty mcqs array.
+- If type is 'mcq', generate ${targetCount} mcqs and an empty flashcards array.
+- If type is 'both', generate ~${Math.ceil(targetCount / 2)} flashcards and ~${Math.floor(targetCount / 2)} mcqs.
+- Output pure JSON only.`;
 
-    const makeBatchUserPrompt = (batchNum: number, batchCount: number, focusTopic: string) => `STUDENT REQUEST / PROMPT: "${prompt}" (BATCH ${batchNum}: ${focusTopic})
-REQUESTED TYPE: ${type}
-TARGET ITEM COUNT: ${batchCount} (CRITICAL: Output EXACTLY ${batchCount} items!)
-DIFFICULTY: ${difficulty.toUpperCase()}
+  const userPrompt = `STUDENT REQUEST: "${prompt}"
+TYPE: ${type}
+TARGET COUNT: ${targetCount} items
+DIFFICULTY: ${difficulty}
 
-GROUNDING SOURCES (Notes & Uploaded Files):
+STUDENT SOURCES & NOTES:
 ${context}`;
 
-    const sysA = makeBatchSystemPrompt(1, countA, 'Focus on core definitions, fundamental laws, and essential foundational formulas.');
-    const usrA = makeBatchUserPrompt(1, countA, 'Focus on core definitions, fundamental laws, and essential foundational formulas.');
+  const rawJson = await callGeminiForSlab(systemPrompt, userPrompt);
+  const parsed = extractJsonObject(rawJson);
 
-    const sysB = makeBatchSystemPrompt(2, countB, 'Focus on practical applications, problem-solving techniques, edge cases, and high-yield exam questions.');
-    const usrB = makeBatchUserPrompt(2, countB, 'Focus on practical applications, problem-solving techniques, edge cases, and high-yield exam questions.');
-
-    try {
-      const [resA, resB] = await Promise.all([
-        callGeminiForSlab(sysA, usrA),
-        callGeminiForSlab(sysB, usrB),
-      ]);
-
-      const parsedA = extractJsonObject(resA);
-      const parsedB = extractJsonObject(resB);
-
-      if (parsedA && parsedB) {
-        parsed = {
-          title: parsedA.title || parsedB.title || 'Study Set',
-          description: parsedA.description || parsedB.description,
-          flashcards: [
-            ...(Array.isArray(parsedA.flashcards) ? parsedA.flashcards : []),
-            ...(Array.isArray(parsedB.flashcards) ? parsedB.flashcards : []),
-          ],
-          mcqs: [
-            ...(Array.isArray(parsedA.mcqs) ? parsedA.mcqs : []),
-            ...(Array.isArray(parsedB.mcqs) ? parsedB.mcqs : []),
-          ],
-        };
-      } else if (parsedA) {
-        parsed = parsedA;
-      } else if (parsedB) {
-        parsed = parsedB;
-      }
-    } catch (parallelErr) {
-      console.warn('Parallel generation fallback to single query:', parallelErr);
-    }
-  }
-
-  // Fallback to single generation if count < 16 or parallel failed
   if (!parsed) {
-    const systemPrompt = `You are Gemini Office AI, an expert exam preparation engine and cognitive study assistant (like Anki and Quizlet, powered by Google Gemini).
-Your purpose is to generate high-yield, engaging study decks (Flashcards and/or Multiple Choice Questions) based on the student's class sources and uploaded files.
-
-CANADIAN ENGLISH & SPELLING:
-- Use Canadian English conventions (e.g., colour, behaviour, centre, analyse).
-
-${difficultyInstruction}
-
-QUESTION DIVERSITY & CONCEPTUAL EXTENSION:
-- Do NOT simply copy text word-for-word from the sources.
-- Formulate creative, diverse questions that are SIMILAR TO and EXTEND the concepts from the sources (e.g. realistic application scenarios, analogous problems, variation of parameters, counterexamples).
-- Provide a wide variety of questions testing genuine conceptual understanding rather than rote memorization.
-
-MATHEMATICAL & SCIENTIFIC NOTATION (LATEX):
-- Format ALL mathematical variables, formulas, chemical equations, units, and expressions in clean, standard KaTeX-compatible LaTeX:
-  - Use $...$ for inline formulas (e.g., $E = mc^2$, $\\Delta G$, $\\frac{a}{b}$).
-  - Use $$...$$ for standalone display equations.
-  - DO NOT output broken or pseudo-latex syntax (such as dangling backslashes, unclosed brackets, or quadruple backslashes).
-  - When writing regular non-math text, use clean plain text without unnecessary backslashes or symbols.
-
-OUTPUT FORMAT:
-Output ONLY a single valid JSON object strictly matching this schema:
-{
-  "title": "A concise, descriptive, professional name for this study set (e.g., 'Macroeconomics: Monetary Policy & Inflation' or 'Calculus: Derivatives Practice')",
-  "description": "A 1-sentence overview of the concepts tested in this set",
-  "flashcards": [
-    {
-      "front": "Concept, term, question, or theorem to recall",
-      "back": "Clear, comprehensive definition or answer with LaTeX formulas and key steps if applicable"
-    }
-  ],
-  "mcqs": [
-    {
-      "question": "Clear, high-yield multiple-choice question stem with LaTeX if relevant",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correctIndex": 0,
-      "explanation": "Detailed pedagogical explanation explaining why the correct choice is true and why distractors are false"
-    }
-  ]
-}
-
-RULES:
-1. CRITICAL COUNT REQUIREMENT: You MUST generate EXACTLY ${finalCount} items in the target array. Do NOT default to 10 or stop early.
-   - If 'flashcards', output EXACTLY ${finalCount} items in the "flashcards" array and an empty "mcqs" array.
-   - If 'mcq', output EXACTLY ${finalCount} items in the "mcqs" array and an empty "flashcards" array.
-   - If 'both', output ~${Math.ceil(finalCount / 2)} items in "flashcards" and ~${Math.floor(finalCount / 2)} in "mcqs".
-2. Base questions directly on the concepts in the provided class sources and files, generating wide variety. If the user prompt asks for specific topics (e.g. 'Chapter 3 MCQs'), tailor the questions precisely.`;
-
-    const userPrompt = `STUDENT REQUEST / PROMPT: "${prompt}"
-REQUESTED TYPE: ${type}
-TARGET ITEM COUNT: ${finalCount} (CRITICAL: Output EXACTLY ${finalCount} items, do not stop early!)
-DIFFICULTY: ${difficulty.toUpperCase()}
-
-GROUNDING SOURCES (Notes & Uploaded Files):
-${context}`;
-
-    const rawReply = await callGeminiForSlab(systemPrompt, userPrompt);
-    parsed = extractJsonObject(rawReply);
+    throw new Error('Could not parse study set response. Please try again.');
   }
 
-  if (!parsed || (!Array.isArray(parsed.flashcards) && !Array.isArray(parsed.mcqs))) {
-    throw new Error('Gemini did not return a valid study set structure. Please try adjusting your prompt.');
-  }
-
+  // Format flashcards
   const flashcards: FlashcardItem[] = Array.isArray(parsed.flashcards)
     ? parsed.flashcards.map((f: any, idx: number) => ({
         id: `fc_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
-        front: sanitizeLatexString(String(f.front || 'Untitled Concept')),
-        back: sanitizeLatexString(String(f.back || '')),
-        mastered: false,
+        front: sanitizeLatexString(String(f.front || f.question || f.term || `Concept ${idx + 1}`)),
+        back: sanitizeLatexString(String(f.back || f.answer || f.definition || 'No answer provided')),
       }))
     : [];
 
+  // Format MCQs
   const mcqs: MultipleChoiceQuestion[] = Array.isArray(parsed.mcqs)
-    ? parsed.mcqs.map((m: any, idx: number) => ({
-        id: `mc_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
-        question: sanitizeLatexString(String(m.question || 'Untitled Question')),
-        options: Array.isArray(m.options) && m.options.length >= 2
-          ? m.options.map((opt: any) => sanitizeLatexString(String(opt)))
-          : ['Option A', 'Option B', 'Option C', 'Option D'],
-        correctIndex: typeof m.correctIndex === 'number' && m.correctIndex >= 0 && m.correctIndex < 4
-          ? m.correctIndex
-          : 0,
-        explanation: sanitizeLatexString(String(m.explanation || '')),
-      }))
+    ? parsed.mcqs.map((q: any, idx: number) => {
+        const rawOptions = Array.isArray(q.options) && q.options.length >= 2 ? q.options : ['True', 'False'];
+        const sanitizedOptions = rawOptions.map((opt: any) => sanitizeLatexString(String(opt)));
+        let correctIdx = typeof q.correctIndex === 'number' ? q.correctIndex : 0;
+        if (correctIdx < 0 || correctIdx >= sanitizedOptions.length) {
+          correctIdx = 0;
+        }
+
+        return {
+          id: `mcq_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+          question: sanitizeLatexString(String(q.question || `Question ${idx + 1}`)),
+          options: sanitizedOptions,
+          correctIndex: correctIdx,
+          explanation: sanitizeLatexString(String(q.explanation || 'Review course concepts for more details.')),
+        };
+      })
     : [];
 
-  // Determine effective type based on generated content
-  const effectiveType: SlabType =
+  if (flashcards.length === 0 && mcqs.length === 0) {
+    throw new Error('Gemini generated an empty set. Please adjust your prompt and try again.');
+  }
+
+  const determinedType: SlabType =
     flashcards.length > 0 && mcqs.length > 0
       ? 'both'
       : flashcards.length > 0
@@ -451,18 +330,17 @@ ${context}`;
       : 'mcq';
 
   return {
-    id: `slab_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-    title: parsed.title ? String(parsed.title).trim() : 'Study Set',
-    description: parsed.description ? String(parsed.description).trim() : undefined,
-    type: effectiveType,
-    prompt: prompt.trim(),
-    classId,
-    className,
-    difficulty,
-    sourceNoteIds: selectedNoteIds,
-    sourceNoteNames: noteNames,
+    id: `slab_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+    title: parsed.title?.trim() || prompt.slice(0, 40) || 'Study Set',
+    description: parsed.description?.trim() || `Generated from ${noteNames.length} sources`,
+    type: determinedType,
+    prompt,
     flashcards,
     mcqs,
+    sourceNoteIds: selectedNoteIds,
+    sourceNoteNames: noteNames,
+    classId,
+    className,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };

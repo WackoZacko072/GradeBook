@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   X,
   Sparkles,
@@ -127,23 +127,23 @@ service cloud.firestore {
   const consoleRulesUrl = `https://console.firebase.google.com/project/${projectId || 'gradebook-cbd26'}/firestore/rules`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-[#18191b] rounded-2xl shadow-2xl border border-slate-200/80 dark:border-[#26282a] w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-[#1e1f20] rounded-3xl shadow-2xl border border-slate-200/50 dark:border-white/10 w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-[#26282a] flex items-center justify-between bg-slate-50/70 dark:bg-[#0f0f10]/60">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/20 dark:border-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-950/40 border border-blue-500/20 dark:border-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#e8eaed]">Cloud Sync & Firebase Settings</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>Cloud Sync & Firebase Settings</h2>
               <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">Cross-device synchronization for PC & Phone</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer google-btn-press"
+            className="p-2 text-slate-400 dark:text-[#9aa0a6] hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] rounded-full transition-colors cursor-pointer google-btn-press"
           >
             <X className="w-5 h-5" />
           </button>

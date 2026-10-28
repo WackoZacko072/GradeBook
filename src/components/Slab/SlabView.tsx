@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BookCheck,
   Plus,
@@ -14,7 +14,6 @@ import {
   Trash2,
   Edit2,
   X,
-  Sparkles,
   Award,
 } from 'lucide-react';
 import type { SlabItem, SlabType } from '../../types/slab';
@@ -758,7 +757,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                     {mcqAnswered && (
                       <div className="mt-4 p-4 rounded-2xl bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200/80 dark:border-violet-800/40 text-xs sm:text-sm text-slate-800 dark:text-[#e8eaed] space-y-1.5 animate-in slide-in-from-top-2">
                         <div className="flex items-center gap-1.5 font-bold text-violet-900 dark:text-[#c58af9]">
-                          <Sparkles className="w-4 h-4 text-violet-600 dark:text-[#c58af9]" />
+                          <HelpCircle className="w-4 h-4 text-violet-600 dark:text-[#c58af9]" />
                           <span>Rationale & Explanation:</span>
                         </div>
                         <div className="leading-relaxed text-slate-700 dark:text-[#c4c7c5]">

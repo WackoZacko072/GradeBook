@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   ArrowLeft,
   Plus,
@@ -9,7 +9,6 @@ import {
   ArrowUp,
   ArrowDown,
   RotateCcw,
-  Sparkles,
   Info,
   Sliders,
   AlertTriangle,
@@ -302,9 +301,9 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
                 )
               }
               title="Ask Gemini about this course"
-              className="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer min-h-[44px] google-btn-press"
+              className="px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-full shadow-xs transition-all flex items-center gap-2 cursor-pointer min-h-[44px] google-btn-press"
             >
-              <Sparkles className="w-4 h-4 text-white stroke-[2.2]" />
+              <img src="/gemini-icon.png" alt="Gemini" className="w-4 h-4 object-contain" />
               <span>Ask Gemini</span>
             </button>
 
@@ -428,7 +427,7 @@ export const ClassDetail: React.FC<ClassDetailProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-blue-900 dark:text-[#8ab4f8] uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-[#8ab4f8]" />
+              <Sliders className="w-3.5 h-3.5 text-blue-600 dark:text-[#8ab4f8]" />
               Add Grading Category
             </div>
             <p className="text-xs text-blue-700/80 dark:text-[#c4c7c5] mt-0.5">

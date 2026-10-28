@@ -200,7 +200,7 @@ export const Header: React.FC<HeaderProps> = ({
               onChangeTab('gradebook');
               onSelectOverview?.();
             }}
-            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none flex-shrink-0 group"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none flex-shrink min-w-0 group"
             title="Gemini Gradebook"
           >
             <img
@@ -209,7 +209,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="w-7 h-7 sm:w-[30px] sm:h-[30px] object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
             />
             <span
-              className="text-[19px] sm:text-[21px] font-medium tracking-tight text-slate-900 dark:text-[#f8f9fa] antialiased select-none"
+              className="text-[17px] sm:text-[21px] font-medium tracking-tight text-slate-900 dark:text-[#f8f9fa] antialiased select-none truncate"
               style={{ fontFamily: "'Google Sans', 'Google Sans Text', sans-serif" }}
             >
               Gemini Gradebook
@@ -217,7 +217,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Right: Search Gradebook, View Toggle, Settings Dropdown, 9-Dots Google Apps, Avatar */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
             {/* Search Gradebook Pill Input */}
             <div className="relative" ref={searchContainerRef}>
               <div className="relative flex items-center">
@@ -245,8 +245,8 @@ export const Header: React.FC<HeaderProps> = ({
                       searchInputRef.current?.blur();
                     }
                   }}
-                  placeholder="Search gradebook"
-                  className="w-36 sm:w-56 md:w-64 lg:w-72 h-10 pl-9 pr-8 text-xs sm:text-sm bg-slate-100/90 dark:bg-[#18191b] hover:dark:bg-[#202123] focus:dark:bg-[#18191b] text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#9aa0a6] rounded-full border border-slate-200/80 dark:border-[#26282a] focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:focus:ring-[#8ab4f8]/50 transition-all shadow-2xs"
+                  placeholder="Search"
+                  className="w-24 xs:w-32 sm:w-56 md:w-64 lg:w-72 h-10 pl-9 pr-7 sm:pr-8 text-xs sm:text-sm bg-slate-100/90 dark:bg-[#18191b] hover:dark:bg-[#202123] focus:dark:bg-[#18191b] text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#9aa0a6] rounded-full border border-slate-200/80 dark:border-[#26282a] focus:outline-none focus:ring-1 focus:ring-blue-500/50 dark:focus:ring-[#8ab4f8]/50 transition-all shadow-2xs"
                 />
                 {searchQuery && (
                   <button
@@ -498,16 +498,18 @@ export const Header: React.FC<HeaderProps> = ({
 
               {/* Google Apps Popover Container */}
               {isAppsMenuOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-[336px] bg-white dark:bg-[#1f1f21] rounded-[28px] shadow-2xl border border-slate-200/90 dark:border-[#2e3032] p-3.5 z-50 animate-fade-scale overflow-hidden">
-                  {/* Top "Your favorites" elevated dark container */}
-                  <div className="bg-slate-50 dark:bg-[#18181a] rounded-[22px] p-3.5 mb-2.5 border border-slate-100/80 dark:border-[#26282a]">
+                <div className="absolute right-0 mt-2 w-80 sm:w-[336px] bg-[#282a2d] text-white rounded-[28px] shadow-2xl border border-white/10 p-3 z-50 animate-fade-scale overflow-hidden select-none">
+                  {/* Top "Your favorites" elevated dark container matching Google UI */}
+                  <div className="bg-[#1b1c1e] rounded-[22px] p-3.5 mb-2 border border-white/5">
                     <div className="flex items-center justify-between mb-3 px-1">
-                      <span className="text-sm font-semibold text-slate-800 dark:text-[#e3e3e3]">Your favorites</span>
+                      <span className="text-sm font-medium text-[#e3e3e3]" style={{ fontFamily: "'Google Sans', Roboto, sans-serif" }}>
+                        Your favorites
+                      </span>
                       <a
                         href="https://about.google/products/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-7 h-7 rounded-full bg-slate-200/70 dark:bg-[#2a2b2e] hover:bg-slate-300 dark:hover:bg-[#383a3e] flex items-center justify-center text-slate-600 dark:text-[#c4c7c5] transition-colors cursor-pointer"
+                        className="w-7 h-7 rounded-full bg-[#2a2b2e] hover:bg-[#383a3e] flex items-center justify-center text-[#c4c7c5] transition-colors cursor-pointer"
                         title="Edit favorites"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -515,32 +517,32 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
 
                     {/* 3x3 Grid of Favorites */}
-                    <div className="grid grid-cols-3 gap-y-3 gap-x-2">
-                      {/* Account */}
+                    <div className="grid grid-cols-3 gap-y-2 gap-x-1">
+                      {/* 1. Account */}
                       <a
                         href="https://myaccount.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
-                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-[#26282a] flex items-center justify-center overflow-hidden border border-slate-300 dark:border-white/10 group-hover:scale-105 transition-transform">
+                        <div className="w-10 h-10 rounded-full bg-black border border-white/10 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
                           {user?.photoURL ? (
                             <img src={user.photoURL} alt="Account" className="w-full h-full object-cover" />
                           ) : (
-                            <User className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                            <User className="w-5 h-5 text-slate-300" />
                           )}
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           Account
                         </span>
                       </a>
 
-                      {/* Drive */}
+                      {/* 2. Drive */}
                       <a
                         href="https://drive.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 87.3 78" className="w-9 h-9">
@@ -552,92 +554,89 @@ export const Header: React.FC<HeaderProps> = ({
                             <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
                           </svg>
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           Drive
                         </span>
                       </a>
 
-                      {/* Gmail */}
+                      {/* 3. Gmail */}
                       <a
                         href="https://mail.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 24 24" className="w-8 h-8">
-                            <path fill="#4285F4" d="M1.5 5.25A2.25 2.25 0 0 1 3.75 3h1.5v7.5L1.5 7.5V5.25z"/>
-                            <path fill="#34A853" d="M22.5 5.25A2.25 2.25 0 0 0 20.25 3h-1.5v7.5l3.75-3V5.25z"/>
-                            <path fill="#EA4335" d="M18.75 3 12 8.25 5.25 3H3.75L12 9.75 20.25 3h-1.5z"/>
-                            <path fill="#FBBC04" d="M1.5 7.5v11.25A2.25 2.25 0 0 0 3.75 21h3v-9L1.5 7.5z"/>
-                            <path fill="#4285F4" d="M22.5 7.5v11.25A2.25 2.25 0 0 1 20.25 21h-3v-9l5.25-4.5z"/>
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <path fill="#4caf50" d="M45,16.2l-5,2.75v18.05c0,1.66-1.34,3-3,3h-5V23.5L24,29.8l-8,-6.3V40H11c-1.66,0-3-1.34-3-3V18.95l-5-2.75C1.84,15.54,1,16.38,1,17.5v21.5c0,3.31,2.69,6,6,6h34c3.31,0,6-2.69,6-6V17.5C47,16.38,46.16,15.54,45,16.2z"/>
+                            <path fill="#f44336" d="M41,10.5v8.45l-17,11.9l-17,-11.9V10.5c0,-1.66,1.34,-3,3,-3h28C39.66,7.5,41,8.84,41,10.5z"/>
                           </svg>
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           Gmail
                         </span>
                       </a>
 
-                      {/* YouTube */}
+                      {/* 4. YouTube */}
                       <a
                         href="https://youtube.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 24 24" className="w-8 h-8">
-                            <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
-                            <path fill="#FFFFFF" d="m9.545 15.568 6.273-3.568-6.273-3.568v7.136z"/>
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <rect x="4" y="11" width="40" height="26" rx="8" fill="#ff0000"/>
+                            <path d="M20 18l11 6-11 6v-12z" fill="#ffffff"/>
                           </svg>
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           YouTube
                         </span>
                       </a>
 
-                      {/* Gemini */}
+                      {/* 5. Gemini */}
                       <a
                         href="https://gemini.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <img src="/gemini-icon.png" alt="Gemini" className="w-8 h-8 object-contain" />
+                          <img src="/gemini-icon.png" alt="Gemini" className="w-9 h-9 object-contain" />
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           Gemini
                         </span>
                       </a>
 
-                      {/* Maps */}
+                      {/* 6. Maps */}
                       <a
                         href="https://maps.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 24 24" className="w-8 h-8">
-                            <path fill="#4285F4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                            <circle cx="12" cy="9" r="2.5" fill="#FFFFFF"/>
-                            <path fill="#EA4335" d="M12 2a7 7 0 0 0-7 7c0 1.9.76 3.63 2 4.9L12 9V2z"/>
-                            <path fill="#FBBC04" d="M12 9 7 13.9C8.25 15.35 10 17.5 12 20v-11z"/>
-                            <path fill="#34A853" d="M12 9v11c2-2.5 3.75-4.65 5-6.1L12 9z"/>
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <path fill="#4285f4" d="M24 4C14.06 4 6 12.06 6 22c0 6.64 3.73 12.42 9.24 15.48L24 44l8.76-6.52C38.27 34.42 42 28.64 42 22 42 12.06 33.94 4 24 4z"/>
+                            <path fill="#34a853" d="M6 22c0 6.64 3.73 12.42 9.24 15.48L24 44V22H6z"/>
+                            <path fill="#fbbc04" d="M24 4v18h18C42 12.06 33.94 4 24 4z"/>
+                            <path fill="#ea4335" d="M24 4C14.06 4 6 12.06 6 22h18V4z"/>
+                            <circle cx="24" cy="18" r="6" fill="#ffffff"/>
                           </svg>
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           Maps
                         </span>
                       </a>
 
-                      {/* Search */}
+                      {/* 7. Search */}
                       <a
                         href="https://google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 24 24" className="w-8 h-8">
@@ -647,167 +646,172 @@ export const Header: React.FC<HeaderProps> = ({
                             <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
                           </svg>
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           Search
                         </span>
                       </a>
 
-                      {/* Calendar */}
+                      {/* 8. Calendar */}
                       <a
                         href="https://calendar.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 24 24" className="w-8 h-8">
-                            <rect x="2" y="4" width="20" height="18" rx="4" fill="#4285F4"/>
-                            <path fill="#FFFFFF" d="M6 2v4M18 2v4M2 9h20"/>
-                            <text x="12" y="18" textAnchor="middle" fill="#FFFFFF" fontSize="9" fontWeight="bold" fontFamily="sans-serif">31</text>
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <rect x="5" y="5" width="38" height="38" rx="10" fill="#1a73e8"/>
+                            <rect x="12" y="3" width="5" height="6" rx="2.5" fill="#ffffff"/>
+                            <rect x="31" y="3" width="5" height="6" rx="2.5" fill="#ffffff"/>
+                            <text x="24" y="33" fill="#ffffff" fontSize="21" fontWeight="bold" fontFamily="'Google Sans', Roboto, sans-serif" textAnchor="middle">31</text>
                           </svg>
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           Calendar
                         </span>
                       </a>
 
-                      {/* News */}
+                      {/* 9. News */}
                       <a
                         href="https://news.google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                        className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 24 24" className="w-8 h-8">
-                            <rect x="2" y="3" width="20" height="18" rx="3" fill="#EA4335"/>
-                            <rect x="4" y="5" width="16" height="14" rx="2" fill="#FBBC04"/>
-                            <rect x="6" y="7" width="14" height="12" rx="2" fill="#34A853"/>
-                            <rect x="8" y="9" width="12" height="10" rx="2" fill="#4285F4"/>
-                            <text x="14" y="17" textAnchor="middle" fill="#FFFFFF" fontSize="8" fontWeight="bold">G</text>
+                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                            <rect x="18" y="7" width="22" height="22" rx="4" fill="#ea4335" transform="rotate(8 29 18)"/>
+                            <rect x="14" y="9" width="22" height="22" rx="4" fill="#fbbc04" transform="rotate(-6 25 20)"/>
+                            <rect x="16" y="11" width="22" height="22" rx="4" fill="#34a853"/>
+                            <rect x="7" y="13" width="26" height="24" rx="5" fill="#1a73e8"/>
+                            <rect x="11" y="18" width="7" height="6" rx="1.5" fill="#ffffff"/>
+                            <rect x="21" y="18" width="8" height="2" rx="1" fill="#ffffff"/>
+                            <rect x="21" y="22" width="8" height="2" rx="1" fill="#ffffff"/>
+                            <rect x="11" y="27" width="18" height="2" rx="1" fill="#ffffff"/>
+                            <rect x="11" y="31" width="13" height="2" rx="1" fill="#ffffff"/>
                           </svg>
                         </div>
-                        <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                        <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                           News
                         </span>
                       </a>
                     </div>
                   </div>
 
-                  {/* Below Favorites: More Google apps */}
-                  <div className="grid grid-cols-3 gap-y-3 gap-x-2 pt-1 pb-1">
-                    {/* Photos */}
+                  {/* Below Favorites: More Google apps matching media_1793127154024.png */}
+                  <div className="grid grid-cols-3 gap-y-2 gap-x-1 pt-1 pb-1">
+                    {/* 10. Photos */}
                     <a
                       href="https://photos.google.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <svg viewBox="0 0 24 24" className="w-8 h-8">
-                          <path fill="#EA4335" d="M12 12c-2.2 0-4-1.8-4-4V2c2.2 0 4 1.8 4 4v6z"/>
-                          <path fill="#FBBC04" d="M12 12c0-2.2 1.8-4 4-4h6c0 2.2-1.8 4-4 4h-6z"/>
-                          <path fill="#34A853" d="M12 12c2.2 0 4 1.8 4 4v6c-2.2 0-4-1.8-4-4v-6z"/>
-                          <path fill="#4285F4" d="M12 12c0 2.2-1.8 4-4 4H2c0-2.2 1.8-4 4-4h6z"/>
+                        <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <path fill="#ea4335" d="M24 4c-5.52 0-10 4.48-10 10v10h10c5.52 0 10-4.48 10-10s-4.48-10-10-10z"/>
+                          <path fill="#fbbc04" d="M44 24c0-5.52-4.48-10-10-10H24v10c0 5.52 4.48 10 10 10s10-4.48 10-10z"/>
+                          <path fill="#34a853" d="M24 44c5.52 0 10-4.48 10-10V24H24c-5.52 0-10 4.48-10 10s4.48 10 10 10z"/>
+                          <path fill="#4285f4" d="M4 24c0 5.52 4.48 10 10 10h10V24c0-5.52-4.48-10-10-10S4 18.48 4 24z"/>
                         </svg>
                       </div>
-                      <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                      <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                         Photos
                       </span>
                     </a>
 
-                    {/* Meet */}
+                    {/* 11. Meet */}
                     <a
                       href="https://meet.google.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <svg viewBox="0 0 24 24" className="w-8 h-8">
-                          <rect x="2" y="5" width="13" height="14" rx="3" fill="#FBBC04"/>
-                          <path fill="#34A853" d="M15 8.5 21 4v16l-6-4.5z"/>
-                          <circle cx="8" cy="12" r="2.5" fill="#FFFFFF"/>
+                        <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <rect x="4" y="10" width="24" height="28" rx="8" fill="#ffba00"/>
+                          <path d="M28 19l13-7.5c1.4-.8 3.2.2 3.2 1.8v21.4c0 1.6-1.8 2.6-3.2 1.8L28 29v-10z" fill="#ff9800"/>
+                          <circle cx="12" cy="19" r="2.5" fill="#ffffff" opacity="0.9"/>
                         </svg>
                       </div>
-                      <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                      <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                         Meet
                       </span>
                     </a>
 
-                    {/* Translate */}
+                    {/* 12. Translate */}
                     <a
                       href="https://translate.google.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <svg viewBox="0 0 24 24" className="w-8 h-8">
-                          <rect x="2" y="3" width="14" height="14" rx="3" fill="#4285F4"/>
-                          <rect x="8" y="8" width="14" height="14" rx="3" fill="#9AA0A6"/>
-                          <text x="9" y="13" textAnchor="middle" fill="#FFFFFF" fontSize="8" fontWeight="bold">G</text>
-                          <text x="15" y="18" textAnchor="middle" fill="#FFFFFF" fontSize="8" fontWeight="bold">文</text>
+                        <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <rect x="18" y="14" width="24" height="24" rx="7" fill="#80868b"/>
+                          <rect x="6" y="10" width="24" height="24" rx="7" fill="#1a73e8"/>
+                          <text x="18" y="27" fill="#ffffff" fontSize="15" fontWeight="bold" fontFamily="'Google Sans', Roboto, sans-serif" textAnchor="middle">G</text>
+                          <text x="30" y="31" fill="#ffffff" fontSize="13" fontWeight="bold" fontFamily="'Noto Sans', sans-serif" textAnchor="middle">文</text>
                         </svg>
                       </div>
-                      <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                      <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                         Translate
                       </span>
                     </a>
 
-                    {/* Play */}
+                    {/* 13. Play */}
                     <a
                       href="https://play.google.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <svg viewBox="0 0 24 24" className="w-8 h-8">
-                          <path fill="#4285F4" d="M3.5 2.5a1.5 1.5 0 0 0-.5 1.2v16.6a1.5 1.5 0 0 0 .5 1.2l9.7-9.5z"/>
-                          <path fill="#34A853" d="m13.2 12 3.4 3.4 4.5-2.6a1.5 1.5 0 0 0 0-2.6l-4.5-2.6z"/>
-                          <path fill="#EA4335" d="M13.2 12 3.5 21.5a1.5 1.5 0 0 0 1.9.1l11.2-6.5z"/>
-                          <path fill="#FBBC04" d="M13.2 12 16.6 8.6 5.4 2.1a1.5 1.5 0 0 0-1.9.1z"/>
+                        <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <rect x="7" y="7" width="34" height="34" rx="10" fill="#7c8cf8"/>
+                          <rect x="10" y="7" width="31" height="34" rx="10" fill="#5865f2" opacity="0.6"/>
+                          <path d="M21 16l12 8-12 8v-16z" fill="#ffffff"/>
                         </svg>
                       </div>
-                      <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                      <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                         Play
                       </span>
                     </a>
 
-                    {/* Sheets */}
+                    {/* 14. Sheets */}
                     <a
                       href="https://sheets.google.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <svg viewBox="0 0 24 24" className="w-8 h-8">
-                          <rect x="3" y="2" width="18" height="20" rx="3" fill="#0F9D58"/>
-                          <path fill="#FFFFFF" d="M7 8h10v2H7zm0 4h10v2H7zm0 4h6v2H7z"/>
-                          <path fill="#FFFFFF" opacity="0.3" d="M12 7v10h1V7z"/>
+                        <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <rect x="6" y="8" width="36" height="32" rx="8" fill="#0f9d58"/>
+                          <path d="M12 24h24M24 14v20" stroke="#ffffff" strokeWidth="3.5" strokeLinecap="round"/>
                         </svg>
                       </div>
-                      <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                      <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                         Sheets
                       </span>
                     </a>
 
-                    {/* Docs */}
+                    {/* 15. Docs */}
                     <a
                       href="https://docs.google.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                      className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <svg viewBox="0 0 24 24" className="w-8 h-8">
-                          <rect x="3" y="2" width="18" height="20" rx="3" fill="#4285F4"/>
-                          <path fill="#FFFFFF" d="M7 7h10v2H7zm0 4h10v2H7zm0 4h6v2H7z"/>
+                        <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <path d="M10 6h18l12 12v22a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z" fill="#2684fc"/>
+                          <path d="M28 6v12h12" fill="#80b5fc" opacity="0.7"/>
+                          <rect x="14" y="26" width="16" height="3" rx="1.5" fill="#ffffff"/>
+                          <rect x="14" y="33" width="16" height="3" rx="1.5" fill="#ffffff"/>
                         </svg>
                       </div>
-                      <span className="text-xs text-slate-800 dark:text-[#e8eaed] mt-1.5 font-medium truncate">
+                      <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
                         Docs
                       </span>
                     </a>
@@ -817,7 +821,7 @@ export const Header: React.FC<HeaderProps> = ({
                     href="https://about.google/products/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-center py-2.5 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors mt-1"
+                    className="block text-center py-2 text-xs font-medium text-blue-400 hover:text-blue-300 hover:bg-white/5 rounded-xl transition-colors mt-1"
                   >
                     More from Google
                   </a>
@@ -1089,8 +1093,8 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Gradebook Calculation & Help Modal */}
       {isHelpModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white dark:bg-[#18191b] rounded-3xl border border-slate-200/90 dark:border-[#26282a] shadow-2xl w-full max-w-lg p-6 animate-scale-up space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-fade-in">
+          <div className="bg-white dark:bg-[#1e1f20] rounded-3xl border border-slate-200/50 dark:border-white/10 shadow-2xl w-full max-w-lg p-6 sm:p-7 animate-scale-up space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#26282a] pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center">

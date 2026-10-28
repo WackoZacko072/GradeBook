@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   X,
   Download,
@@ -84,26 +84,26 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 dark:bg-black/70 backdrop-blur-xs overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-md overflow-y-auto animate-fade-in"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="transcript-modal-title"
     >
       <div
-        className="bg-white dark:bg-[#18191b] rounded-2xl shadow-2xl border border-slate-200/80 dark:border-[#26282a] w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden my-auto"
+        className="bg-white dark:bg-[#1e1f20] rounded-3xl shadow-2xl border border-slate-200/50 dark:border-white/10 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Header Bar */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-[#26282a] bg-slate-50/70 dark:bg-[#0f0f10]/60 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-white/5 flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <FileText className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
-              <h2 id="transcript-modal-title" className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#e8eaed] flex items-center gap-2">
+              <h2 id="transcript-modal-title" className="text-base sm:text-lg font-semibold text-slate-900 dark:text-[#e8eaed] flex items-center gap-2" style={{ fontFamily: "'Google Sans', sans-serif" }}>
                 Official Academic Transcript
-                <span className="hidden sm:inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-100/70 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                <span className="hidden sm:inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full bg-blue-100/70 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
                   PDF Export
                 </span>
               </h2>
@@ -116,7 +116,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg text-slate-400 dark:text-[#9aa0a6] hover:text-slate-700 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] flex items-center justify-center transition-colors cursor-pointer google-btn-press"
+            className="w-9 h-9 rounded-full text-slate-400 dark:text-[#9aa0a6] hover:text-slate-700 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] flex items-center justify-center transition-colors cursor-pointer google-btn-press"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />

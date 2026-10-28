@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Paperclip,
   Upload,
@@ -215,10 +215,10 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
       {isPasteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-2xs"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
             onClick={() => setIsPasteModalOpen(false)}
           />
-          <div className="relative bg-white dark:bg-[#18191b] rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-200 dark:border-[#26282a] z-10 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-scale">
+          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-scale">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-extrabold text-slate-900 dark:text-[#e8eaed]">Add Text Source</h3>
               <button
@@ -282,10 +282,10 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
       {viewingSource && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-2xs"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
             onClick={() => setViewingSource(null)}
           />
-          <div className="relative bg-white dark:bg-[#18191b] rounded-2xl max-w-2xl w-full p-5 shadow-2xl border border-slate-200 dark:border-[#26282a] z-10 space-y-3 max-h-[85vh] flex flex-col animate-fade-scale">
+          <div className="relative bg-white dark:bg-[#1e1f20] rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200/50 dark:border-white/10 z-10 space-y-3 max-h-[85vh] flex flex-col animate-fade-scale">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-[#26282a] flex-shrink-0">
               <div className="flex items-center gap-2 truncate">
                 <FileCode className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
