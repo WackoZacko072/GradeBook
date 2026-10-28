@@ -219,17 +219,17 @@ export const Header: React.FC<HeaderProps> = ({
                 onChangeTab('gradebook');
                 onSelectOverview?.();
               }}
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none flex-shrink min-w-0 group"
+              className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none flex-shrink min-w-0 group"
               title="Gemini Gradebook"
             >
               <img
                 src="/gemini-gradebook-logo.png"
                 alt="Gemini Gradebook"
-                className="w-7 h-7 sm:w-[30px] sm:h-[30px] object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
+                className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
               />
               <span
-                className="text-[17px] sm:text-[21px] font-medium tracking-tight text-slate-900 dark:text-[#f8f9fa] antialiased select-none truncate"
-                style={{ fontFamily: "'Google Sans', 'Google Sans Text', sans-serif" }}
+                className="text-[18px] sm:text-[22px] font-normal tracking-[-0.015em] leading-none text-slate-900 dark:text-white antialiased select-none truncate"
+                style={{ fontFamily: "'Google Sans', 'Google Sans Text', 'Inter', sans-serif" }}
               >
                 Gemini Gradebook
               </span>
