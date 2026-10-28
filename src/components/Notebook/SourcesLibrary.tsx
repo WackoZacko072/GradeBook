@@ -279,7 +279,13 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            <div
+              className="w-full gap-4 sm:gap-5"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+              }}
+            >
               {classes.map((cls) => {
                 const count = sources.filter((s) => s.classId === cls.id).length;
                 const totalWords = sources
@@ -293,7 +299,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                       setActiveClassId(cls.id);
                       setSearchQuery('');
                     }}
-                    className="bg-white dark:bg-[#18191b] rounded-3xl p-6 border border-slate-200/90 dark:border-[#26282a] shadow-xs hover:shadow-md hover:border-blue-300 dark:hover:border-[#5f6368] transition-all cursor-pointer group flex flex-col justify-between space-y-4 google-card"
+                    className="bg-white dark:bg-[#18191b] rounded-3xl p-6 border border-slate-200/90 dark:border-[#26282a] shadow-xs hover:shadow-md hover:border-blue-300 dark:hover:border-[#5f6368] transition-all cursor-pointer group flex flex-col justify-between space-y-4 google-card min-w-0"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -485,7 +491,13 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              className="w-full gap-4"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+              }}
+            >
               {filteredClassSources.map((source) => {
                 const words = source.extractedWordCount || countWords(source.content);
                 const size = source.fileSize || 'Note';
@@ -493,7 +505,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                 return (
                   <div
                     key={source.id}
-                    className="bg-white dark:bg-[#18191b] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-[#26282a] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between space-y-3 group google-card"
+                    className="bg-white dark:bg-[#18191b] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-[#26282a] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between space-y-3 group google-card min-w-0"
                   >
                     {/* Top: Icon + Title + Delete */}
                     <div className="flex items-start justify-between gap-3">

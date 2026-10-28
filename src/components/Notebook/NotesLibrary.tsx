@@ -232,7 +232,13 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div
+          className="w-full gap-4 sm:gap-5"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+          }}
+        >
           {filteredNotes.map((note) => {
             const totalQuestions =
               (note.multipleChoice?.length || 0) + (note.longAnswer?.length || 0);
@@ -253,7 +259,7 @@ export const NotesLibrary: React.FC<NotesLibraryProps> = ({
               <div
                 key={note.id}
                 onClick={() => onSelectNote(note.id)}
-                className="group relative bg-white dark:bg-[#18191b] hover:bg-blue-50/20 dark:hover:bg-[#202123] border border-slate-200/90 dark:border-[#26282a] hover:border-blue-300 dark:hover:border-[#8ab4f8] rounded-2xl p-5 shadow-2xs cursor-pointer flex flex-col justify-between google-card transition-colors"
+                className="group relative bg-white dark:bg-[#18191b] hover:bg-blue-50/20 dark:hover:bg-[#202123] border border-slate-200/90 dark:border-[#26282a] hover:border-blue-300 dark:hover:border-[#8ab4f8] rounded-2xl p-5 shadow-2xs cursor-pointer flex flex-col justify-between google-card transition-colors min-w-0"
               >
                 <div>
                   {/* Card Header: Icon, Class Tag & Delete */}

@@ -785,7 +785,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
           ) : viewMode === 'split' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-[#26282a] min-h-[460px]">
               {/* Left Split: Editor */}
-              <div className="p-4 sm:p-5 flex flex-col">
+              <div className="p-4 sm:p-5 flex flex-col min-w-0">
                 <textarea
                   ref={textareaRef}
                   rows={22}
@@ -798,7 +798,7 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 />
               </div>
               {/* Right Split: Live KaTeX & Markdown Rendering */}
-              <div className="p-4 sm:p-6 overflow-y-auto bg-[#FAFBFD] dark:bg-[#0f0f10] min-h-[420px]">
+              <div className="p-4 sm:p-6 overflow-y-auto bg-[#FAFBFD] dark:bg-[#0f0f10] min-h-[420px] min-w-0">
                 {content.trim() ? (
                   <MarkdownRenderer content={content} />
                 ) : (

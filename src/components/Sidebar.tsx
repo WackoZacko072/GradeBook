@@ -33,6 +33,8 @@ interface SidebarProps {
   onOpenSlateAi?: () => void;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -55,6 +57,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSlateAi,
   isMobileOpen = false,
   onMobileClose,
+  isCollapsed = false,
+  onToggleCollapse: _onToggleCollapse,
 }) => {
   const content = (
     <div className="flex flex-col justify-between h-full select-none">
@@ -363,11 +367,91 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </div>
   );
 
+  // YouTube-style compact mini rail for collapsed desktop mode
+  const collapsedRail = (
+    <div className="flex flex-col items-center justify-between h-full py-2 select-none">
+      <div className="flex flex-col items-center gap-2 w-full">
+        {/* 1. Gradebook */}
+        <button
+          type="button"
+          onClick={() => {
+            onChangeTab('gradebook');
+            onSelectOverview();
+          }}
+          title={`Gradebook (${classes.length} classes)`}
+          className={`w-14 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer google-btn-press ${
+            activeTab === 'gradebook' && selectedClassId === null
+              ? 'bg-[#EBF2FE] dark:bg-[#8ab4f8]/20 text-[#2563EB] dark:text-[#8ab4f8] font-bold shadow-2xs'
+              : 'text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
+          }`}
+        >
+          <BookOpen className="w-5 h-5 stroke-[2]" />
+          <span className="text-[10px] tracking-tight">Grades</span>
+        </button>
+
+        {/* 2. Notebook / Sources */}
+        <button
+          type="button"
+          onClick={() => {
+            onChangeTab('notebook');
+            onSelectNote?.(null);
+          }}
+          title={`Notebook (${sources.length} sources)`}
+          className={`w-14 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer google-btn-press ${
+            activeTab === 'notebook' && selectedNoteId === null
+              ? 'bg-[#EEF2FF] dark:bg-[#c58af9]/20 text-[#4F46E5] dark:text-[#c58af9] font-bold shadow-2xs'
+              : 'text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
+          }`}
+        >
+          <BookMarked className="w-5 h-5 stroke-[2]" />
+          <span className="text-[10px] tracking-tight">Sources</span>
+        </button>
+
+        {/* 3. Office / Slab */}
+        <button
+          type="button"
+          onClick={() => {
+            onChangeTab('slab');
+            onSelectSlab?.(null);
+          }}
+          title={`Office (${slabs.length} sets)`}
+          className={`w-14 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer google-btn-press ${
+            activeTab === 'slab' && selectedSlabId === null
+              ? 'bg-violet-50 dark:bg-[#c58af9]/20 text-violet-700 dark:text-[#c58af9] font-bold shadow-2xs'
+              : 'text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
+          }`}
+        >
+          <BookCheck className="w-5 h-5 stroke-[2]" />
+          <span className="text-[10px] tracking-tight">Office</span>
+        </button>
+
+        {/* Add Class Quick Action */}
+        <button
+          type="button"
+          onClick={onOpenAddClass}
+          title="Add New Class"
+          className="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center transition-all cursor-pointer mt-1 google-btn-press shadow-2xs"
+        >
+          <Plus className="w-5 h-5 stroke-[2.5]" />
+        </button>
+      </div>
+
+      {/* Bottom Calculator Icon */}
+      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#202123] text-slate-500 dark:text-[#9aa0a6] flex items-center justify-center">
+        <Calculator className="w-4 h-4" />
+      </div>
+    </div>
+  );
+
   return (
     <>
-      {/* 1. Desktop Persistent Sidebar */}
-      <aside className="hidden md:flex w-64 bg-[#FAFBFD] dark:bg-[#0f0f10] flex-col justify-between p-4 flex-shrink-0 min-h-[calc(100vh-65px)] transition-colors duration-250">
-        {content}
+      {/* 1. Desktop Persistent Sidebar (Expands or Collapses smoothly like YouTube) */}
+      <aside
+        className={`hidden md:flex ${
+          isCollapsed ? 'w-[72px] px-1.5 py-3' : 'w-64 p-4'
+        } bg-[#FAFBFD] dark:bg-[#0f0f10] flex-col justify-between flex-shrink-0 min-h-[calc(100vh-65px)] transition-all duration-300 select-none`}
+      >
+        {isCollapsed ? collapsedRail : content}
       </aside>
 
       {/* 2. Mobile Slide-Over Drawer with Backdrop */}

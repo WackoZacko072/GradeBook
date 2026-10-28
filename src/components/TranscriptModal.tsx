@@ -237,7 +237,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
             </div>
 
             {/* Student Dossier Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/80 dark:bg-[#0f0f10]/70 p-3.5 rounded-xl border border-slate-200 dark:border-[#26282a] my-4 text-xs">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50/80 dark:bg-[#0f0f10]/70 p-3.5 rounded-xl border border-slate-200 dark:border-[#26282a] my-4 text-xs">
               <div>
                 <span className="text-[10px] font-bold text-slate-500 dark:text-[#9aa0a6] block uppercase tracking-wider">Student Name</span>
                 <span className="font-bold text-slate-900 dark:text-[#e8eaed] text-sm">{studentName}</span>
@@ -259,7 +259,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
             </div>
 
             {/* Summary Metrics Banner */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5">
               <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/40 text-center">
                 <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 block uppercase">Cumulative GPA</span>
                 <span className="text-xl font-black text-blue-900 dark:text-blue-300">{gpaInfo.gpa.toFixed(2)}</span>

@@ -110,6 +110,19 @@ export const App: React.FC = () => {
     localStorage.setItem('gemini_gradebook_view_mode', mode);
   };
 
+  // YouTube-style collapsible desktop sidebar
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<'expanded' | 'collapsed'>(() => {
+    return (localStorage.getItem('gradeslate_sidebar_collapsed') as 'expanded' | 'collapsed') || 'expanded';
+  });
+
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = prev === 'expanded' ? 'collapsed' : 'expanded';
+      localStorage.setItem('gradeslate_sidebar_collapsed', next);
+      return next;
+    });
+  };
+
   // Scroll ref for main content
   const mainContentRef = useRef<HTMLElement>(null);
 
@@ -367,6 +380,8 @@ export const App: React.FC = () => {
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
         viewMode={viewMode}
         onToggleViewMode={handleToggleViewMode}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={handleToggleSidebar}
       />
 
       {/* App Body: Full width flex layout */}
@@ -414,6 +429,8 @@ export const App: React.FC = () => {
           onOpenSlateAi={() => handleOpenAiAdvisor()}
           isMobileOpen={isMobileDrawerOpen}
           onMobileClose={() => setIsMobileDrawerOpen(false)}
+          isCollapsed={isSidebarCollapsed === 'collapsed'}
+          onToggleCollapse={handleToggleSidebar}
         />
 
         {/* Main Content Area with Sliding Over Transition */}
@@ -421,7 +438,7 @@ export const App: React.FC = () => {
           ref={mainContentRef}
           className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] dark:bg-[#0f0f10] pb-24 md:pb-8 transition-colors duration-250"
         >
-          <div className="w-full max-w-[1140px] mx-auto px-4 sm:px-8 lg:px-10 py-5 sm:py-8">
+          <div className="w-full max-w-[1840px] mx-auto px-3 sm:px-6 md:px-8 xl:px-10 py-4 sm:py-7 transition-all duration-300">
             <div
               key={activeTab + (selectedClassId || '') + (selectedNoteId || '') + (selectedSlabId || '')}
               className={slideDirection === 'right' ? 'animate-slide-right' : 'animate-slide-left'}

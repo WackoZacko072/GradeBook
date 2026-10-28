@@ -207,3 +207,50 @@ html.dark ::-webkit-scrollbar-thumb {
 html.dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 155, 160, 0.7);
 }
+
+/* ========================================================================= */
+/* YouTube-Style Fluid Grid System & Adaptive Layout Utilities              */
+/* ========================================================================= */
+
+.fluid-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.fluid-card-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.fluid-card-grid-wide {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.fluid-card-grid-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Fluid responsive typography */
+.text-fluid-hero {
+  font-size: clamp(2.25rem, 4.5vw, 4rem);
+  line-height: 1.05;
+}
+
+.text-fluid-title {
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  line-height: 1.2;
+}
+
+.text-fluid-subtitle {
+  font-size: clamp(0.75rem, 1.1vw, 0.875rem);
+}

@@ -348,11 +348,17 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
         </div>
       ) : (
         /* GRID OVERVIEW MODE */
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div
+          className="w-full gap-3.5"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+          }}
+        >
           {flashcards.map((card, idx) => (
             <div
               key={card.id}
-              className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs flex flex-col justify-between space-y-3"
+              className="bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-2xl p-4 shadow-2xs flex flex-col justify-between space-y-3 min-w-0"
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="w-5 h-5 rounded-md bg-slate-100 text-slate-600 font-bold text-[10px] flex items-center justify-center">

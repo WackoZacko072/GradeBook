@@ -957,7 +957,13 @@ export const SlabView: React.FC<SlabViewProps> = ({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div
+          className="w-full gap-4 sm:gap-5"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 290px), 1fr))',
+          }}
+        >
           {filteredSlabs.map((slab) => {
             const isEditing = editingSlabId === slab.id;
             const fcCount = slab.flashcards.length;
@@ -967,7 +973,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
               <div
                 key={slab.id}
                 onClick={() => !isEditing && handleSelectSlabItem(slab)}
-                className="group bg-white dark:bg-[#18191b] rounded-3xl border border-slate-200/90 dark:border-[#26282a] hover:border-violet-300 dark:hover:border-violet-500/50 p-5 sm:p-6 shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4 relative google-card"
+                className="group bg-white dark:bg-[#18191b] rounded-3xl border border-slate-200/90 dark:border-[#26282a] hover:border-violet-300 dark:hover:border-violet-500/50 p-5 sm:p-6 shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4 relative google-card min-w-0"
               >
                 <div>
                   {/* Card Header: Type Badge & Action Buttons */}

@@ -17,6 +17,7 @@ import {
   HelpCircle,
   Pencil,
   GraduationCap,
+  Menu,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -43,6 +44,8 @@ interface HeaderProps {
   onOpenAiAdvisor?: () => void;
   viewMode?: 'grid' | 'list';
   onToggleViewMode?: (mode: 'grid' | 'list') => void;
+  isSidebarCollapsed?: 'expanded' | 'collapsed';
+  onToggleSidebar?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -57,6 +60,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenMobileDrawer: _onOpenMobileDrawer,
   viewMode: controlledViewMode,
   onToggleViewMode,
+  isSidebarCollapsed = 'expanded',
+  onToggleSidebar,
 }) => {
   const { user, isConfigured, signInWithGoogle, logout, authError } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -194,26 +199,40 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <header className="sticky top-0 z-30 bg-[#FAFBFD]/95 dark:bg-[#0f0f10]/95 backdrop-blur-md transition-colors duration-250 select-none">
         <div className="w-full px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
-          {/* Left: Gemini Gradebook Branding (Matches NotebookLM screenshot layout) */}
-          <div
-            onClick={() => {
-              onChangeTab('gradebook');
-              onSelectOverview?.();
-            }}
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none flex-shrink min-w-0 group"
-            title="Gemini Gradebook"
-          >
-            <img
-              src="/gemini-gradebook-logo.png"
-              alt="Gemini Gradebook"
-              className="w-7 h-7 sm:w-[30px] sm:h-[30px] object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
-            />
-            <span
-              className="text-[17px] sm:text-[21px] font-medium tracking-tight text-slate-900 dark:text-[#f8f9fa] antialiased select-none truncate"
-              style={{ fontFamily: "'Google Sans', 'Google Sans Text', sans-serif" }}
+          {/* Left: YouTube-style Sidebar Toggle + Gemini Gradebook Branding */}
+          <div className="flex items-center gap-1 sm:gap-2.5 min-w-0 flex-shrink">
+            {onToggleSidebar && (
+              <button
+                type="button"
+                onClick={onToggleSidebar}
+                className="hidden md:flex p-2 text-slate-500 hover:text-slate-900 dark:text-[#9aa0a6] dark:hover:text-[#e8eaed] hover:bg-slate-200/60 dark:hover:bg-[#202123] rounded-full transition-colors cursor-pointer google-btn-press -ml-1 flex-shrink-0"
+                title={isSidebarCollapsed === 'collapsed' ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-label="Toggle navigation drawer"
+              >
+                <Menu className="w-5 h-5 stroke-[2]" />
+              </button>
+            )}
+
+            <div
+              onClick={() => {
+                onChangeTab('gradebook');
+                onSelectOverview?.();
+              }}
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none flex-shrink min-w-0 group"
+              title="Gemini Gradebook"
             >
-              Gemini Gradebook
-            </span>
+              <img
+                src="/gemini-gradebook-logo.png"
+                alt="Gemini Gradebook"
+                className="w-7 h-7 sm:w-[30px] sm:h-[30px] object-contain flex-shrink-0 group-hover:scale-105 transition-transform duration-200 drop-shadow-xs"
+              />
+              <span
+                className="text-[17px] sm:text-[21px] font-medium tracking-tight text-slate-900 dark:text-[#f8f9fa] antialiased select-none truncate"
+                style={{ fontFamily: "'Google Sans', 'Google Sans Text', sans-serif" }}
+              >
+                Gemini Gradebook
+              </span>
+            </div>
           </div>
 
           {/* Right: Search Gradebook, View Toggle, Settings Dropdown, 9-Dots Google Apps, Avatar */}

@@ -685,9 +685,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
       {/* Category Header */}
       <div className="p-4 sm:p-5 bg-slate-50/60 dark:bg-[#242526] border-b border-slate-100 dark:border-[#26282a] flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Name and Reorder */}
-        <div className="flex items-center gap-2.5 flex-1">
+        <div className="flex items-center gap-2.5 flex-1 min-w-0 flex-wrap">
           {/* Reorder Buttons */}
-          <div className="flex flex-col gap-0.5 text-slate-400 dark:text-[#80868b]">
+          <div className="flex flex-col gap-0.5 text-slate-400 dark:text-[#80868b] flex-shrink-0">
             <button
               type="button"
               disabled={catIndex === 0}
@@ -709,7 +709,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           </div>
 
           {isEditingName ? (
-            <div className="flex items-center gap-1.5 flex-1 max-w-xs">
+            <div className="flex items-center gap-1.5 flex-1 max-w-xs min-w-0">
               <input
                 type="text"
                 value={nameInput}
@@ -719,7 +719,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                   if (e.key === 'Escape') setIsEditingName(false);
                 }}
                 autoFocus
-                className="w-full px-2.5 py-1 text-sm bg-white dark:bg-[#0f0f10] border border-blue-500 dark:border-[#8ab4f8] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none"
+                className="w-full min-w-0 px-2.5 py-1 text-sm bg-white dark:bg-[#0f0f10] border border-blue-500 dark:border-[#8ab4f8] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none"
               />
               <button
                 type="button"
@@ -737,8 +737,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]">
+            <div className="flex items-center gap-2 min-w-0">
+              <h3 className="text-base font-bold text-slate-900 dark:text-[#e8eaed] truncate" title={category.name}>
                 {category.name}
               </h3>
               <button
@@ -748,7 +748,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                   setIsEditingName(true);
                 }}
                 title="Rename category"
-                className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] rounded-md cursor-pointer"
+                className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] rounded-md cursor-pointer flex-shrink-0"
               >
                 <Edit2 className="w-3.5 h-3.5" />
               </button>
@@ -759,20 +759,20 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
           {catCalc.isDefault100 ? (
             <span
               title="Category has no graded assessments entered yet, so its calculated average automatically defaults to 100%."
-              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-700 dark:text-[#8ab4f8] border border-blue-200/80 dark:border-[#8ab4f8]/30"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-700 dark:text-[#8ab4f8] border border-blue-200/80 dark:border-[#8ab4f8]/30 flex-shrink-0"
             >
               <Info className="w-3 h-3 text-blue-500 dark:text-[#8ab4f8]" />
               No grades yet (100%)
             </span>
           ) : (
-            <span className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">
+            <span className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium flex-shrink-0">
               {catCalc.gradedCount} graded of {catCalc.totalCount}
             </span>
           )}
         </div>
 
         {/* Right side: Weight input, Average, and Delete */}
-        <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap justify-between md:justify-end">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-between md:justify-end min-w-0 flex-shrink-0">
           {/* Weight percentage input */}
           <div className="flex items-center gap-2">
             <label htmlFor={`weight-input-${category.id}`} className="text-xs font-semibold text-slate-600 dark:text-[#c4c7c5]">
@@ -926,10 +926,10 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
   const isGraded = assessment.score !== null && assessment.score !== undefined;
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 sm:px-4 sm:py-3 bg-white dark:bg-[#242526] rounded-xl border border-slate-200/70 dark:border-[#26282a] hover:border-blue-300 dark:hover:border-blue-500/40 hover:shadow-2xs transition-all">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 sm:px-4 sm:py-3 bg-white dark:bg-[#242526] rounded-xl border border-slate-200/70 dark:border-[#26282a] hover:border-blue-300 dark:hover:border-blue-500/40 hover:shadow-2xs transition-all w-full">
       {/* Title Input */}
-      <div className="flex items-center gap-2 flex-1">
-        <span className="text-xs font-semibold text-slate-300 dark:text-[#5f6368] w-5 text-right select-none">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <span className="text-xs font-semibold text-slate-300 dark:text-[#5f6368] w-5 text-right select-none flex-shrink-0">
           {assIndex + 1}.
         </span>
         <input
@@ -937,12 +937,12 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
           value={assessment.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
           placeholder="Assessment title..."
-          className="w-full text-sm font-semibold text-slate-900 dark:text-[#e8eaed] bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-[#5f6368] focus:border-blue-600 dark:focus:border-[#8ab4f8] focus:outline-none transition-colors py-1"
+          className="w-full min-w-0 text-sm font-semibold text-slate-900 dark:text-[#e8eaed] bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-[#5f6368] focus:border-blue-600 dark:focus:border-[#8ab4f8] focus:outline-none transition-colors py-1"
         />
       </div>
 
       {/* Grade input area */}
-      <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap justify-between sm:justify-end pt-1 sm:pt-0">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-between md:justify-end pt-1 md:pt-0 flex-shrink-0 min-w-0">
         {/* Points vs Percentage toggle */}
         <button
           type="button"

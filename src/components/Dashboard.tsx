@@ -58,28 +58,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="space-y-8 animate-fade-scale select-none">
       {/* 1. Hero Banner & Stat Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
-        {/* Large Blue Hero Card (2 cols) */}
-        <div className="lg:col-span-2 bg-gradient-to-r from-[#2052DE] via-[#2563EB] to-[#1D4ED8] dark:from-[#1e3a8a] dark:via-[#2563eb] dark:to-[#1e40af] text-white rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-xs min-h-[200px] sm:min-h-[220px] google-card">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-5 w-full">
+        {/* Large Blue Hero Card (2 cols on xl) */}
+        <div className="xl:col-span-2 min-w-0 bg-gradient-to-r from-[#2052DE] via-[#2563EB] to-[#1D4ED8] dark:from-[#1e3a8a] dark:via-[#2563eb] dark:to-[#1e40af] text-white rounded-3xl p-5 sm:p-7 lg:p-8 relative overflow-hidden flex flex-col justify-between shadow-xs min-h-[200px] sm:min-h-[220px] google-card">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
 
           <div className="flex items-start justify-between gap-4 sm:gap-6 relative z-10">
-            <div>
+            <div className="min-w-0 flex-1">
               <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-blue-200">
                 Overall Average
               </span>
 
-              <div className="mt-2 flex items-baseline">
-                <span className="text-4xl sm:text-6xl font-extrabold tracking-tight">
+              <div className="mt-2 flex items-baseline flex-wrap">
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight">
                   {classes.length > 0 ? overallCalc.overallAverage.toFixed(1) : '--'}
                 </span>
                 {classes.length > 0 && (
-                  <span className="text-2xl sm:text-4xl font-bold text-blue-200 ml-0.5">%</span>
+                  <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-200 ml-0.5">%</span>
                 )}
               </div>
 
-              <p className="text-xs text-blue-100/90 font-medium mt-1.5">
+              <p className="text-xs text-blue-100/90 font-medium mt-1.5 line-clamp-2">
                 {classes.length > 0
                   ? `Across ${classes.length} ${classes.length === 1 ? 'class' : 'classes'}, equally weighted`
                   : 'Add your classes to begin calculating your overall weighted GPA'}
@@ -87,8 +87,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* Circular icon graphic */}
-            <div className="w-16 h-16 sm:w-28 sm:h-28 rounded-full border-2 sm:border-4 border-white/20 flex items-center justify-center bg-white/10 flex-shrink-0 shadow-inner">
-              <BookOpen className="w-7 h-7 sm:w-10 sm:h-10 text-white stroke-[2]" />
+            <div className="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full border-2 sm:border-3 border-white/20 flex items-center justify-center bg-white/10 flex-shrink-0 shadow-inner">
+              <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white stroke-[2]" />
             </div>
           </div>
 
@@ -106,8 +106,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        {/* Right Two Stacked Stat Cards (1 col) */}
-        <div className="lg:col-span-1 flex flex-col sm:flex-row lg:flex-col gap-4">
+        {/* Right Stacked Stat Cards (1 col on xl, 2 cols on sm/md/lg) */}
+        <div className="xl:col-span-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4 min-w-0">
           {/* Stat Card 1: Classes */}
           <div className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] p-5 shadow-2xs flex items-center justify-between flex-1 google-card transition-colors">
             <div className="flex items-center gap-3.5">
@@ -304,8 +304,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
             })}
           </div>
         ) : (
-          /* Class Cards Grid with Google Hover Lift */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          /* Class Cards Dynamic Auto-Fit Grid (Adapts to available container width without clipping) */
+          <div
+            className="w-full gap-4 sm:gap-5"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+            }}
+          >
             {classes.map((item) => {
               const classCalc = calculateClassAverage(item);
               const gradedCount = item.categories.reduce(
@@ -320,7 +326,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div
                   key={item.id}
                   onClick={() => onSelectClass(item.id)}
-                  className="group bg-white dark:bg-[#18191b] rounded-2xl p-5 border border-slate-200/80 dark:border-[#26282a] shadow-2xs hover:border-blue-300 dark:hover:border-[#8ab4f8] cursor-pointer flex flex-col justify-between google-card"
+                  className="group bg-white dark:bg-[#18191b] rounded-2xl p-5 border border-slate-200/80 dark:border-[#26282a] shadow-2xs hover:border-blue-300 dark:hover:border-[#8ab4f8] cursor-pointer flex flex-col justify-between google-card min-w-0"
                 >
                   <div>
                     {/* Top row: Icon and settings/sliders */}

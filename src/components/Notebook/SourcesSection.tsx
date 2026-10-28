@@ -170,11 +170,17 @@ export const SourcesSection: React.FC<SourcesSectionProps> = ({
           <span>No external sources attached yet. The AI will generate questions strictly from your typed note above.</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+        <div
+          className="w-full gap-2 pt-1"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
+          }}
+        >
           {sources.map((src) => (
             <div
               key={src.id}
-              className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-[#0f0f10] hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 border border-slate-200/80 dark:border-[#26282a] rounded-xl text-xs group transition-colors"
+              className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-[#0f0f10] hover:bg-emerald-50/40 dark:hover:bg-emerald-950/20 border border-slate-200/80 dark:border-[#26282a] rounded-xl text-xs group transition-colors min-w-0"
             >
               <div className="flex items-center gap-2 truncate pr-2">
                 <FileText className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />

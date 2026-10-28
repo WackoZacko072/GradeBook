@@ -211,7 +211,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             <label className="block text-xs font-bold text-slate-800 dark:text-[#e8eaed] mb-2">
               Study Format
             </label>
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <button
                 type="button"
                 disabled={isGenerating}
@@ -275,7 +275,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 {quantity === 'less' ? '~8 items' : quantity === 'more' ? '~16 items' : '~12 items'}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[
                 { id: 'less' as const, label: 'Less', desc: '~8 items' },
                 { id: 'standard' as const, label: 'Standard', desc: '~12 items' },
@@ -312,7 +312,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
                 {difficulty}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {[
                 { id: 'easy' as const, label: 'Easy', desc: 'Core terms' },
                 { id: 'medium' as const, label: 'Medium', desc: 'Exam standard' },
