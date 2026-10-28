@@ -484,7 +484,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               />
               <span
                 className="font-medium text-[21px] leading-none text-slate-900 dark:text-[#f8f9fa] tracking-[-0.015em]"
-                style={{ fontFamily: "'Google Sans', 'Outfit', 'Inter', sans-serif" }}
+                style={{ fontFamily: "'Google Sans', 'Google Sans Text', sans-serif" }}
               >
                 Gemini Gradebook
               </span>

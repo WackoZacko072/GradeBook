@@ -214,7 +214,7 @@ export const Header: React.FC<HeaderProps> = ({
               />
               <span
                 className="text-[21px] sm:text-[23px] font-medium tracking-[-0.015em] leading-none text-slate-900 dark:text-[#f8f9fa] antialiased select-none truncate"
-                style={{ fontFamily: "'Google Sans', 'Outfit', 'Inter', sans-serif" }}
+                style={{ fontFamily: "'Google Sans', 'Google Sans Text', sans-serif" }}
               >
                 Gemini Gradebook
               </span>
