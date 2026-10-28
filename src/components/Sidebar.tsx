@@ -476,14 +476,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           {/* Drawer Header */}
           <div className="flex items-center justify-between pb-4 mb-2 border-b border-slate-200/80 dark:border-[#26282a]">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <img
                 src="/gemini-gradebook-logo.png"
                 alt="Gemini Gradebook"
-                className="w-[18px] h-[18px] object-contain flex-shrink-0"
+                className="w-[22px] h-[22px] object-contain flex-shrink-0"
               />
               <span
-                className="font-normal text-[18px] leading-none text-slate-900 dark:text-white tracking-[-0.015em]"
+                className="font-semibold text-[20px] leading-none text-slate-900 dark:text-white tracking-[-0.02em]"
                 style={{ fontFamily: "'Google Sans', 'Google Sans Text', 'Inter', sans-serif" }}
               >
                 Gemini Gradebook
