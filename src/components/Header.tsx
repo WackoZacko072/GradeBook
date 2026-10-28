@@ -67,8 +67,11 @@ export const Header: React.FC<HeaderProps> = ({
   // Search state for "Search gradebook"
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [viewportRect, setViewportRect] = useState<{ height: number; offsetTop: number } | null>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
 
   // View mode state (grid vs list)
   const [internalViewMode, setInternalViewMode] = useState<'grid' | 'list'>('grid');
@@ -126,6 +129,7 @@ export const Header: React.FC<HeaderProps> = ({
         setIsSettingsOpen(false);
         setIsAppsMenuOpen(false);
         setIsSearchOpen(false);
+        setIsMobileSearchOpen(false);
       }
     };
 
@@ -136,6 +140,39 @@ export const Header: React.FC<HeaderProps> = ({
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  // Track visualViewport for mobile keyboard docking and auto-focus mobile search input
+  useEffect(() => {
+    if (!isMobileSearchOpen) {
+      setViewportRect(null);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      mobileSearchInputRef.current?.focus();
+    }, 50);
+
+    const vv = window.visualViewport;
+    if (!vv) {
+      return () => clearTimeout(timer);
+    }
+
+    const updateViewport = () => {
+      setViewportRect({
+        height: vv.height,
+        offsetTop: vv.offsetTop,
+      });
+    };
+
+    updateViewport();
+    vv.addEventListener('resize', updateViewport);
+    vv.addEventListener('scroll', updateViewport);
+    return () => {
+      clearTimeout(timer);
+      vv.removeEventListener('resize', updateViewport);
+      vv.removeEventListener('scroll', updateViewport);
+    };
+  }, [isMobileSearchOpen]);
 
   // Exclusive toggle helpers
   const toggleAppsMenu = () => {
@@ -157,6 +194,19 @@ export const Header: React.FC<HeaderProps> = ({
     setIsAppsMenuOpen(false);
     setIsSettingsOpen(false);
     setIsSearchOpen(false);
+  };
+
+  const openMobileSearch = () => {
+    setIsAppsMenuOpen(false);
+    setIsSettingsOpen(false);
+    setIsUserMenuOpen(false);
+    setIsSearchOpen(false);
+    setIsMobileSearchOpen(true);
+  };
+
+  const closeMobileSearch = () => {
+    setIsMobileSearchOpen(false);
+    setSearchQuery('');
   };
 
   const handleForceSync = async () => {
@@ -183,6 +233,7 @@ export const Header: React.FC<HeaderProps> = ({
         );
       })
     : [];
+  const mobileDisplayClasses = trimmedQuery ? matchingClasses : classes;
 
   const handleSelectClassItem = (classId: string) => {
     if (onSelectClass) {
@@ -191,13 +242,14 @@ export const Header: React.FC<HeaderProps> = ({
     onChangeTab('gradebook');
     setSearchQuery('');
     setIsSearchOpen(false);
+    setIsMobileSearchOpen(false);
   };
 
   return (
     <>
       <header className="sticky top-0 z-30 bg-[#FAFBFD]/95 dark:bg-[#0f0f10]/95 backdrop-blur-md transition-colors duration-250 select-none">
         <div className="w-full px-5 sm:px-7 h-16 flex items-center justify-between gap-3">
-          {/* Left: Gemini Gradebook Branding matching Google NotebookLM lockup */}
+          {/* Left: Gemini Gradebook Branding (title-only on mobile, logo + title on desktop) */}
           <div className="flex items-center min-w-0 flex-shrink">
             <div
               onClick={() => {
@@ -210,7 +262,7 @@ export const Header: React.FC<HeaderProps> = ({
               <img
                 src="/gemini-gradebook-logo.png"
                 alt="Gemini Gradebook"
-                className="w-[25px] h-[25px] sm:w-[27px] sm:h-[27px] object-contain flex-shrink-0 -translate-y-[0.5px] group-hover:scale-105 transition-transform duration-200"
+                className="hidden sm:block w-[27px] h-[27px] object-contain flex-shrink-0 -translate-y-[0.5px] group-hover:scale-105 transition-transform duration-200"
               />
               <span
                 className="text-[21px] sm:text-[23px] font-medium tracking-[-0.015em] leading-none text-slate-900 dark:text-[#f8f9fa] antialiased select-none truncate"
@@ -221,10 +273,21 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Right: Search Gradebook, View Toggle, Settings Dropdown, 9-Dots Google Apps, Avatar */}
+          {/* Right: Mobile Magnifying Glass / Desktop Search Pill, View Toggle, Settings, 9-Dots (desktop), Avatar */}
           <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-            {/* Search Gradebook Pill Input */}
-            <div className="relative" ref={searchContainerRef}>
+            {/* Mobile Magnifying Glass Button */}
+            <button
+              type="button"
+              onClick={openMobileSearch}
+              className="sm:hidden p-2 rounded-full text-slate-600 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#18191b] transition-colors cursor-pointer google-btn-press"
+              title="Search classes"
+              aria-label="Search classes"
+            >
+              <Search className="w-5 h-5 stroke-[1.8]" />
+            </button>
+
+            {/* Desktop Search Gradebook Pill Input */}
+            <div className="hidden sm:block relative" ref={searchContainerRef}>
               <div className="relative flex items-center">
                 <Search className="w-4 h-4 text-slate-400 dark:text-[#9aa0a6] absolute left-3.5 pointer-events-none" />
                 <input
@@ -475,8 +538,8 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* Google Apps 9-Dot Launcher Dropdown (Matches Screenshot Exactly) */}
-            <div className="relative" ref={appsMenuRef}>
+            {/* Google Apps 9-Dot Launcher Dropdown (Desktop only, hidden on mobile) */}
+            <div className="hidden sm:block relative" ref={appsMenuRef}>
               <button
                 type="button"
                 onClick={toggleAppsMenu}
@@ -1179,6 +1242,136 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
       </header>
+
+      {/* Mobile Class Search Popup (Matches NotebookLM mobile search reference) */}
+      {isMobileSearchOpen && (
+        <div
+          className="fixed left-0 right-0 z-50 sm:hidden bg-[#FAFBFD] dark:bg-[#1b1c1f] flex flex-col select-none"
+          style={
+            viewportRect
+              ? {
+                  top: `${viewportRect.offsetTop}px`,
+                  height: `${viewportRect.height}px`,
+                }
+              : {
+                  top: 0,
+                  bottom: 0,
+                }
+          }
+        >
+          {/* Scrollable Class Cards List */}
+          <div className="flex-1 overflow-y-auto px-4 pt-3 pb-2 space-y-2.5">
+            {mobileDisplayClasses.length > 0 ? (
+              mobileDisplayClasses.map((c) => {
+                const calc = calculateClassAverage(c);
+                const totalAssessments = c.categories.reduce(
+                  (sum, cat) => sum + cat.assessments.length,
+                  0
+                );
+                const baseColor = c.color || '#3b82f6';
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => handleSelectClassItem(c.id)}
+                    className="w-full text-left rounded-[22px] px-4 py-3.5 flex items-center justify-between gap-3 transition-transform active:scale-[0.99] cursor-pointer"
+                    style={{
+                      backgroundColor:
+                        theme === 'dark'
+                          ? `color-mix(in srgb, ${baseColor} 15%, #2b2d31)`
+                          : `color-mix(in srgb, ${baseColor} 12%, #f1f5f9)`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{
+                          backgroundColor:
+                            theme === 'dark'
+                              ? `color-mix(in srgb, ${baseColor} 28%, #1e1f22)`
+                              : `color-mix(in srgb, ${baseColor} 20%, #ffffff)`,
+                        }}
+                      >
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: baseColor }}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[16px] font-normal text-slate-900 dark:text-[#f1f3f4] leading-snug truncate">
+                          {c.name}
+                        </div>
+                        <div className="text-[12px] text-slate-500 dark:text-[#a8abb0] mt-0.5 truncate">
+                          {c.code ? `${c.code} • ` : ''}
+                          {totalAssessments} {totalAssessments === 1 ? 'assessment' : 'assessments'} •{' '}
+                          {calc.average.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="w-10 h-10 rounded-full bg-slate-900/10 dark:bg-[#1e1f22]/85 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-medium text-slate-800 dark:text-[#e8eaed]">
+                        {calc.letterGrade}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center px-6 py-12">
+                <p className="text-sm text-slate-500 dark:text-[#9aa0a6]">
+                  No classes found matching{' '}
+                  <span className="font-medium text-slate-900 dark:text-[#e8eaed]">
+                    "{searchQuery}"
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Search Input Bar + Cancel Button (docked above keyboard) */}
+          <div className="px-4 py-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] bg-[#FAFBFD] dark:bg-[#1b1c1f] flex items-center gap-3 flex-shrink-0">
+            <div className="flex-1 h-11 rounded-full border border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#1b1c1f] px-4 flex items-center gap-2.5">
+              <Search className="w-4 h-4 text-slate-500 dark:text-[#e8eaed] flex-shrink-0" />
+              <input
+                ref={mobileSearchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && mobileDisplayClasses.length > 0) {
+                    handleSelectClassItem(mobileDisplayClasses[0].id);
+                  } else if (e.key === 'Escape') {
+                    closeMobileSearch();
+                  }
+                }}
+                placeholder="Search by class title"
+                className="w-full bg-transparent text-[15px] text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#9aa0a6] focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    mobileSearchInputRef.current?.focus();
+                  }}
+                  className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-[#e8eaed] cursor-pointer"
+                  aria-label="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={closeMobileSearch}
+              className="text-[14px] font-medium text-slate-700 dark:text-[#e8eaed] px-1.5 py-2 cursor-pointer flex-shrink-0"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Gradebook Calculation & Help Modal */}
       <ModalPortal
