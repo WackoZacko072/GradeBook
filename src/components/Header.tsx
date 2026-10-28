@@ -605,7 +605,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </a>
 
-                      {/* 2. Drive (Rounded gradient triangle matching screenshot) */}
+                      {/* 2. Drive (Mathematically exact rounded equilateral triangle with downward inner cutout) */}
                       <a
                         href="https://drive.google.com"
                         target="_blank"
@@ -615,38 +615,44 @@ export const Header: React.FC<HeaderProps> = ({
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 48 48" className="w-9 h-9">
                             <defs>
-                              <linearGradient id="gg-drive-green" x1="0%" y1="100%" x2="80%" y2="0%">
+                              <clipPath id="gg-drive-clip">
+                                <path
+                                  fillRule="evenodd"
+                                  d="M17.5 9.75A7.5 7.5 0 0 1 30.5 9.75L41.5 28.8A7.5 7.5 0 0 1 35 40.05H13A7.5 7.5 0 0 1 6.5 28.8L17.5 9.75zM18.6 23.5h10.8L24 32.85 18.6 23.5z"
+                                />
+                              </clipPath>
+                              <linearGradient id="gg-drive-green" x1="15%" y1="100%" x2="65%" y2="10%">
                                 <stop offset="0%" stopColor="#5ec8ff" />
-                                <stop offset="45%" stopColor="#00b359" />
+                                <stop offset="42%" stopColor="#00b359" />
                                 <stop offset="100%" stopColor="#00a651" />
                               </linearGradient>
-                              <linearGradient id="gg-drive-blue" x1="0%" y1="30%" x2="100%" y2="90%">
+                              <linearGradient id="gg-drive-blue" x1="15%" y1="20%" x2="95%" y2="95%">
                                 <stop offset="0%" stopColor="#1a78ff" />
-                                <stop offset="70%" stopColor="#3b82f6" />
+                                <stop offset="62%" stopColor="#3b82f6" />
                                 <stop offset="100%" stopColor="#999cff" />
                               </linearGradient>
-                              <linearGradient id="gg-drive-yellow" x1="20%" y1="0%" x2="80%" y2="100%">
+                              <linearGradient id="gg-drive-yellow" x1="30%" y1="0%" x2="70%" y2="100%">
                                 <stop offset="0%" stopColor="#ffd633" />
                                 <stop offset="100%" stopColor="#fbbc04" />
                               </linearGradient>
                             </defs>
-                            {/* Top Green Lobe */}
-                            <path
-                              fill="url(#gg-drive-green)"
-                              d="M17.2 9.5C19.2 6 23.8 5 27.5 6.8c1.8.9 3.3 2.5 4.3 4.3l3.2 5.6-15.5 8.8H9.2l8-16z"
-                            />
-                            {/* Bottom-Left Blue Lobe */}
-                            <path
-                              fill="url(#gg-drive-blue)"
-                              d="M9.2 25.5h10.3l8.8 15.5H14.5c-4.2 0-7.8-2.8-8.8-6.8-.6-2.5 0-5.2 1.5-7.4l2-1.3z"
-                            />
-                            {/* Right Yellow Lobe */}
-                            <path
-                              fill="url(#gg-drive-yellow)"
-                              d="M35 16.7l6.8 11.8c2.2 3.8.9 8.7-2.9 10.9-1.2.7-2.6 1.1-4 1.1h-6.6l-4.3-15 11-8.8z"
-                            />
-                            {/* Center dark triangle cutout */}
-                            <path fill="#1b1c1e" d="M19.5 25.5h9l-4.5 7.8-4.5-7.8z" />
+                            <g clipPath="url(#gg-drive-clip)">
+                              {/* Bottom-Left Blue Lobe */}
+                              <polygon
+                                fill="url(#gg-drive-blue)"
+                                points="4,23.5 18.6,23.5 28.5,40.6 4,40.6"
+                              />
+                              {/* Right Yellow Lobe */}
+                              <polygon
+                                fill="url(#gg-drive-yellow)"
+                                points="35.8,12.4 44,28 44,41 28.2,40.05 24,32.85 29.4,23.5"
+                              />
+                              {/* Top Green-Cyan Lobe */}
+                              <polygon
+                                fill="url(#gg-drive-green)"
+                                points="4,5 36,5 35.8,12.4 29.4,23.5 4,23.5"
+                              />
+                            </g>
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -809,7 +815,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </a>
 
-                      {/* 7. Search (Smooth gradient Google G logo) */}
+                      {/* 7. Search (Official Google G geometry with smooth rainbow gradient) */}
                       <a
                         href="https://google.com"
                         target="_blank"
@@ -817,31 +823,38 @@ export const Header: React.FC<HeaderProps> = ({
                         className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 48 48" className="w-9 h-9">
+                          <svg viewBox="0 0 24 24" className="w-8 h-8">
                             <defs>
-                              <linearGradient id="gg-search-top" x1="80%" y1="0%" x2="0%" y2="85%">
-                                <stop offset="0%" stopColor="#ea4335" />
-                                <stop offset="55%" stopColor="#ff5252" />
-                                <stop offset="100%" stopColor="#fbbc04" />
-                              </linearGradient>
-                              <linearGradient id="gg-search-bot" x1="0%" y1="20%" x2="90%" y2="90%">
-                                <stop offset="0%" stopColor="#fbbc04" />
-                                <stop offset="50%" stopColor="#34a853" />
-                                <stop offset="100%" stopColor="#4285f4" />
-                              </linearGradient>
+                              <clipPath id="gg-search-g-clip">
+                                <path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17zM12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24zM5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.02 0 12s.45 3.82 1.25 5.42l4.03-3.15zM12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
+                              </clipPath>
+                              <radialGradient id="gg-g-red" cx="50%" cy="8%" r="58%">
+                                <stop offset="0%" stopColor="#ff3b30" />
+                                <stop offset="55%" stopColor="#ea4335" />
+                                <stop offset="100%" stopColor="#ea4335" stopOpacity="0" />
+                              </radialGradient>
+                              <radialGradient id="gg-g-yellow" cx="6%" cy="52%" r="52%">
+                                <stop offset="0%" stopColor="#ffca22" />
+                                <stop offset="55%" stopColor="#fbbc04" />
+                                <stop offset="100%" stopColor="#fbbc04" stopOpacity="0" />
+                              </radialGradient>
+                              <radialGradient id="gg-g-green" cx="42%" cy="96%" r="58%">
+                                <stop offset="0%" stopColor="#00b359" />
+                                <stop offset="55%" stopColor="#34a853" />
+                                <stop offset="100%" stopColor="#34a853" stopOpacity="0" />
+                              </radialGradient>
                             </defs>
-                            <path
-                              fill="url(#gg-search-top)"
-                              d="M24 11.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.8 4.4 30.4 2 24 2 12.8 2 3.4 9.6 1 20l8 6.2c1.8-8.4 9.2-14.7 15-14.7z"
-                            />
-                            <path
-                              fill="url(#gg-search-bot)"
-                              d="M9 26.2l-8-6.2C.3 22 0 23 0 24c0 12.2 9.8 22 22 22 6.2 0 11.8-2.2 15.8-6l-7.6-5.9c-2.1 1.4-4.9 2.3-8.2 2.3-7.6 0-13.9-5.1-15.9-12.1L9 26.2z"
-                            />
-                            <path
-                              fill="#4285f4"
-                              d="M45.6 20H24v8.8h12.4c-.9 3.4-3.1 6.1-6.2 7.8l7.6 5.9C42.6 38.1 46 31.7 46 24c0-1.4-.1-2.7-.4-4z"
-                            />
+                            <g clipPath="url(#gg-search-g-clip)">
+                              <rect x="0" y="0" width="24" height="24" fill="#4285f4" />
+                              <rect x="0" y="0" width="24" height="24" fill="url(#gg-g-green)" />
+                              <rect x="0" y="0" width="24" height="24" fill="url(#gg-g-red)" />
+                              <rect x="0" y="0" width="24" height="24" fill="url(#gg-g-yellow)" />
+                              {/* Keep the horizontal crossbar and right side crisp Google Blue */}
+                              <path
+                                fill="#4285f4"
+                                d="M24 10H12v4.6h6.6c-.2 1.1-.8 2.1-1.6 2.9l4.2 3.3C23 18.9 24 15.9 24 12.2V10z"
+                              />
+                            </g>
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
