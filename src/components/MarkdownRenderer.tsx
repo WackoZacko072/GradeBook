@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { LatexRenderer } from './LatexRenderer';
 
 interface MarkdownRendererProps {
@@ -304,16 +304,16 @@ function splitIntoBlocks(text: string): Block[] {
     }
 
     // 6. Bullet or Numbered List
-    if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || /^\d+[\.\)]\s/.test(trimmed)) {
+    if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || /^\d+[.)]\s/.test(trimmed)) {
       const items: string[] = [];
       while (
         i < lines.length &&
         (lines[i].trim().startsWith('* ') ||
           lines[i].trim().startsWith('- ') ||
-          /^\d+[\.\)]\s/.test(lines[i].trim()))
+          /^\d+[.)]\s/.test(lines[i].trim()))
       ) {
         // Strip bullet / number prefix
-        const itemText = lines[i].trim().replace(/^(\*|-|\d+[\.\)])\s+/, '');
+        const itemText = lines[i].trim().replace(/^(\*|-|\d+[.)])\s+/, '');
         // Also strip any accidental heading prefix inside the list item, e.g. "### Question 1" -> "Question 1"
         const cleanItem = itemText.replace(/^#{1,6}\s+/, '');
         items.push(cleanItem);

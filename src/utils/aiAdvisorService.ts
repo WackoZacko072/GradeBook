@@ -10,7 +10,14 @@ import {
 export const GEMINI_STORAGE_KEY = 'gradebook_gemini_api_key';
 export const GEMINI_MODEL_STORAGE_KEY = 'gradebook_gemini_model';
 
-export type GeminiModel = 'gemini-3.5-flash-lite' | 'gemini-3.5-flash' | 'gemini-3.6-flash' | 'gemini-3.8-flash';
+export type GeminiModel =
+  | 'gemini-3.5-flash-lite'
+  | 'gemini-3.5-flash'
+  | 'gemini-3.6-flash'
+  | 'gemini-3.8-flash'
+  | 'gemini-2.5-flash-lite'
+  | 'gemini-2.5-flash'
+  | 'gemini-2.0-flash';
 
 export interface ChatMessage {
   id: string;
@@ -29,6 +36,9 @@ const FALLBACK_MODELS: GeminiModel[] = [
   'gemini-3.5-flash',
   'gemini-3.6-flash',
   'gemini-3.8-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
 ];
 
 /**
@@ -484,8 +494,14 @@ export async function sendSlateAiMessage(
 
       const data = await response.json();
       const candidate = data?.candidates?.[0];
+      const parts = candidate?.content?.parts || [];
+      const nonThoughtParts = parts.filter((p: any) => !p.thought && typeof p.text === 'string');
+      const responseText =
+        nonThoughtParts.length > 0
+          ? nonThoughtParts.map((p: any) => p.text).join('')
+          : parts.map((p: any) => p.text || '').join('');
 
-      if (!candidate || !candidate.content?.parts?.[0]?.text) {
+      if (!candidate || !responseText.trim()) {
         if (candidate?.finishReason === 'SAFETY') {
           return 'The response was flagged by safety filters. Please rephrase your query.';
         }
@@ -494,7 +510,7 @@ export async function sendSlateAiMessage(
 
       // Save working model for future calls
       saveSelectedGeminiModel(model);
-      return candidate.content.parts[0].text;
+      return responseText;
     } catch (err: any) {
       if (err.message === 'QUOTA_EXCEEDED' || err.message === 'INVALID_API_KEY') {
         throw err;
@@ -646,10 +662,12 @@ export async function streamSlateAiMessage(
 
           try {
             const parsed = JSON.parse(jsonStr);
-            const textChunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textChunk) {
-              accumulatedText += textChunk;
-              onChunk(accumulatedText);
+            const parts = parsed.candidates?.[0]?.content?.parts || [];
+            for (const part of parts) {
+              if (!part.thought && typeof part.text === 'string' && part.text) {
+                accumulatedText += part.text;
+                onChunk(accumulatedText);
+              }
             }
           } catch {
             // Ignore incomplete chunks
@@ -663,10 +681,12 @@ export async function streamSlateAiMessage(
         if (jsonStr && jsonStr !== '[DONE]') {
           try {
             const parsed = JSON.parse(jsonStr);
-            const textChunk = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textChunk) {
-              accumulatedText += textChunk;
-              onChunk(accumulatedText);
+            const parts = parsed.candidates?.[0]?.content?.parts || [];
+            for (const part of parts) {
+              if (!part.thought && typeof part.text === 'string' && part.text) {
+                accumulatedText += part.text;
+                onChunk(accumulatedText);
+              }
             }
           } catch {
             // Ignore

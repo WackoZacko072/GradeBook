@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   BookCheck,
@@ -56,6 +56,20 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      setError(null);
+      if (initialPrompt) setPrompt(initialPrompt);
+      if (initialType) setSlabType(initialType);
+      if (initialSourceIds && initialSourceIds.length > 0) {
+        setSelectedSourceIds(initialSourceIds);
+        setUseAllSources(false);
+      } else {
+        setUseAllSources(true);
+      }
+    }
+  }, [isOpen, initialPrompt, initialType, initialSourceIds]);
+
   if (!isOpen) return null;
 
   // Filter sources for currently chosen class notebook
@@ -87,7 +101,13 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!prompt.trim() || isGenerating) return;
+    if (isGenerating) return;
+
+    const finalPrompt =
+      prompt.trim() ||
+      (selectedClassEntity
+        ? `Key concepts, definitions, formulas, and exam review questions for ${selectedClassEntity.name}`
+        : 'Key concepts, definitions, formulas, and applications from my course materials');
 
     setIsGenerating(true);
     setError(null);
@@ -112,7 +132,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
         : selectedSourceIds;
 
       const generated = await generateSlabSet({
-        prompt,
+        prompt: finalPrompt,
         type: slabType,
         notes,
         sources,
@@ -188,12 +208,11 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             What do you want to create?
           </label>
           <textarea
-            required
             rows={4}
             value={prompt}
             onChange={(e) => handlePromptChange(e.target.value)}
             disabled={isGenerating}
-            placeholder="e.g. Look at my Biology sources and create flashcards on cellular respiration and ATP synthesis..."
+            placeholder="e.g. Look at my Biology sources and create flashcards on cellular respiration (or leave blank to cover all key concepts)..."
             className="w-full text-sm sm:text-base p-4 bg-slate-100/70 dark:bg-[#131314] rounded-2xl focus:bg-white dark:focus:bg-[#131314] focus:outline-hidden focus:ring-2 focus:ring-blue-500/50 transition-all text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] leading-relaxed shadow-2xs border border-transparent"
           />
 
@@ -487,7 +506,7 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
 
         <button
           type="button"
-          disabled={!prompt.trim() || isGenerating}
+          disabled={isGenerating}
           onClick={handleGenerate}
           className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-[#8ab4f8] dark:hover:bg-[#a6c8ff] dark:text-[#0f0f10] active:scale-95 disabled:opacity-50 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all cursor-pointer google-btn-press min-h-[44px]"
         >

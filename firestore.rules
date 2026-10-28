@@ -45,6 +45,16 @@ service cloud.firestore {
       match /notebook/{document=**} {
         allow read, write: if isOwner(userId);
       }
+
+      // Subcollection for Uploaded Class Sources
+      match /sources/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Subcollection for Office Study Sets (Slabs)
+      match /slabs/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // Default deny all other paths
