@@ -34,15 +34,20 @@ const PROMPT_SUGGESTIONS = [
   'Comprehensive exam review with diverse question styles',
 ];
 
+const EMPTY_CLASSES: ClassItem[] = [];
+const EMPTY_NOTES: NoteItem[] = [];
+const EMPTY_SOURCES: NoteSource[] = [];
+const EMPTY_SOURCE_IDS: string[] = [];
+
 export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
   isOpen,
   onClose,
-  classes = [],
-  notes = [],
-  sources = [],
+  classes = EMPTY_CLASSES,
+  notes = EMPTY_NOTES,
+  sources = EMPTY_SOURCES,
   initialPrompt = '',
   initialType = 'flashcards',
-  initialSourceIds = [],
+  initialSourceIds = EMPTY_SOURCE_IDS,
   onCreateSlab,
 }) => {
   const [prompt, setPrompt] = useState(initialPrompt);
@@ -55,19 +60,22 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const wasOpenRef = React.useRef(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpenRef.current) {
       setError(null);
       if (initialPrompt) setPrompt(initialPrompt);
-      if (initialType) setSlabType(initialType);
+      setSlabType(initialType || 'flashcards');
       if (initialSourceIds && initialSourceIds.length > 0) {
         setSelectedSourceIds(initialSourceIds);
         setUseAllSources(false);
       } else {
+        setSelectedSourceIds([]);
         setUseAllSources(true);
       }
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen, initialPrompt, initialType, initialSourceIds]);
 
   if (!isOpen) return null;

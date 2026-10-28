@@ -120,7 +120,11 @@ export const SlabView: React.FC<SlabViewProps> = ({
 
   const handleSelectSlabItem = (slab: SlabItem) => {
     onSelectSlab(slab.id);
-    setStudyMode(slab.type === 'mcq' ? 'mcq' : 'flashcards');
+    setStudyMode(
+      slab.type === 'mcq' || (slab.flashcards.length === 0 && slab.mcqs.length > 0)
+        ? 'mcq'
+        : 'flashcards'
+    );
     setCurrentCardIndex(0);
     setIsCardFlipped(false);
     setCardReviews({});
@@ -235,6 +239,12 @@ export const SlabView: React.FC<SlabViewProps> = ({
   if (selectedSlab) {
     const hasFlashcards = selectedSlab.flashcards.length > 0;
     const hasMcqs = selectedSlab.mcqs.length > 0;
+    const effectiveStudyMode =
+      studyMode === 'flashcards' && !hasFlashcards && hasMcqs
+        ? 'mcq'
+        : studyMode === 'mcq' && !hasMcqs && hasFlashcards
+          ? 'flashcards'
+          : studyMode;
 
     const allCards = selectedSlab.flashcards;
     const activeCards = activeCardFilter === 'dont_know'
@@ -335,7 +345,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
                 type="button"
                 onClick={() => setStudyMode('mcq')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer google-btn-press ${
-                  studyMode === 'mcq'
+                  effectiveStudyMode === 'mcq'
                     ? 'bg-white dark:bg-[#202123] text-violet-700 dark:text-[#c58af9] shadow-2xs font-extrabold'
                     : 'text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed]'
                 }`}
@@ -350,7 +360,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
         {/* ================================================================= */}
         {/* FLASHCARDS INTERACTIVE MODE                                       */}
         {/* ================================================================= */}
-        {studyMode === 'flashcards' && hasFlashcards && (
+        {effectiveStudyMode === 'flashcards' && hasFlashcards && (
           <div className="max-w-2xl mx-auto space-y-5 animate-fade-scale">
             {isDeckCompleted ? (
               /* Deck Review Complete Screen */
@@ -630,7 +640,7 @@ export const SlabView: React.FC<SlabViewProps> = ({
         {/* ================================================================= */}
         {/* MCQS PRACTICE QUIZ MODE                                           */}
         {/* ================================================================= */}
-        {studyMode === 'mcq' && hasMcqs && (
+        {effectiveStudyMode === 'mcq' && hasMcqs && (
           <div className="max-w-2xl mx-auto space-y-6 animate-fade-scale">
             {isQuizCompleted ? (
               /* Quiz Completion Summary Card */
