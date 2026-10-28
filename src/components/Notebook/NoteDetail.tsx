@@ -19,7 +19,6 @@ import {
   Clock,
   FileText,
   ChevronDown,
-  LayoutTemplate,
 } from 'lucide-react';
 import { ModalPortal } from '../ModalPortal';
 import type { NoteItem, NoteSource } from '../../types/notebook';
@@ -57,7 +56,6 @@ export const NoteDetail: React.FC<NoteDetailProps> = ({
   const [viewMode, setViewMode] = useState<'write' | 'split' | 'preview'>('write');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isIconPickerOpen, setIsIconPickerOpen] = useState(false);
-  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [showSourcesPanel, setShowSourcesPanel] = useState(false);
 
   // Debounce timer refs
@@ -297,74 +295,6 @@ export const NoteDetail: React.FC<NoteDetailProps> = ({
     }, 0);
   };
 
-  // Insert Notion-style templates
-  const handleInsertTemplate = (templateType: 'cornell' | 'lecture' | 'exam' | 'analysis') => {
-    setIsTemplatesOpen(false);
-    let templateText = '';
-
-    if (templateType === 'lecture') {
-      templateText = `\n\n## 🎯 Key Objectives
-- [ ] Understand the primary thesis & core definitions
-- [ ] Master formula derivations and boundary conditions
-
-## 📝 Main Lecture Notes
-### 1. Fundamental Principles
-Enter main points, theorems, and explanations here...
-
-### 2. Equations & Formulas
-$$\\text{Formula} = \\text{Variable}_1 \\times \\text{Variable}_2$$
-
-## 💡 Key Takeaway
-> 💡 **Core Insight**: Write your 1-2 sentence core conclusion here.
-
-## 📌 Review Questions
-- What are the assumptions behind this model?
-- How does changing the key parameter alter the final outcome?`;
-    } else if (templateType === 'cornell') {
-      templateText = `\n\n## ⚖️ Cornell Notes Structure
-### Cues & Keywords
-- **Topic Keyword 1**: Core definition or prompt
-- **Formula Name**: Relevant relationship
-
-### Notes & Derivations
-- Detailed explanation of mechanism...
-- Step-by-step problem breakdown:
-  1. Identify given variables
-  2. Set up boundary equation
-  3. Solve for target output
-
-## 💡 Summary (In your own words)
-> 💡 Write a concise 3-4 sentence summary synthesizing this lecture.`;
-    } else if (templateType === 'exam') {
-      templateText = `\n\n## 📈 High-Yield Exam Review & Formula Sheet
-### 1. Essential Formulas
-$$\\text{Equation 1}: x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
-
-### 2. High-Frequency Exam Traps
-> ⚠️ **Common Trap**: Make sure units are consistently converted before substituting into equations.
-
-### 3. Study Checklist
-- [ ] Concept definitions memorized
-- [ ] Formula derivations practiced
-- [ ] Practice MCQs completed with Slate AI
-- [ ] 3 past exam problem sets solved`;
-    } else if (templateType === 'analysis') {
-      templateText = `\n\n## 📊 Analytical & Case Breakdown
-### 1. Market / System Dynamics
-- **Baseline State**: Equilibrium condition $Q_d = Q_s$
-- **Distortion / Intervention**: External shocks, taxes, subsidies, or constraints
-
-### 2. Mathematical Impact
-$$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
-
-### 3. Policy & Real-World Implication
-> 💡 **Takeaway**: Evaluates trade-offs between equity and economic efficiency.`;
-    }
-
-    const next = content + templateText;
-    handleContentChange(next);
-  };
-
   // Update sources
   const handleUpdateSources = (sources: NoteSource[]) => {
     onUpdateNote({
@@ -534,18 +464,6 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
               {readingTime} min read
             </span>
           </div>
-
-          {/* Property 4: Slate AI Prompt Quick Chip */}
-          {onOpenSlateAi && currentClass && (
-            <button
-              type="button"
-              onClick={() => onOpenSlateAi(`Look at my ${currentClass.name} notes and create a mcq`)}
-              className="text-[11px] text-blue-600 dark:text-[#8ab4f8] hover:text-blue-800 dark:hover:text-blue-300 font-semibold hover:underline flex items-center gap-1 ml-auto cursor-pointer"
-            >
-              <img src="/gemini-icon.png" alt="Gemini" className="w-3 h-3 object-contain" />
-              Create MCQs for {currentClass.name}
-            </button>
-          )}
         </div>
 
         {/* Collapsible Class & Note File Uploads Panel */}
@@ -716,56 +634,6 @@ $$\\text{Efficiency Loss} = \\frac{1}{2} \\times \\Delta P \\times \\Delta Q$$
                 </button>
               </div>
             )}
-
-            {/* Right Toolbar: Notion Templates Dropdown */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsTemplatesOpen(!isTemplatesOpen)}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-[#e8eaed] hover:bg-slate-200/70 dark:hover:bg-[#202123] rounded-md transition-colors cursor-pointer google-btn-press"
-              >
-                <LayoutTemplate className="w-3.5 h-3.5 text-blue-600 dark:text-[#8ab4f8]" />
-                <span className="hidden sm:inline">Templates</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-
-              {isTemplatesOpen && (
-                <div className="absolute right-0 top-8 z-30 w-56 p-1.5 bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-xl shadow-xl space-y-1 animate-in zoom-in-95 duration-150">
-                  <button
-                    type="button"
-                    onClick={() => handleInsertTemplate('lecture')}
-                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#202123] rounded-lg text-xs transition-colors cursor-pointer"
-                  >
-                    <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📚 Lecture Notes</div>
-                    <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Objectives, notes & key takeaways</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInsertTemplate('cornell')}
-                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#202123] rounded-lg text-xs transition-colors cursor-pointer"
-                  >
-                    <div className="font-bold text-slate-800 dark:text-[#e8eaed]">⚖️ Cornell Method</div>
-                    <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Cues, derivations & summary</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInsertTemplate('exam')}
-                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#202123] rounded-lg text-xs transition-colors cursor-pointer"
-                  >
-                    <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📈 Exam Prep & Formulas</div>
-                    <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Formulas, common traps & checklist</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleInsertTemplate('analysis')}
-                    className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-[#202123] rounded-lg text-xs transition-colors cursor-pointer"
-                  >
-                    <div className="font-bold text-slate-800 dark:text-[#e8eaed]">📊 Analytical & Case Notes</div>
-                    <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Market dynamics & equations</div>
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Editor Canvas: Write, Split, or Preview */}

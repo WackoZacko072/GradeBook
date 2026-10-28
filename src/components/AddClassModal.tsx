@@ -10,18 +10,6 @@ interface AddClassModalProps {
   onAddClass: (newClass: ClassItem) => void;
 }
 
-const PRESET_CLASSES = [
-  'Pre-Calculus 12',
-  'Economics 12',
-  'Physics 12',
-  'AP Chemistry',
-  'English Literature 12',
-  'World History',
-  'Computer Science',
-  'Biology 12',
-  'Psychology',
-];
-
 interface DraftCategory {
   id: string;
   name: string;
@@ -35,103 +23,49 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
 }) => {
   const [className, setClassName] = useState('');
   const [credits, setCredits] = useState<number>(3);
-  const [template, setTemplate] = useState<'standard' | 'simple' | 'custom' | 'empty'>('standard');
-  const [customCategories, setCustomCategories] = useState<DraftCategory[]>([
-    { id: '1', name: 'Tests', weight: 40 },
-    { id: '2', name: 'Assignments', weight: 30 },
-    { id: '3', name: 'Quizzes', weight: 30 },
-  ]);
+  const [categories, setCategories] = useState<DraftCategory[]>([]);
 
   if (!isOpen) return null;
 
-  const customTotal = roundTo(
-    customCategories.reduce((acc, c) => acc + (Number(c.weight) || 0), 0),
+  const totalWeight = roundTo(
+    categories.reduce((acc, c) => acc + (Number(c.weight) || 0), 0),
     2
   );
-  const isCustomValid = Math.abs(customTotal - 100) < 0.001;
+  const isCategoriesValid = categories.length === 0 || Math.abs(totalWeight - 100) < 0.001;
 
-  const handleAddCustomCategory = () => {
-    const remaining = Math.max(0, roundTo(100 - customTotal, 2));
-    setCustomCategories((prev) => [
+  const handleAddCategory = () => {
+    const remaining = Math.max(0, roundTo(100 - totalWeight, 2));
+    setCategories((prev) => [
       ...prev,
       {
         id: 'draft_' + Math.random().toString(36).substring(2, 9),
-        name: `Category ${prev.length + 1}`,
+        name: '',
         weight: remaining,
       },
     ]);
   };
 
-  const handleUpdateCustomCategory = (id: string, updates: Partial<DraftCategory>) => {
-    setCustomCategories((prev) =>
+  const handleUpdateCategory = (id: string, updates: Partial<DraftCategory>) => {
+    setCategories((prev) =>
       prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
     );
   };
 
-  const handleDeleteCustomCategory = (id: string) => {
-    setCustomCategories((prev) => prev.filter((c) => c.id !== id));
+  const handleDeleteCategory = (id: string) => {
+    setCategories((prev) => prev.filter((c) => c.id !== id));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = className.trim();
-    if (!trimmed) return;
+    if (!trimmed || !isCategoriesValid) return;
 
-    let initialCategories: Category[] = [];
-
-    if (template === 'standard') {
-      initialCategories = [
-        {
-          id: 'cat_' + Math.random().toString(36).substring(2, 9),
-          name: 'Tests',
-          weight: 40,
-          assessments: [],
-        },
-        {
-          id: 'cat_' + Math.random().toString(36).substring(2, 9),
-          name: 'Assignments',
-          weight: 30,
-          assessments: [],
-        },
-        {
-          id: 'cat_' + Math.random().toString(36).substring(2, 9),
-          name: 'Quizzes',
-          weight: 15,
-          assessments: [],
-        },
-        {
-          id: 'cat_' + Math.random().toString(36).substring(2, 9),
-          name: 'Final Exam',
-          weight: 15,
-          assessments: [],
-        },
-      ];
-    } else if (template === 'simple') {
-      initialCategories = [
-        {
-          id: 'cat_' + Math.random().toString(36).substring(2, 9),
-          name: 'Coursework',
-          weight: 70,
-          assessments: [],
-        },
-        {
-          id: 'cat_' + Math.random().toString(36).substring(2, 9),
-          name: 'Exams',
-          weight: 30,
-          assessments: [],
-        },
-      ];
-    } else if (template === 'custom') {
-      if (!isCustomValid) return;
-      initialCategories = customCategories.map((c) => ({
-        id: 'cat_' + Math.random().toString(36).substring(2, 9),
-        name: c.name.trim() || 'Category',
-        weight: Number(c.weight) || 0,
-        assessments: [],
-      }));
-    } else if (template === 'empty') {
-      initialCategories = [];
-    }
+    const initialCategories: Category[] = categories.map((c, idx) => ({
+      id: 'cat_' + Math.random().toString(36).substring(2, 9),
+      name: c.name.trim() || `Category ${idx + 1}`,
+      weight: Number(c.weight) || 0,
+      assessments: [],
+    }));
 
     const newClass: ClassItem = {
       id: 'class_' + Math.random().toString(36).substring(2, 9),
@@ -144,11 +78,11 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
 
     onAddClass(newClass);
     setClassName('');
-    setTemplate('standard');
+    setCategories([]);
     onClose();
   };
 
-  const isFormValid = className.trim().length > 0 && (template !== 'custom' || isCustomValid);
+  const isFormValid = className.trim().length > 0 && isCategoriesValid;
 
   return (
     <ModalPortal
@@ -216,127 +150,38 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <span className="block text-xs font-semibold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider mb-2">
-              Quick Course Suggestions
-            </span>
-            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
-              {PRESET_CLASSES.map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => setClassName(preset)}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-100 dark:bg-[#131314] hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-[#8ab4f8] text-slate-600 dark:text-[#c4c7c5] transition-colors cursor-pointer google-btn-press"
-                >
-                  {preset}
-                </button>
-              ))}
+          {/* Grading Categories Setup */}
+          <div className="p-4 bg-slate-50 dark:bg-[#0f0f10] rounded-xl border border-slate-200 dark:border-[#26282a] space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider">
+                Grading Categories
+              </span>
+              {categories.length > 0 && (
+                <span className={`text-xs font-bold ${isCategoriesValid ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                  Total: {totalWeight.toFixed(1)}% {isCategoriesValid ? '✓ (100%)' : '⚠️ (Must = 100%)'}
+                </span>
+              )}
             </div>
-          </div>
 
-          <div>
-            <span className="block text-xs font-semibold text-slate-700 dark:text-[#e8eaed] uppercase tracking-wider mb-2">
-              Initial Category Setup
-            </span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button
-                type="button"
-                onClick={() => setTemplate('standard')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
-                  template === 'standard'
-                    ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
-                    : 'border-slate-200 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#0f0f10]'
-                }`}
-              >
-                <div className="text-xs font-semibold text-slate-900 dark:text-[#e8eaed]">
-                  Standard
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1 leading-tight">
-                  40% / 30% / 15% / 15%
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTemplate('simple')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
-                  template === 'simple'
-                    ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
-                    : 'border-slate-200 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#0f0f10]'
-                }`}
-              >
-                <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
-                  Simple
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1 leading-tight">
-                  70% / 30%
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTemplate('custom')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
-                  template === 'custom'
-                    ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
-                    : 'border-slate-200 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#0f0f10]'
-                }`}
-              >
-                <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
-                  Custom
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1 leading-tight">
-                  Set own weights
-                </p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTemplate('empty')}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer google-btn-press ${
-                  template === 'empty'
-                    ? 'border-blue-600 dark:border-[#8ab4f8] bg-blue-50/50 dark:bg-blue-950/40 ring-1 ring-blue-600 dark:ring-[#8ab4f8]'
-                    : 'border-slate-200 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#5f6368] bg-white dark:bg-[#0f0f10]'
-                }`}
-              >
-                <div className="text-xs font-bold text-slate-900 dark:text-[#e8eaed]">
-                  Blank
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-1 leading-tight">
-                  Start from scratch
-                </p>
-              </button>
-            </div>
-          </div>
-
-          {/* Custom Categories Setup when template === 'custom' */}
-          {template === 'custom' && (
-            <div className="p-4 bg-slate-50 dark:bg-[#0f0f10] rounded-xl border border-slate-200 dark:border-[#26282a] space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700 dark:text-[#e8eaed]">Custom Categories</span>
-                <span className={`text-xs font-bold ${isCustomValid ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                  Total: {customTotal.toFixed(1)}% {isCustomValid ? '✓ (100%)' : '⚠️ (Must = 100%)'}
+            {!isCategoriesValid && (
+              <div className="p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-lg text-rose-700 dark:text-rose-300 text-xs flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>
+                  Category weights must total exactly 100% (currently {totalWeight.toFixed(1)}% —{' '}
+                  {totalWeight > 100 ? `${(totalWeight - 100).toFixed(1)}% over` : `${(100 - totalWeight).toFixed(1)}% remaining`}).
                 </span>
               </div>
+            )}
 
-              {!isCustomValid && (
-                <div className="p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-lg text-rose-700 dark:text-rose-300 text-xs flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    Category weights must total exactly 100% (currently {customTotal.toFixed(1)}% —{' '}
-                    {customTotal > 100 ? `${(customTotal - 100).toFixed(1)}% over` : `${(100 - customTotal).toFixed(1)}% remaining`}).
-                  </span>
-                </div>
-              )}
-
+            {categories.length > 0 && (
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {customCategories.map((cat, idx) => (
+                {categories.map((cat, idx) => (
                   <div key={cat.id} className="flex items-center gap-2">
                     <span className="text-xs text-slate-400 dark:text-[#9aa0a6] font-semibold w-4">{idx + 1}.</span>
                     <input
                       type="text"
                       value={cat.name}
-                      onChange={(e) => handleUpdateCustomCategory(cat.id, { name: e.target.value })}
+                      onChange={(e) => handleUpdateCategory(cat.id, { name: e.target.value })}
                       placeholder="Category name"
                       className="flex-1 px-3 py-1.5 text-xs bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
                     />
@@ -347,34 +192,32 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                         max="100"
                         step="any"
                         value={cat.weight}
-                        onChange={(e) => handleUpdateCustomCategory(cat.id, { weight: parseFloat(e.target.value) || 0 })}
+                        onChange={(e) => handleUpdateCategory(cat.id, { weight: parseFloat(e.target.value) || 0 })}
                         className="w-full pr-5 pl-2 py-1.5 text-xs font-bold text-right bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
                       />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-[#9aa0a6] font-bold pointer-events-none">%</span>
                     </div>
-                    {customCategories.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteCustomCategory(cat.id)}
-                        className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-rose-600 dark:hover:text-rose-400 rounded-md google-btn-press"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(cat.id)}
+                      className="p-1.5 text-slate-400 dark:text-[#9aa0a6] hover:text-rose-600 dark:hover:text-rose-400 rounded-md google-btn-press"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 ))}
               </div>
+            )}
 
-              <button
-                type="button"
-                onClick={handleAddCustomCategory}
-                className="w-full py-2 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors flex items-center justify-center gap-1.5 google-btn-press"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Category</span>
-              </button>
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={handleAddCategory}
+              className="w-full py-2 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer google-btn-press"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Category</span>
+            </button>
+          </div>
 
         </div>
 

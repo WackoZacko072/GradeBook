@@ -27,13 +27,6 @@ interface CreateSlabModalProps {
   onCreateSlab: (slab: SlabItem) => void;
 }
 
-const PROMPT_SUGGESTIONS = [
-  'Key concepts, terms, and applications from my sources',
-  'Core definitions, formulas, and fundamental laws',
-  'Challenging questions extending concepts from my files',
-  'Comprehensive exam review with diverse question styles',
-];
-
 const EMPTY_CLASSES: ClassItem[] = [];
 const EMPTY_NOTES: NoteItem[] = [];
 const EMPTY_SOURCES: NoteSource[] = [];
@@ -227,21 +220,6 @@ export const CreateSlabModal: React.FC<CreateSlabModalProps> = ({
             placeholder="e.g. Look at my Biology sources and create flashcards on cellular respiration (or leave blank to cover all key concepts)..."
             className="w-full text-sm sm:text-base p-4 bg-slate-100/70 dark:bg-[#131314] rounded-2xl focus:bg-white dark:focus:bg-[#131314] focus:outline-hidden focus:ring-2 focus:ring-blue-500/50 transition-all text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#5f6368] leading-relaxed shadow-2xs border border-transparent"
           />
-
-          {/* Prompt suggestion chips */}
-          <div className="flex flex-wrap gap-2 mt-2.5">
-            {PROMPT_SUGGESTIONS.map((sug, i) => (
-              <button
-                key={i}
-                type="button"
-                disabled={isGenerating}
-                onClick={() => handlePromptChange(sug)}
-                className="text-xs px-3 py-1.5 bg-slate-100 dark:bg-[#28292a] hover:bg-slate-200 dark:hover:bg-[#333538] text-slate-600 dark:text-[#c4c7c5] hover:text-slate-900 dark:hover:text-white rounded-xl transition-colors cursor-pointer font-medium max-w-full google-btn-press"
-              >
-                {sug}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* 2. Format / Type Selector */}

@@ -237,7 +237,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
             className="w-full py-2.5 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50/80 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px] google-btn-press"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Add New Category</span>
+            <span>Add Category</span>
           </button>
         </div>
 
