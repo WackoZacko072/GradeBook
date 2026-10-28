@@ -347,19 +347,91 @@ function splitIntoBlocks(text: string): Block[] {
  * e.g., "**Formula: $E=mc^2$**" -> "**Formula:** $E=mc^2$"
  * This prevents math delimiters from splitting bold pairs and leaving stray asterisks.
  */
+function replaceBareLatexOutsideMath(segment: string): string {
+  if (!segment) return '';
+
+  // 1. Unwrap plain \text{...} or \mathrm{...} not attached to superscripts/subscripts
+  let s = segment.replace(/\\(?:text|mathrm|mathbf|textit)\{([^}]*)\}(?![_^])/g, '$1');
+
+  // 2. Wrap bare structural LaTeX commands (\frac, \sqrt, \binom, etc.) in $...$ so KaTeX renders them
+  if (/\\(?:frac|sqrt|binom|int|sum|prod|lim|vec|hat|bar|overline)\b|\^\{[^}]+\}|_\{[^}]+\}/.test(s)) {
+    const wordCount = s.replace(/\\[a-zA-Z]+(\{[^}]*\})*/g, '').trim().split(/\s+/).filter(Boolean).length;
+    if (wordCount <= 4) {
+      return `$${s.trim()}$`;
+    }
+    s = s.replace(
+      /((?:[0-9a-zA-Z.]+\s*\\(?:times|cdot)\s*)?(?:\\(?:frac|binom)\{[^}]*\}\{[^}]*\}|\\(?:sqrt|vec|hat|bar|overline)\{[^}]*\}|[0-9a-zA-Z)]+(?:\^\{[^}]+\}|_\{[^}]+\}|\^[0-9+-]+)+)(?:\s*[+\-*/=<>]\s*(?:\\(?:frac|binom)\{[^}]*\}\{[^}]*\}|\\(?:sqrt|vec|hat|bar|overline)\{[^}]*\}|[0-9a-zA-Z.^{}_+-]+))*)/g,
+      (m) => `$${m.trim()}$`
+    );
+  }
+
+  // 3. Replace any remaining standalone bare LaTeX symbols with clean Unicode characters
+  s = s
+    .replace(/\\times\b/g, '×')
+    .replace(/\\cdot\b/g, '·')
+    .replace(/\\div\b/g, '÷')
+    .replace(/\\pm\b/g, '±')
+    .replace(/\\mp\b/g, '∓')
+    .replace(/\\le(?:q)?\b/g, '≤')
+    .replace(/\\ge(?:q)?\b/g, '≥')
+    .replace(/\\ne(?:q)?\b/g, '≠')
+    .replace(/\\approx\b/g, '≈')
+    .replace(/\\equiv\b/g, '≡')
+    .replace(/\\propto\b/g, '∝')
+    .replace(/\\infty\b/g, '∞')
+    .replace(/\\(?:rightarrow|to)\b/g, '→')
+    .replace(/\\leftarrow\b/g, '←')
+    .replace(/\\(?:leftrightarrow|rightleftharpoons)\b/g, '⇌')
+    .replace(/\\Rightarrow\b/g, '⇒')
+    .replace(/\\Delta\b/g, 'Δ')
+    .replace(/\\alpha\b/g, 'α')
+    .replace(/\\beta\b/g, 'β')
+    .replace(/\\gamma\b/g, 'γ')
+    .replace(/\\delta\b/g, 'δ')
+    .replace(/\\(?:epsilon|varepsilon)\b/g, 'ε')
+    .replace(/\\theta\b/g, 'θ')
+    .replace(/\\lambda\b/g, 'λ')
+    .replace(/\\mu\b/g, 'μ')
+    .replace(/\\nu\b/g, 'ν')
+    .replace(/\\pi\b/g, 'π')
+    .replace(/\\rho\b/g, 'ρ')
+    .replace(/\\sigma\b/g, 'σ')
+    .replace(/\\tau\b/g, 'τ')
+    .replace(/\\(?:phi|varphi)\b/g, 'φ')
+    .replace(/\\omega\b/g, 'ω')
+    .replace(/\\Omega\b/g, 'Ω')
+    .replace(/\\degree\b|\^\\circ/g, '°')
+    .replace(/\\%/g, '%');
+
+  return s;
+}
+
 function normalizeMathAsterisks(text: string): string {
   if (!text) return '';
 
-  // 1. Normalize \[ ... \] to $$ ... $$ and \( ... \) to $ ... $
+  // 0. Recover control characters if \frac, \beta, \theta, \text were unescaped in saved JSON
   let normalized = text
-    .replace(/\\\[([\s\S]+?)\\\]/g, '$$$$$1$$$$')
-    .replace(/\\\(([\s\S]+?)\\\)/g, '$$$1$$');
+    .replace(/\f(rac|orall|lat|box)/g, '\\f$1')
+    .replace(/[\b](eta|inom|oxed|ar|egin|f|ig|m|mod|owtie|ullet)/g, '\\b$1')
+    .replace(/\t(heta|imes|ext|o|an|au|riangle|ilde|op|frac)/g, '\\t$1');
+
+  // 1. Normalize \[ ... \] to $$ ... $$ and \( ... \) to $ ... $
+  normalized = normalized
+    .replace(/\\\[([\s\S]+?)\\\]/g, (_m, inner) => `$$${inner.trim()}$$`)
+    .replace(/\\\(([\s\S]+?)\\\)/g, (_m, inner) => `$${inner.trim()}$`);
 
   // 2. Normalize double-escaped commands like \\frac -> \frac
   normalized = normalized.replace(/\\\\([a-zA-Z]+)/g, '\\$1');
 
   // 3. Normalize spaced math like $ x $ -> $x$
-  normalized = normalized.replace(/\$\s+([^$\n]+?)\s+\$/g, '$$$1$$');
+  normalized = normalized.replace(/\$(?!\$)\s*([^$\n]+?)\s*\$(?!\$)/g, (_m, inner) => `$${inner.trim()}$`);
+
+  // 3b. Convert any bare LaTeX commands outside $...$ blocks so raw LaTeX is never displayed
+  const mathSplitRegex = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g;
+  const segments = normalized.split(mathSplitRegex);
+  normalized = segments
+    .map((seg) => (seg.startsWith('$') && seg.endsWith('$') ? seg : replaceBareLatexOutsideMath(seg)))
+    .join('');
 
   // 4. Bold wrapping math: **prefix $math$ suffix**
   normalized = normalized.replace(

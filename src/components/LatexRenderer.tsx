@@ -92,9 +92,9 @@ export function parseLatexAndText(rawText: string): ParsedSegment[] {
   // Regex pattern matching:
   // 1. $$ ... $$ (display math)
   // 2. \[ ... \] (display math)
-  // 3. $ ... $ (inline math - excluding currency like $100)
+  // 3. $ ... $ (inline math - tolerant of inner whitespace)
   // 4. \( ... \) (inline math)
-  const mathRegex = /(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|(?<!\\)\$(?!\s)(.+?)(?<!\s)\$|\\\([\s\S]+?\\\))/g;
+  const mathRegex = /(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|(?<!\\)\$[^$\n]+?\$|\\\([\s\S]+?\\\))/g;
 
   let lastIndex = 0;
   let match: RegExpExecArray | null;

@@ -221,9 +221,10 @@ function repairJsonLatexEscapes(rawJson: string): string {
   const DOUBLE_BS_TOKEN = '__DBL_BS_PLACEHOLDER__';
   let s = rawJson.replace(/\\\\/g, DOUBLE_BS_TOKEN);
 
-  // Escape common LaTeX commands that start with valid JSON escape letters (b, f, n, r, t)
+  // Escape LaTeX commands that start with valid JSON escape letters (b, f, n, r, t, u)
+  // before JSON.parse can turn \f, \b, \t, \n, \r into ASCII control characters!
   s = s.replace(
-    /\\(frac|forall|flat|fbox|beta|binom|boxed|bar|begin|bf|Big|big|bigl|bigr|theta|times|text|textbf|textit|textrm|texttt|to|tan|tau|triangle|tilde|top|neq|nu|nabla|notin|ni|natural|neg|rho|rightarrow|Rightarrow|right|rangle|rceil|rfloor)\b/g,
+    /\\(frac|forall|flat|fbox|beta|binom|boxed|bar|begin|bf|Big|big|bigl|bigr|bm|bmod|bowtie|bullet|theta|times|text|textbf|textit|textrm|texttt|to|tan|tau|triangle|tilde|top|tfrac|neq|ne|nu|nabla|notin|ni|natural|neg|nmid|nparallel|nsim|nsubseteq|rho|rightarrow|Rightarrow|right|rangle|rceil|rfloor|rbrace|rbrack|Re|rightleftharpoons|underline|uparrow|Uparrow|updownarrow|upsilon|Upsilon)\b/g,
     DOUBLE_BS_TOKEN + '$1'
   );
 
@@ -249,7 +250,9 @@ function extractJsonObject(raw: string): any {
   }
 
   const tryParseObject = (candidateStr: string): any => {
-    for (const attempt of [candidateStr, repairJsonLatexEscapes(candidateStr)]) {
+    // IMPORTANT: Try repairJsonLatexEscapes FIRST so single-backslash \frac, \times, \text, \theta, \beta, \neq
+    // are not silently turned into control characters (\f, \t, \b, \n, \r) by JSON.parse!
+    for (const attempt of [repairJsonLatexEscapes(candidateStr), candidateStr]) {
       try {
         const parsed = JSON.parse(attempt);
         if (Array.isArray(parsed)) {
@@ -323,19 +326,46 @@ export interface GenerateSlabOptions {
 
 function sanitizeLatexString(text: string): string {
   if (!text) return '';
-  return (
-    text
-      // Recover control characters if \frac, \beta, \theta, \text were ever unescaped in JSON
-      .replace(/\f(rac|orall|lat|box)/g, '\\f$1')
-      .replace(/[\b](eta|inom|oxed|ar|egin|f|ig)/g, '\\b$1')
-      .replace(/\t(heta|imes|ext|o|an|au|riangle|ilde|op)/g, '\\t$1')
-      .replace(/\\\\([a-zA-Z]+)/g, '\\$1')
-      .replace(/\\\[/g, '$$')
-      .replace(/\\\]/g, '$$')
-      .replace(/\\\(/g, '$')
-      .replace(/\\\)/g, '$')
-      .replace(/\$\s+([^$\n]+?)\s+\$/g, '$$1$')
-  );
+  let s = text
+    // Recover control characters if \frac, \beta, \theta, \text, \neq, \right were ever unescaped in JSON
+    .replace(/\f(rac|orall|lat|box)/g, '\\f$1')
+    .replace(/[\b](eta|inom|oxed|ar|egin|f|ig|m|mod|owtie|ullet)/g, '\\b$1')
+    .replace(/\t(heta|imes|ext|o|an|au|riangle|ilde|op|frac)/g, '\\t$1')
+    .replace(/\n(eq|e\b|u\b|abla|otin|i\b|atural|eg\b)/g, '\\n$1')
+    .replace(/\r(ho\b|ightarrow|ight|angle|ceil|floor|brace|brack|e\b)/g, '\\r$1')
+    // Collapse double-escaped backslashes before LaTeX commands: \\frac -> \frac
+    .replace(/\\\\([a-zA-Z]+)/g, '\\$1')
+    // Normalize display and inline math delimiters using callbacks so '$' is never misinterpreted by JS replace
+    .replace(/\\\[/g, () => '$$')
+    .replace(/\\\]/g, () => '$$')
+    .replace(/\\\(/g, () => '$')
+    .replace(/\\\)/g, () => '$')
+    // Trim spaces inside inline math ($ x + 1 $ -> $x + 1$)
+    .replace(/\$(?!\$)\s*([^$\n]+?)\s*\$(?!\$)/g, (_m, inner) => `$${inner.trim()}$`);
+
+  // If the entire string has no '$' delimiters at all, check if it contains bare LaTeX commands
+  if (!s.includes('$')) {
+    // Unwrap standalone \text{...} or \mathrm{...} when not part of a math expression
+    s = s.replace(/\\(?:text|mathrm|mathbf|textit)\{([^}]*)\}(?![_^])/g, '$1');
+
+    // If it still has structural LaTeX commands (\frac, \sqrt, \int, \sum, \binom, _{...}, ^{...}),
+    // wrap bare LaTeX segments so KaTeX renders them properly
+    if (/\\(?:frac|sqrt|binom|int|sum|prod|lim|vec|hat|bar|overline)\b|\^\{[^}]+\}|_\{[^}]+\}/.test(s)) {
+      // If the whole string looks like a standalone math expression/option (e.g. "\frac{1}{2}mv^2" or "3.0 \times 10^8")
+      const wordCount = s.replace(/\\[a-zA-Z]+(\{[^}]*\})*/g, '').trim().split(/\s+/).filter(Boolean).length;
+      if (wordCount <= 4) {
+        s = `$${s.trim()}$`;
+      } else {
+        // Wrap individual bare LaTeX command expressions inline
+        s = s.replace(
+          /((?:[0-9a-zA-Z.]+\s*\\(?:times|cdot)\s*)?(?:\\(?:frac|binom)\{[^}]*\}\{[^}]*\}|\\(?:sqrt|vec|hat|bar|overline)\{[^}]*\}|[0-9a-zA-Z)]+(?:\^\{[^}]+\}|_\{[^}]+\}|\^[0-9+-]+)+)(?:\s*[+\-*/=<>]\s*(?:\\(?:frac|binom)\{[^}]*\}\{[^}]*\}|\\(?:sqrt|vec|hat|bar|overline)\{[^}]*\}|[0-9a-zA-Z.^{}_+-]+))*)/g,
+          (m) => `$${m.trim()}$`
+        );
+      }
+    }
+  }
+
+  return s;
 }
 
 function buildDifficultyInstruction(difficulty: 'easy' | 'medium' | 'hard'): string {
@@ -382,9 +412,11 @@ Generate a high-yield study set grounded in the student's materials that strictl
 
 ${difficultyInstruction}
 ${avoidClause}
-CANADIAN ENGLISH & NOTATION:
+CANADIAN ENGLISH, CONCRETE NUMBERS & CLEAN NOTATION:
 - Use Canadian English spelling (e.g., colour, behaviour, centre, analyse).
-- Format mathematical and scientific formulas using inline LaTeX ($...$). Escape backslashes in JSON strings (e.g., "\\\\frac{a}{b}").
+- USE ACTUAL NUMBERS IN MCQs: For any quantitative, math, science, or problem-solving MCQ, give concrete numerical values in the question and compute the ACTUAL final numerical answers for the 4 options (e.g., "14.7 m/s", "240 J", "0.125 mol/L", "37.5%") instead of leaving options as raw symbolic LaTeX formulas.
+- DO NOT OUTPUT RAW LATEX CODE: Never output bare LaTeX commands like \\frac, \\text, \\times, \\cdot, \\Delta, or \\sqrt as raw text. For numbers, units, and simple expressions, write clean readable text and Unicode symbols (e.g., "25 m/s", "3.0 × 10⁸ m/s", "ΔH = -285 kJ/mol", "x² + 2x + 1").
+- If a complex multi-term equation requires LaTeX rendering, wrap it in single dollar signs ($...$) with no spaces inside the dollar signs, and double-escape backslashes in JSON (e.g., "$\\\\frac{a}{b}$").
 
 JSON SCHEMA:
 Return ONLY a valid JSON object matching this schema:
