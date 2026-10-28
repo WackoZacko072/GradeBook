@@ -587,9 +587,12 @@ export const Header: React.FC<HeaderProps> = ({
                         className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                          <svg viewBox="0 0 48 48" className="w-9 h-9">
-                            <path fill="#4caf50" d="M45,16.2l-5,2.75v18.05c0,1.66-1.34,3-3,3h-5V23.5L24,29.8l-8,-6.3V40H11c-1.66,0-3-1.34-3-3V18.95l-5-2.75C1.84,15.54,1,16.38,1,17.5v21.5c0,3.31,2.69,6,6,6h34c3.31,0,6-2.69,6-6V17.5C47,16.38,46.16,15.54,45,16.2z"/>
-                            <path fill="#f44336" d="M41,10.5v8.45l-17,11.9l-17,-11.9V10.5c0,-1.66,1.34,-3,3,-3h28C39.66,7.5,41,8.84,41,10.5z"/>
+                          <svg viewBox="52 42 88 66" className="w-9 h-9">
+                            <path fill="#4285f4" d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6" />
+                            <path fill="#34a853" d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15" />
+                            <path fill="#fbbc04" d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2" />
+                            <path fill="#ea4335" d="M72 74V48l24 18 24-18v26L96 92" />
+                            <path fill="#c5221f" d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2" />
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -606,8 +609,11 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 48 48" className="w-9 h-9">
-                            <rect x="4" y="11" width="40" height="26" rx="8" fill="#ff0000"/>
-                            <path d="M20 18l11 6-11 6v-12z" fill="#ffffff"/>
+                            <path
+                              fill="#FF0000"
+                              d="M43.2 13.9c-.46-1.73-1.82-3.09-3.55-3.55C36.52 9.5 24 9.5 24 9.5s-12.52 0-15.65.85c-1.73.46-3.09 1.82-3.55 3.55C4 17.03 4 24 4 24s0 6.97.8 10.1c.46 1.73 1.82 3.09 3.55 3.55 3.13.85 15.65.85 15.65.85s12.52 0 15.65-.85c1.73-.46 3.09-1.82 3.55-3.55.8-3.13.8-10.1.8-10.1s0-6.97-.8-10.1z"
+                            />
+                            <path fill="#FFFFFF" d="M20 30.2V17.8L30.8 24 20 30.2z" />
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -639,11 +645,26 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 48 48" className="w-9 h-9">
-                            <path fill="#4285f4" d="M24 4C14.06 4 6 12.06 6 22c0 6.64 3.73 12.42 9.24 15.48L24 44l8.76-6.52C38.27 34.42 42 28.64 42 22 42 12.06 33.94 4 24 4z"/>
-                            <path fill="#34a853" d="M6 22c0 6.64 3.73 12.42 9.24 15.48L24 44V22H6z"/>
-                            <path fill="#fbbc04" d="M24 4v18h18C42 12.06 33.94 4 24 4z"/>
-                            <path fill="#ea4335" d="M24 4C14.06 4 6 12.06 6 22h18V4z"/>
-                            <circle cx="24" cy="18" r="6" fill="#ffffff"/>
+                            <path
+                              fill="#1a73e8"
+                              d="M29.76 6.23A14.88 14.88 0 0 0 24 5c-4.56 0-8.64 2.04-11.38 5.26L21.9 18l7.86-11.77z"
+                            />
+                            <path
+                              fill="#ea4335"
+                              d="M12.62 10.26A14.91 14.91 0 0 0 9 20c0 2.91.58 5.28 1.54 7.4L21.9 18l-9.28-7.74z"
+                            />
+                            <path
+                              fill="#4285f4"
+                              d="M24 14.5a5.5 5.5 0 0 1 5.5 5.5c0 1.35-.49 2.59-1.3 3.55l10.25-12.2A14.94 14.94 0 0 0 29.76 6.23L20.47 17.3A5.48 5.48 0 0 1 24 14.5z"
+                            />
+                            <path
+                              fill="#fbbc04"
+                              d="M24 25.5a5.5 5.5 0 0 1-5.5-5.5c0-1.01.28-1.95.75-2.76L10.54 27.4c1.54 3.4 4.1 6.13 6.73 9.57l10.93-12.97A5.48 5.48 0 0 1 24 25.5z"
+                            />
+                            <path
+                              fill="#34a853"
+                              d="M27.32 39.67c4.94-7.73 11.68-11.24 11.68-19.67 0-2.4-.57-4.66-1.55-6.65L17.27 36.97c1.3 1.71 2.61 3.55 3.65 5.58.78 1.52 1.37 2.45 2.08 2.45s1.3-.93 2.08-2.45c.68-1.33 1.44-2.61 2.24-3.88z"
+                            />
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -680,10 +701,24 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 48 48" className="w-9 h-9">
-                            <rect x="5" y="5" width="38" height="38" rx="10" fill="#1a73e8"/>
-                            <rect x="12" y="3" width="5" height="6" rx="2.5" fill="#ffffff"/>
-                            <rect x="31" y="3" width="5" height="6" rx="2.5" fill="#ffffff"/>
-                            <text x="24" y="33" fill="#ffffff" fontSize="21" fontWeight="bold" fontFamily="'Google Sans', Roboto, sans-serif" textAnchor="middle">31</text>
+                            <path fill="#ffffff" d="M14 14h20v20H14z" />
+                            <path fill="#4285f4" d="M34 6H10a4 4 0 0 0-4 4v24h8V14h20V6z" />
+                            <path fill="#1967d2" d="M34 6h4a4 4 0 0 1 4 4v4h-8V6z" />
+                            <path fill="#fbbc04" d="M34 14h8v20h-8V14z" />
+                            <path fill="#188038" d="M6 34h8v8h-4a4 4 0 0 1-4-4v-4z" />
+                            <path fill="#34a853" d="M14 34h20v8H14v-8z" />
+                            <path fill="#ea4335" d="M34 42v-8h8l-8 8z" />
+                            <text
+                              x="24"
+                              y="29.5"
+                              fill="#1a73e8"
+                              fontSize="15.5"
+                              fontWeight="700"
+                              fontFamily="'Google Sans', Roboto, Arial, sans-serif"
+                              textAnchor="middle"
+                            >
+                              31
+                            </text>
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -700,15 +735,13 @@ export const Header: React.FC<HeaderProps> = ({
                       >
                         <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                           <svg viewBox="0 0 48 48" className="w-9 h-9">
-                            <rect x="18" y="7" width="22" height="22" rx="4" fill="#ea4335" transform="rotate(8 29 18)"/>
-                            <rect x="14" y="9" width="22" height="22" rx="4" fill="#fbbc04" transform="rotate(-6 25 20)"/>
-                            <rect x="16" y="11" width="22" height="22" rx="4" fill="#34a853"/>
-                            <rect x="7" y="13" width="26" height="24" rx="5" fill="#1a73e8"/>
-                            <rect x="11" y="18" width="7" height="6" rx="1.5" fill="#ffffff"/>
-                            <rect x="21" y="18" width="8" height="2" rx="1" fill="#ffffff"/>
-                            <rect x="21" y="22" width="8" height="2" rx="1" fill="#ffffff"/>
-                            <rect x="11" y="27" width="18" height="2" rx="1" fill="#ffffff"/>
-                            <rect x="11" y="31" width="13" height="2" rx="1" fill="#ffffff"/>
+                            <rect x="13" y="6" width="22" height="16" rx="2.5" fill="#0f9d58" />
+                            <rect x="9" y="10.5" width="30" height="20" rx="2.5" fill="#fbbc04" />
+                            <rect x="4" y="15" width="40" height="26" rx="3.5" fill="#4285f4" />
+                            <rect x="9" y="21" width="11" height="14" rx="1.5" fill="#ea4335" />
+                            <rect x="24" y="21" width="15" height="3" rx="1.5" fill="#ffffff" />
+                            <rect x="24" y="26.5" width="15" height="3" rx="1.5" fill="#ffffff" />
+                            <rect x="24" y="32" width="10" height="3" rx="1.5" fill="#ffffff" />
                           </svg>
                         </div>
                         <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -718,7 +751,7 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                   </div>
 
-                  {/* Below Favorites: More Google apps matching media_1793127154024.png */}
+                  {/* Below Favorites: More Google apps */}
                   <div className="grid grid-cols-3 gap-y-2 gap-x-1 pt-1 pb-1">
                     {/* 10. Photos */}
                     <a
@@ -729,10 +762,10 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <path fill="#ea4335" d="M24 4c-5.52 0-10 4.48-10 10v10h10c5.52 0 10-4.48 10-10s-4.48-10-10-10z"/>
-                          <path fill="#fbbc04" d="M44 24c0-5.52-4.48-10-10-10H24v10c0 5.52 4.48 10 10 10s10-4.48 10-10z"/>
-                          <path fill="#34a853" d="M24 44c5.52 0 10-4.48 10-10V24H24c-5.52 0-10 4.48-10 10s4.48 10 10 10z"/>
-                          <path fill="#4285f4" d="M4 24c0 5.52 4.48 10 10 10h10V24c0-5.52-4.48-10-10-10S4 18.48 4 24z"/>
+                          <path fill="#fbbc04" d="M24 5c-5.25 0-9.5 4.25-9.5 9.5S18.75 24 24 24V5z" />
+                          <path fill="#ea4335" d="M43 24c0-5.25-4.25-9.5-9.5-9.5S24 18.75 24 24h19z" />
+                          <path fill="#4285f4" d="M24 43c5.25 0 9.5-4.25 9.5-9.5S29.25 24 24 24v19z" />
+                          <path fill="#34a853" d="M5 24c0 5.25 4.25 9.5 9.5 9.5S24 29.25 24 24H5z" />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -748,10 +781,16 @@ export const Header: React.FC<HeaderProps> = ({
                       className="flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer"
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <rect x="4" y="10" width="24" height="28" rx="8" fill="#ffba00"/>
-                          <path d="M28 19l13-7.5c1.4-.8 3.2.2 3.2 1.8v21.4c0 1.6-1.8 2.6-3.2 1.8L28 29v-10z" fill="#ff9800"/>
-                          <circle cx="12" cy="19" r="2.5" fill="#ffffff" opacity="0.9"/>
+                        <svg viewBox="0 0 87.5 72" className="w-9 h-9">
+                          <path fill="#00832d" d="M49.5 36l8.53 9.75 11.47 7.33 2-17.02-2-16.64-11.69 6.44z" />
+                          <path fill="#0066da" d="M0 51.5V66c0 3.315 2.685 6 6 6h14.5l3-10.96-3-9.54-9.95-3z" />
+                          <path fill="#e94235" d="M20.5 0L0 20.5l10.55 3 9.95-3 2.95-9.41z" />
+                          <path fill="#2684fc" d="M20.5 20.5H0v31h20.5z" />
+                          <path
+                            fill="#00ac47"
+                            d="M82.6 8.68L69.5 19.42v33.66l13.16 10.79c1.97 1.54 4.85.135 4.85-2.37V11c0-2.535-2.945-3.925-4.91-2.32zM49.5 36v15.5h-29V72h43c3.315 0 6-2.685 6-6V53.08z"
+                          />
+                          <path fill="#ffba00" d="M63.5 0h-43v20.5h29V36l20-16.57V6c0-3.315-2.685-6-6-6z" />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -768,10 +807,31 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <rect x="18" y="14" width="24" height="24" rx="7" fill="#80868b"/>
-                          <rect x="6" y="10" width="24" height="24" rx="7" fill="#1a73e8"/>
-                          <text x="18" y="27" fill="#ffffff" fontSize="15" fontWeight="bold" fontFamily="'Google Sans', Roboto, sans-serif" textAnchor="middle">G</text>
-                          <text x="30" y="31" fill="#ffffff" fontSize="13" fontWeight="bold" fontFamily="'Noto Sans', sans-serif" textAnchor="middle">文</text>
+                          <path fill="#d2e3fc" d="M18 12h22a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H24l-6-16V12z" />
+                          <path fill="#174ea6" d="M24 44l5-8h-9l4 8z" />
+                          <path fill="#4285f4" d="M8 4h18l8 32H8a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" />
+                          <text
+                            x="16.5"
+                            y="25.5"
+                            fill="#ffffff"
+                            fontSize="15.5"
+                            fontWeight="700"
+                            fontFamily="'Google Sans', Roboto, Arial, sans-serif"
+                            textAnchor="middle"
+                          >
+                            G
+                          </text>
+                          <text
+                            x="33.5"
+                            y="33.5"
+                            fill="#5f6368"
+                            fontSize="13.5"
+                            fontWeight="700"
+                            fontFamily="'Noto Sans', sans-serif"
+                            textAnchor="middle"
+                          >
+                            文
+                          </text>
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -788,9 +848,22 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <rect x="7" y="7" width="34" height="34" rx="10" fill="#7c8cf8"/>
-                          <rect x="10" y="7" width="31" height="34" rx="10" fill="#5865f2" opacity="0.6"/>
-                          <path d="M21 16l12 8-12 8v-16z" fill="#ffffff"/>
+                          <path
+                            fill="#4285f4"
+                            d="M8.5 5.8C7.9 6.4 7.5 7.4 7.5 8.6v30.8c0 1.2.4 2.2 1 2.8l.15.14L26 24.9v-.4L8.65 5.66 8.5 5.8z"
+                          />
+                          <path
+                            fill="#fbbc04"
+                            d="M31.8 30.7L26 24.9v-.4l5.8-5.8.13.08 6.85 3.9c1.96 1.11 1.96 2.93 0 4.04l-6.85 3.9-.13.08z"
+                          />
+                          <path
+                            fill="#ea4335"
+                            d="M31.93 30.62L26 24.7 8.5 42.2c.65.68 1.71.77 2.91.09l20.52-11.67z"
+                          />
+                          <path
+                            fill="#34a853"
+                            d="M31.93 18.78L11.41 7.11c-1.2-.68-2.26-.59-2.91.09L26 24.7l5.93-5.92z"
+                          />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -807,8 +880,15 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <rect x="6" y="8" width="36" height="32" rx="8" fill="#0f9d58"/>
-                          <path d="M12 24h24M24 14v20" stroke="#ffffff" strokeWidth="3.5" strokeLinecap="round"/>
+                          <path
+                            fill="#0f9d58"
+                            d="M12 4h16l12 12v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z"
+                          />
+                          <path fill="#87ceac" d="M28 4l12 12H31a3 3 0 0 1-3-3V4z" />
+                          <path
+                            fill="#ffffff"
+                            d="M14 21h20v15H14V21zm2.5 2.5v4h6v-4h-6zm8.5 0v4h6.5v-4H25zm-8.5 6.5v4h6v-4h-6zm8.5 0v4h6.5v-4H25z"
+                          />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
@@ -825,10 +905,14 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <svg viewBox="0 0 48 48" className="w-9 h-9">
-                          <path d="M10 6h18l12 12v22a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z" fill="#2684fc"/>
-                          <path d="M28 6v12h12" fill="#80b5fc" opacity="0.7"/>
-                          <rect x="14" y="26" width="16" height="3" rx="1.5" fill="#ffffff"/>
-                          <rect x="14" y="33" width="16" height="3" rx="1.5" fill="#ffffff"/>
+                          <path
+                            fill="#4285f4"
+                            d="M12 4h16l12 12v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z"
+                          />
+                          <path fill="#a0c2f9" d="M28 4l12 12H31a3 3 0 0 1-3-3V4z" />
+                          <rect x="14" y="22" width="20" height="2.6" rx="1.3" fill="#ffffff" />
+                          <rect x="14" y="27.5" width="20" height="2.6" rx="1.3" fill="#ffffff" />
+                          <rect x="14" y="33" width="13" height="2.6" rx="1.3" fill="#ffffff" />
                         </svg>
                       </div>
                       <span className="text-xs text-[#e8eaed] mt-1.5 font-normal truncate">
