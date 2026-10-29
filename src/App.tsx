@@ -32,7 +32,13 @@ import { AddClassModal } from './components/AddClassModal';
 import { TranscriptModal } from './components/TranscriptModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
-import { AiAdvisorDrawer } from './components/AiAdvisorDrawer';
+import {
+  AiAdvisorDrawer,
+  loadInitialSessions,
+  createNewSession,
+  SESSIONS_STORAGE_KEY,
+  type ChatSession,
+} from './components/AiAdvisorDrawer';
 import { subscribeToGradingScale } from './utils/gradeCalculations';
 
 const SLABS_STORAGE_KEY = 'gradeslate_slabs_v1';
@@ -53,17 +59,18 @@ function loadLocalSlabs(): SlabItem[] {
   return [];
 }
 
-const TAB_INDEX_MAP: Record<'gradebook' | 'notebook' | 'slab', number> = {
+const TAB_INDEX_MAP: Record<'gradebook' | 'notebook' | 'slab' | 'gemini', number> = {
   gradebook: 0,
   notebook: 1,
   slab: 2,
+  gemini: 3,
 };
 
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
 
-  // Top level active tab: Gradebook vs Notebook vs Slab
-  const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook' | 'slab'>('gradebook');
+  // Top level active tab: Gradebook vs Notebook vs Slab vs Gemini
+  const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook' | 'slab' | 'gemini'>('gradebook');
   const [slideDirection, setSlideDirection] = useState<'right' | 'left'>('right');
 
   // Gradebook classes state
@@ -104,9 +111,21 @@ export const App: React.FC = () => {
   const [isFirebaseConfigOpen, setIsFirebaseConfigOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
-  // AI Advisor Drawer state
-  const [isAiAdvisorOpen, setIsAiAdvisorOpen] = useState(false);
+  // AI Advisor / Gemini Chat state
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => loadInitialSessions());
+  const [currentChatSessionId, setCurrentChatSessionId] = useState<string>(() => {
+    const initial = loadInitialSessions();
+    return initial[0]?.id || 'default';
+  });
   const [prefilledAdvisorPrompt, setPrefilledAdvisorPrompt] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(chatSessions));
+    } catch {
+      // ignore
+    }
+  }, [chatSessions]);
 
   // Dashboard layout view mode (grid cards vs list rows)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
@@ -135,7 +154,7 @@ export const App: React.FC = () => {
   const mainContentRef = useRef<HTMLElement>(null);
 
   // Handle Tab Switch with Directional Slide Transition
-  const handleTabChange = (nextTab: 'gradebook' | 'notebook' | 'slab') => {
+  const handleTabChange = (nextTab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => {
     if (nextTab === activeTab) return;
     const prevIdx = TAB_INDEX_MAP[activeTab];
     const nextIdx = TAB_INDEX_MAP[nextTab];
@@ -360,7 +379,42 @@ export const App: React.FC = () => {
     if (prompt) {
       setPrefilledAdvisorPrompt(prompt);
     }
-    setIsAiAdvisorOpen(true);
+    setSlideDirection('right');
+    setActiveTab('gemini');
+  };
+
+  const handleCreateChatSession = () => {
+    const current = chatSessions.find((s) => s.id === currentChatSessionId) || chatSessions[0];
+    if (current && current.messages.length === 0) {
+      setCurrentChatSessionId(current.id);
+      setActiveTab('gemini');
+      return;
+    }
+    const fresh = createNewSession();
+    setChatSessions((prev) => [fresh, ...prev]);
+    setCurrentChatSessionId(fresh.id);
+    setActiveTab('gemini');
+  };
+
+  const handleRenameChatSession = (sessionId: string, title: string) => {
+    setChatSessions((prev) =>
+      prev.map((s) => (s.id === sessionId ? { ...s, title, updatedAt: Date.now() } : s))
+    );
+  };
+
+  const handleDeleteChatSession = (sessionId: string) => {
+    setChatSessions((prev) => {
+      const remaining = prev.filter((s) => s.id !== sessionId);
+      if (remaining.length === 0) {
+        const fresh = createNewSession();
+        setCurrentChatSessionId(fresh.id);
+        return [fresh];
+      }
+      if (currentChatSessionId === sessionId) {
+        setCurrentChatSessionId(remaining[0].id);
+      }
+      return remaining;
+    });
   };
 
   return (
@@ -402,9 +456,11 @@ export const App: React.FC = () => {
           notes={notes}
           sources={sources}
           slabs={slabs}
+          chatSessions={chatSessions}
           selectedClassId={selectedClassId}
           selectedNoteId={selectedNoteId}
           selectedSlabId={selectedSlabId}
+          selectedChatSessionId={currentChatSessionId}
           onSelectOverview={() => {
             setSlideDirection('left');
             setActiveTab('gradebook');
@@ -425,6 +481,10 @@ export const App: React.FC = () => {
             setActiveTab('slab');
             setSelectedSlabId(id);
           }}
+          onSelectChatSession={(id) => {
+            setCurrentChatSessionId(id);
+            setActiveTab('gemini');
+          }}
           onOpenAddClass={() => setIsAddModalOpen(true)}
           onCreateNote={() => {
             handleTabChange('notebook');
@@ -434,6 +494,9 @@ export const App: React.FC = () => {
             setActiveTab('slab');
             setSelectedSlabId(null);
           }}
+          onCreateChatSession={handleCreateChatSession}
+          onRenameChatSession={handleRenameChatSession}
+          onDeleteChatSession={handleDeleteChatSession}
           onOpenSlateAi={() => handleOpenAiAdvisor()}
           isMobileOpen={isMobileDrawerOpen}
           onMobileClose={() => setIsMobileDrawerOpen(false)}
@@ -451,7 +514,21 @@ export const App: React.FC = () => {
               key={activeTab + (selectedClassId || '') + (selectedNoteId || '') + (selectedSlabId || '')}
               className={slideDirection === 'right' ? 'animate-slide-right' : 'animate-slide-left'}
             >
-              {activeTab === 'slab' ? (
+              {activeTab === 'gemini' ? (
+                <AiAdvisorDrawer
+                  isOpen={true}
+                  classes={classes}
+                  notes={notes}
+                  sources={sources}
+                  slabs={slabs}
+                  sessions={chatSessions}
+                  currentSessionId={currentChatSessionId}
+                  onUpdateSessions={setChatSessions}
+                  onSelectSession={setCurrentChatSessionId}
+                  initialPrompt={prefilledAdvisorPrompt}
+                  onClearPrefilledPrompt={() => setPrefilledAdvisorPrompt(undefined)}
+                />
+              ) : activeTab === 'slab' ? (
                 <SlabView
                   slabs={slabs}
                   notes={notes}
@@ -552,37 +629,6 @@ export const App: React.FC = () => {
       <FirebaseConfigModal
         isOpen={isFirebaseConfigOpen}
         onClose={() => setIsFirebaseConfigOpen(false)}
-      />
-
-      {/* AI Advisor Drawer */}
-      <AiAdvisorDrawer
-        isOpen={isAiAdvisorOpen}
-        onClose={() => setIsAiAdvisorOpen(false)}
-        classes={classes}
-        notes={notes}
-        sources={sources}
-        slabs={slabs}
-        initialPrompt={prefilledAdvisorPrompt}
-        onNavigate={(tab) => {
-          setSlideDirection('right');
-          setActiveTab(tab);
-          if (tab === 'gradebook') setSelectedClassId(null);
-          if (tab === 'notebook') setSelectedNoteId(null);
-          if (tab === 'slab') setSelectedSlabId(null);
-          setIsAiAdvisorOpen(false);
-        }}
-        onNavigateToClass={(id: string) => {
-          setSlideDirection('right');
-          setActiveTab('gradebook');
-          setSelectedClassId(id);
-          setIsAiAdvisorOpen(false);
-        }}
-        onNavigateToNote={(id: string) => {
-          setSlideDirection('right');
-          setActiveTab('notebook');
-          setSelectedNoteId(id);
-          setIsAiAdvisorOpen(false);
-        }}
       />
     </div>
   );

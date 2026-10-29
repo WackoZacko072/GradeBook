@@ -12,6 +12,7 @@ import {
   Info,
   Sliders,
   AlertTriangle,
+  ChevronDown,
 } from 'lucide-react';
 import type { ClassItem, Category, Assessment } from '../types/grade';
 import {
@@ -647,6 +648,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(category.name);
   const [weightInput, setWeightInput] = useState<string>(String(category.weight));
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   React.useEffect(() => {
     setWeightInput((prev) => {
@@ -666,9 +668,29 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
   return (
     <div className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] shadow-xs overflow-hidden transition-all google-card">
       {/* Category Header */}
-      <div className="p-4 sm:p-5 bg-slate-50/60 dark:bg-[#242526] border-b border-slate-100 dark:border-[#26282a] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div
+        className={`p-4 sm:p-5 bg-slate-50/60 dark:bg-[#242526] ${
+          isCollapsed ? '' : 'border-b border-slate-100 dark:border-[#26282a]'
+        } flex flex-col md:flex-row md:items-center justify-between gap-4`}
+      >
         {/* Name and Reorder */}
         <div className="flex items-center gap-2.5 flex-1 min-w-0 flex-wrap">
+          {/* Collapse / Expand Category Button */}
+          <button
+            type="button"
+            onClick={() => setIsCollapsed((prev) => !prev)}
+            title={isCollapsed ? 'Expand category' : 'Collapse category'}
+            aria-label={isCollapsed ? 'Expand category' : 'Collapse category'}
+            aria-expanded={!isCollapsed}
+            className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/70 dark:hover:bg-[#303134] rounded-lg transition-colors cursor-pointer flex-shrink-0 google-btn-press"
+          >
+            <ChevronDown
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isCollapsed ? '-rotate-90' : 'rotate-0'
+              }`}
+            />
+          </button>
+
           {/* Reorder Buttons */}
           <div className="flex flex-col gap-0.5 text-slate-400 dark:text-[#80868b] flex-shrink-0">
             <button
@@ -810,53 +832,55 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
       </div>
 
       {/* Assessments list inside this category */}
-      <div className="p-4 sm:p-5 space-y-3">
-        {category.assessments.length === 0 ? (
-          <div className="py-6 px-4 bg-slate-50/50 dark:bg-[#242526] rounded-xl text-center border border-dashed border-slate-200 dark:border-[#26282a]">
-            <p className="text-xs font-medium text-slate-500 dark:text-[#9aa0a6]">
-              No assessments in this category yet.
-            </p>
-            <p className="text-[11px] text-blue-600 dark:text-[#8ab4f8] mt-0.5">
-              Category average is automatically 100% until grades are added.
-            </p>
-            <button
-              type="button"
-              onClick={onAddAssessment}
-              className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 google-btn-press"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Add First Assessment
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-2.5">
-            {category.assessments.map((assessment, assIndex) => (
-              <AssessmentRow
-                key={assessment.id}
-                assessment={assessment}
-                assIndex={assIndex}
-                onUpdate={(updates) => onUpdateAssessment(assessment.id, updates)}
-                onDelete={() => onDeleteAssessment(assessment.id)}
-                onReset={() => onResetAssessmentScore(assessment.id)}
-              />
-            ))}
-          </div>
-        )}
+      {!isCollapsed && (
+        <div className="p-4 sm:p-5 space-y-3">
+          {category.assessments.length === 0 ? (
+            <div className="py-6 px-4 bg-slate-50/50 dark:bg-[#242526] rounded-xl text-center border border-dashed border-slate-200 dark:border-[#26282a]">
+              <p className="text-xs font-medium text-slate-500 dark:text-[#9aa0a6]">
+                No assessments in this category yet.
+              </p>
+              <p className="text-[11px] text-blue-600 dark:text-[#8ab4f8] mt-0.5">
+                Category average is automatically 100% until grades are added.
+              </p>
+              <button
+                type="button"
+                onClick={onAddAssessment}
+                className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1.5 google-btn-press"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add First Assessment
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {category.assessments.map((assessment, assIndex) => (
+                <AssessmentRow
+                  key={assessment.id}
+                  assessment={assessment}
+                  assIndex={assIndex}
+                  onUpdate={(updates) => onUpdateAssessment(assessment.id, updates)}
+                  onDelete={() => onDeleteAssessment(assessment.id)}
+                  onReset={() => onResetAssessmentScore(assessment.id)}
+                />
+              ))}
+            </div>
+          )}
 
-        {/* Add Assessment Button */}
-        {category.assessments.length > 0 && (
-          <div className="pt-2 flex justify-start">
-            <button
-              type="button"
-              onClick={onAddAssessment}
-              className="px-3.5 py-2 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] hover:text-blue-700 bg-blue-50/80 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer min-h-[40px] google-btn-press"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Add Assessment to {category.name}</span>
-            </button>
-          </div>
-        )}
-      </div>
+          {/* Add Assessment Button */}
+          {category.assessments.length > 0 && (
+            <div className="pt-2 flex justify-start">
+              <button
+                type="button"
+                onClick={onAddAssessment}
+                className="px-3.5 py-2 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] hover:text-blue-700 bg-blue-50/80 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer min-h-[40px] google-btn-press"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Add Assessment to {category.name}</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -32,8 +32,8 @@ import { calculateClassAverage, getGradingScale } from '../utils/gradeCalculatio
 import type { ClassItem } from '../types/grade';
 
 interface HeaderProps {
-  activeTab: 'gradebook' | 'notebook' | 'slab';
-  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab') => void;
+  activeTab: 'gradebook' | 'notebook' | 'slab' | 'gemini';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => void;
   classes: ClassItem[];
   onSelectClass?: (id: string) => void;
   onSelectOverview?: () => void;
@@ -491,7 +491,7 @@ export const Header: React.FC<HeaderProps> = ({
                       </div>
                     </button>
 
-                    {/* Help item */}
+                    {/* How your grades are calculated */}
                     <button
                       type="button"
                       onClick={() => {
@@ -504,9 +504,9 @@ export const Header: React.FC<HeaderProps> = ({
                         <HelpCircle className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="font-bold">Help & Calculations</div>
+                        <div className="font-bold">How your grades are calculated</div>
                         <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">
-                          How weighted grades and GPAs work
+                          Category weights, empty categories & GPA rules
                         </div>
                       </div>
                     </button>
@@ -1616,9 +1616,9 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <h3 id="help-modal-title" className="font-bold text-base text-slate-900 dark:text-[#e8eaed]" style={{ fontFamily: "'Google Sans', sans-serif" }}>
-                How Grades Are Calculated
+                How Your Grades Are Calculated
               </h3>
-              <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">Official Academic Calculation Rules</p>
+              <p className="text-xs text-slate-500 dark:text-[#9aa0a6]">Calculation Transparency & GPA Rules</p>
             </div>
           </div>
           <button
@@ -1633,25 +1633,25 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className="p-6 space-y-3.5 text-xs text-slate-600 dark:text-[#c4c7c5] max-h-[60vh] overflow-y-auto">
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
-            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">1. Weighted Category Averages</h4>
-            <p className="leading-relaxed">Each category (e.g. Homework 20%, Exams 50%) computes the arithmetic mean of its graded items. Ungraded or blank scores never count as zeros.</p>
+            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">1. Category Average</h4>
+            <p className="leading-relaxed">Each graded assessment within a category contributes equally as a percentage. Ungraded or blank scores are excluded from calculations and never count as zeros.</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
-            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">2. Unstarted / Empty Categories</h4>
-            <p className="leading-relaxed">Empty categories default to 100% contribution so that early in the semester, unfinished categories do not artificially depress your grade.</p>
+            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">2. Empty Categories</h4>
+            <p className="leading-relaxed">A category with no graded assessments automatically counts as 100% for the class average so unfinished categories do not artificially lower your grade.</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
-            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">3. Cumulative GPA Scale</h4>
+            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">3. Weighted Class & Overall Average</h4>
+            <p className="leading-relaxed">A class average is the sum of each category's average multiplied by its percentage weight (category weights must total 100%). Your overall average is calculated with equal weighting across all enrolled classes.</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
+            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">4. Cumulative GPA Scale</h4>
             <p className="leading-relaxed">
               Weighted GPA is calculated using your configured Grading Scale ({getGradingScale().map((s) => `${s.letter} ≥ ${s.minPercentage}% = ${s.gpaPoints.toFixed(1)}`).join(', ')}) weighted by course credit hours.
             </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
-            <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">4. Cloud Synchronization</h4>
-            <p className="leading-relaxed">Sign in with your Google Account anytime to enable real-time device synchronization through Cloud Firestore.</p>
           </div>
         </div>
 

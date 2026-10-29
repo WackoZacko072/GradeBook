@@ -1,35 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Plus,
-  Calculator,
   X,
   BookOpen,
   BookMarked,
   BookCheck,
   FileText,
+  MessageSquare,
+  Edit2,
+  Trash2,
+  Check,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem, NoteSource } from '../types/notebook';
 import type { SlabItem } from '../types/slab';
+import type { ChatSession } from './AiAdvisorDrawer';
 import { calculateClassAverage } from '../utils/gradeCalculations';
 
 interface SidebarProps {
-  activeTab: 'gradebook' | 'notebook' | 'slab';
-  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab') => void;
+  activeTab: 'gradebook' | 'notebook' | 'slab' | 'gemini';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => void;
   classes: ClassItem[];
   notes?: NoteItem[];
   sources?: NoteSource[];
   slabs?: SlabItem[];
+  chatSessions?: ChatSession[];
   selectedClassId: string | null;
   selectedNoteId?: string | null;
   selectedSlabId?: string | null;
+  selectedChatSessionId?: string | null;
   onSelectOverview: () => void;
   onSelectClass: (id: string) => void;
   onSelectNote?: (id: string | null) => void;
   onSelectSlab?: (id: string | null) => void;
+  onSelectChatSession?: (id: string) => void;
   onOpenAddClass: () => void;
   onCreateNote?: () => void;
   onCreateSlab?: () => void;
+  onCreateChatSession?: () => void;
+  onRenameChatSession?: (id: string, title: string) => void;
+  onDeleteChatSession?: (id: string) => void;
   onOpenSlateAi?: () => void;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
@@ -44,24 +54,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
   notes: _notes = [],
   sources = [],
   slabs = [],
+  chatSessions = [],
   selectedClassId,
   selectedNoteId = null,
   selectedSlabId = null,
+  selectedChatSessionId = null,
   onSelectOverview,
   onSelectClass,
   onSelectNote,
   onSelectSlab,
+  onSelectChatSession,
   onOpenAddClass,
   onCreateNote: _onCreateNote,
   onCreateSlab,
+  onCreateChatSession,
+  onRenameChatSession,
+  onDeleteChatSession,
   onOpenSlateAi,
   isMobileOpen = false,
   onMobileClose,
   isCollapsed = false,
   onToggleCollapse: _onToggleCollapse,
 }) => {
+  const [editingChatId, setEditingChatId] = useState<string | null>(null);
+  const [editingChatTitle, setEditingChatTitle] = useState('');
+
+  const handleSaveChatRename = (sessionId: string) => {
+    const trimmed = editingChatTitle.trim();
+    if (trimmed) {
+      onRenameChatSession?.(sessionId, trimmed);
+    }
+    setEditingChatId(null);
+  };
+
   const content = (
-    <div className="flex flex-col justify-between h-full select-none">
+    <div className="flex flex-col h-full select-none">
       <div className="space-y-6">
         {/* Workspace section with Tab Switching */}
         <div>
@@ -128,7 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </button>
 
-            {/* Office Tab Button (renamed from Slab) */}
+            {/* Office Tab Button */}
             <button
               type="button"
               onClick={() => {
@@ -157,29 +184,162 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </button>
 
-            {/* Gemini Quick Action Button (renamed from Slate AI) */}
+            {/* Gemini Tab Button (same format as Gradebook, Notebook, Office) */}
             <button
               type="button"
               onClick={() => {
+                onChangeTab('gemini');
                 onOpenSlateAi?.();
                 onMobileClose?.();
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] group google-btn-press"
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] google-btn-press ${
+                activeTab === 'gemini'
+                  ? 'bg-[#EBF2FE] dark:bg-[#8ab4f8]/15 text-[#2563EB] dark:text-[#8ab4f8] shadow-2xs font-bold'
+                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
+              }`}
             >
               <div className="flex items-center gap-2.5">
                 <img
                   src="/gemini-icon.png"
                   alt="Gemini"
-                  className="w-5 h-5 object-contain flex-shrink-0 group-hover:scale-110 transition-transform duration-200"
+                  className="w-4 h-4 object-contain flex-shrink-0"
                 />
-                <span className="group-hover:text-blue-700 dark:group-hover:text-[#8ab4f8] font-bold">Gemini</span>
+                <span>Gemini</span>
               </div>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
+                  activeTab === 'gemini'
+                    ? 'bg-blue-600 dark:bg-[#8ab4f8] text-white dark:text-[#0f0f10]'
+                    : 'bg-slate-200 dark:bg-[#202123] text-slate-600 dark:text-[#9aa0a6]'
+                }`}
+              >
+                {chatSessions.length}
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Dynamic section: If Office active -> Your Office Sets. If Gradebook active -> Your Classes. If Notebook active -> Your Notes */}
-        {activeTab === 'slab' ? (
+        {/* Dynamic section: matches activeTab with consistent format */}
+        {activeTab === 'gemini' ? (
+          <div>
+            <div className="flex items-center justify-between px-3 mb-2">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider">
+                Your Chats
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onCreateChatSession?.();
+                  onMobileClose?.();
+                }}
+                title="Start New Chat"
+                aria-label="Start New Chat"
+                className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/80 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center google-btn-press"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
+            <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
+              {chatSessions.length === 0 ? (
+                <div className="px-3 py-3 text-center bg-slate-100/60 dark:bg-[#18191b] rounded-xl border border-dashed border-slate-200 dark:border-[#26282a]">
+                  <p className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">No chats yet</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onCreateChatSession?.();
+                      onMobileClose?.();
+                    }}
+                    className="mt-2 text-xs font-bold text-blue-600 dark:text-[#8ab4f8] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> New Chat
+                  </button>
+                </div>
+              ) : (
+                chatSessions.map((session) => {
+                  const isSelected = selectedChatSessionId === session.id;
+                  const isEditing = editingChatId === session.id;
+
+                  return (
+                    <div
+                      key={session.id}
+                      onClick={() => {
+                        if (!isEditing) {
+                          onSelectChatSession?.(session.id);
+                          onMobileClose?.();
+                        }
+                      }}
+                      className={`group w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] google-btn-press ${
+                        isSelected
+                          ? 'bg-white dark:bg-[#202123] text-blue-700 dark:text-[#8ab4f8] font-semibold shadow-2xs border border-slate-200/80 dark:border-[#26282a]'
+                          : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] font-medium'
+                      }`}
+                    >
+                      {isEditing ? (
+                        <div
+                          className="flex items-center gap-1 w-full"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="text"
+                            value={editingChatTitle}
+                            onChange={(e) => setEditingChatTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveChatRename(session.id);
+                              if (e.key === 'Escape') setEditingChatId(null);
+                            }}
+                            onBlur={() => handleSaveChatRename(session.id)}
+                            autoFocus
+                            className="w-full text-xs px-2 py-1 bg-white dark:bg-[#0f0f10] border border-blue-500 rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveChatRename(session.id)}
+                            className="p-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-md cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2.5 truncate pr-2">
+                            <MessageSquare className="w-4 h-4 text-blue-500 dark:text-[#8ab4f8] flex-shrink-0" />
+                            <span className="truncate">{session.title || 'New Chat'}</span>
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingChatId(session.id);
+                                setEditingChatTitle(session.title);
+                              }}
+                              title="Rename chat"
+                              className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] rounded-md transition-opacity cursor-pointer"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteChatSession?.(session.id);
+                              }}
+                              title="Delete chat"
+                              className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-md transition-opacity cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        ) : activeTab === 'slab' ? (
           <div>
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider">
@@ -191,27 +351,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onCreateSlab?.();
                   onMobileClose?.();
                 }}
-                className="p-1 text-violet-600 dark:text-[#c58af9] hover:bg-violet-50 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer google-btn-press"
+                className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/80 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center google-btn-press"
                 title="Create new Office set"
                 aria-label="Create new Office set"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
               {slabs.length === 0 ? (
-                <div className="px-3 py-4 text-center">
-                  <p className="text-xs text-slate-400 dark:text-[#80868b]">No study sets yet.</p>
+                <div className="px-3 py-3 text-center bg-slate-100/60 dark:bg-[#18191b] rounded-xl border border-dashed border-slate-200 dark:border-[#26282a]">
+                  <p className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">No study sets yet</p>
                   <button
                     type="button"
                     onClick={() => {
                       onCreateSlab?.();
                       onMobileClose?.();
                     }}
-                    className="mt-2 text-xs font-bold text-violet-600 dark:text-[#c58af9] hover:underline cursor-pointer"
+                    className="mt-2 text-xs font-bold text-violet-600 dark:text-[#c58af9] hover:underline inline-flex items-center gap-1 cursor-pointer"
                   >
-                    + Create with Gemini
+                    <Plus className="w-3.5 h-3.5" /> Create Set
                   </button>
                 </div>
               ) : (
@@ -353,23 +513,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
       </div>
-
-      {/* Bottom Inspiration Tag */}
-      <div className="pt-4 border-t border-slate-200/60 dark:border-[#26282a] flex items-center gap-2.5 px-2">
-        <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-[#8ab4f8]/15 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0 border border-blue-100 dark:border-[#8ab4f8]/30">
-          <Calculator className="w-4 h-4" />
-        </div>
-        <div className="leading-tight">
-          <div className="text-xs font-bold text-slate-800 dark:text-[#e8eaed]">A little clarity.</div>
-          <div className="text-[11px] text-slate-400 dark:text-[#80868b]">A lot less mental math.</div>
-        </div>
-      </div>
     </div>
   );
 
   // YouTube-style compact mini rail for collapsed desktop mode
   const collapsedRail = (
-    <div className="flex flex-col items-center justify-between h-full py-2 select-none">
+    <div className="flex flex-col items-center h-full py-2 select-none">
       <div className="flex flex-col items-center gap-2 w-full">
         {/* 1. Gradebook */}
         <button
@@ -425,6 +574,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span className="text-[10px] tracking-tight">Office</span>
         </button>
 
+        {/* 4. Gemini */}
+        <button
+          type="button"
+          onClick={() => {
+            onChangeTab('gemini');
+            onOpenSlateAi?.();
+          }}
+          title={`Gemini (${chatSessions.length} chats)`}
+          className={`w-14 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer google-btn-press ${
+            activeTab === 'gemini'
+              ? 'bg-[#EBF2FE] dark:bg-[#8ab4f8]/20 text-[#2563EB] dark:text-[#8ab4f8] font-bold shadow-2xs'
+              : 'text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
+          }`}
+        >
+          <img src="/gemini-icon.png" alt="Gemini" className="w-5 h-5 object-contain" />
+          <span className="text-[10px] tracking-tight">Gemini</span>
+        </button>
+
         {/* Add Class Quick Action */}
         <button
           type="button"
@@ -434,11 +601,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <Plus className="w-5 h-5 stroke-[2.5]" />
         </button>
-      </div>
-
-      {/* Bottom Calculator Icon */}
-      <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#202123] text-slate-500 dark:text-[#9aa0a6] flex items-center justify-center">
-        <Calculator className="w-4 h-4" />
       </div>
     </div>
   );

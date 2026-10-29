@@ -2,8 +2,8 @@ import React from 'react';
 import { BookOpen, BookMarked, BookCheck } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  activeTab: 'gradebook' | 'notebook' | 'slab';
-  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab') => void;
+  activeTab: 'gradebook' | 'notebook' | 'slab' | 'gemini';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => void;
   selectedClassId: string | null;
   classCount?: number;
   noteCount?: number;
@@ -128,10 +128,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       {/* 4. Gemini Tab */}
       <button
         type="button"
-        onClick={onOpenAiAdvisor}
+        onClick={() => {
+          onChangeTab('gemini');
+          onOpenAiAdvisor();
+        }}
         className="flex flex-col items-center justify-center flex-1 cursor-pointer transition-all group"
       >
-        <div className="w-14 h-8 rounded-full flex items-center justify-center text-slate-600 dark:text-[#9aa0a6] hover:bg-slate-200/50 dark:hover:bg-white/5 transition-all">
+        <div
+          className={`w-14 h-8 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'gemini'
+              ? 'bg-[#c2e7ff] dark:bg-[#004a77] text-[#001d35] dark:text-[#c2e7ff]'
+              : 'text-slate-600 dark:text-[#9aa0a6] hover:bg-slate-200/50 dark:hover:bg-white/5'
+          }`}
+        >
           <img
             src="/gemini-icon.png"
             alt="Gemini"
@@ -139,7 +148,11 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           />
         </div>
         <span
-          className="text-[11px] mt-0.5 tracking-tight font-medium text-slate-600 dark:text-[#9aa0a6]"
+          className={`text-[11px] mt-0.5 tracking-tight ${
+            activeTab === 'gemini'
+              ? 'font-semibold text-slate-900 dark:text-white'
+              : 'font-normal text-slate-600 dark:text-[#9aa0a6]'
+          }`}
           style={{ fontFamily: "'Google Sans', sans-serif" }}
         >
           Gemini

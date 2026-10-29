@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Plus,
   BookOpen,
   FileText,
   Sliders,
   ChevronRight,
-  HelpCircle,
-  ShieldCheck,
-  HeartHandshake,
   GraduationCap,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
@@ -36,8 +33,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenAiAdvisor: _onOpenAiAdvisor,
   viewMode = 'grid',
 }) => {
-  const [showCalculationInfo, setShowCalculationInfo] = useState(false);
-
   // Overall calculations across all classes
   const overallCalc = calculateOverallAverage(classes);
   const gpaInfo = calculateCumulativeGPA(classes);
@@ -415,51 +410,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         )}
       </div>
-
-      {/* 3. Bottom Info: How your grades are calculated */}
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={() => setShowCalculationInfo(!showCalculationInfo)}
-          className="text-xs text-slate-400 dark:text-[#80868b] hover:text-slate-700 dark:hover:text-[#e8eaed] flex items-center gap-1.5 cursor-pointer select-none transition-colors"
-        >
-          <HelpCircle className="w-3.5 h-3.5" />
-          <span>How your grades are calculated</span>
-          <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${showCalculationInfo ? 'rotate-90' : ''}`} />
-        </button>
-
-        {showCalculationInfo && (
-          <div className="mt-3 p-4 bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] shadow-2xs text-xs text-slate-600 dark:text-[#c4c7c5] space-y-2 animate-slide-up">
-            <h4 className="font-bold text-slate-900 dark:text-[#e8eaed]">Calculation Transparency:</h4>
-            <ul className="list-disc list-inside space-y-1 text-slate-500 dark:text-[#9aa0a6]">
-              <li>
-                <strong>Category Average:</strong> Each graded assessment within a category contributes equally as a percentage. Ungraded assessments are excluded from calculations.
-              </li>
-              <li>
-                <strong>Empty Categories:</strong> A category with no graded assessments automatically counts as 100% for the class average.
-              </li>
-              <li>
-                <strong>Weighted Class Average:</strong> Sum of each category's average multiplied by its percentage weight. Category weights must total exactly 100%.
-              </li>
-              <li>
-                <strong>Overall Average:</strong> Calculated with equal weighting across all enrolled classes.
-              </li>
-            </ul>
-          </div>
-        )}
-      </div>
-
-      {/* 4. Minimal Footer */}
-      <footer className="pt-8 pb-4 border-t border-slate-200/60 dark:border-[#26282a] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 dark:text-[#80868b]">
-        <div className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-slate-400 dark:text-[#8ab4f8]" />
-          <span>Your grades. Your private space.</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <HeartHandshake className="w-3.5 h-3.5 text-slate-400 dark:text-[#f28b82]" />
-          <span>Keep going. You've got this.</span>
-        </div>
-      </footer>
     </div>
   );
 };
