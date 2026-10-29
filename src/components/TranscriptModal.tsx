@@ -259,7 +259,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
               <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/40 text-center">
                 <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 block uppercase">Cumulative GPA</span>
                 <span className="text-xl font-black text-blue-900 dark:text-blue-300">{gpaInfo.gpa.toFixed(2)}</span>
-                <span className="text-[10px] text-slate-500 dark:text-[#9aa0a6] block">Scale 4.00</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#9aa0a6] block">Scale {gpaInfo.maxGpa.toFixed(2)}</span>
               </div>
               <div className="p-3 bg-sky-50/60 dark:bg-sky-950/30 rounded-xl border border-sky-100 dark:border-sky-900/40 text-center">
                 <span className="text-[10px] font-bold text-sky-700 dark:text-sky-400 block uppercase">Weighted Average</span>
@@ -274,7 +274,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
               <div className="p-3 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-900/40 text-center">
                 <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 block uppercase">Unweighted GPA</span>
                 <span className="text-xl font-black text-indigo-900 dark:text-indigo-300">{gpaInfo.unweightedGpa.toFixed(2)}</span>
-                <span className="text-[10px] text-slate-500 dark:text-[#9aa0a6] block">Scale 4.00</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#9aa0a6] block">Scale {gpaInfo.maxGpa.toFixed(2)}</span>
               </div>
             </div>
 
@@ -288,7 +288,7 @@ export const TranscriptModal: React.FC<TranscriptModalProps> = ({
                     <th className="py-2.5 px-2 text-center">Credits</th>
                     <th className="py-2.5 px-2 text-right">Average</th>
                     <th className="py-2.5 px-2 text-center">Letter</th>
-                    <th className="py-2.5 px-3 text-right">Points (4.0)</th>
+                    <th className="py-2.5 px-3 text-right">Points ({gpaInfo.maxGpa.toFixed(1)})</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-[#26282a]">

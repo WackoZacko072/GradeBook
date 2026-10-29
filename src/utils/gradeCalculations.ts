@@ -1,4 +1,95 @@
-import type { Assessment, Category, ClassItem, CategoryCalculation, ClassCalculation, OverallCalculation } from '../types/grade';
+import type {
+  Assessment,
+  Category,
+  ClassItem,
+  CategoryCalculation,
+  ClassCalculation,
+  OverallCalculation,
+  GradeScaleEntry,
+} from '../types/grade';
+
+const GRADING_SCALE_STORAGE_KEY = 'gemini_gradebook_grading_scale_v1';
+
+export const DEFAULT_GRADING_SCALE: GradeScaleEntry[] = [
+  { id: 'scale_a_plus', letter: 'A+', minPercentage: 97, gpaPoints: 4.0 },
+  { id: 'scale_a', letter: 'A', minPercentage: 93, gpaPoints: 4.0 },
+  { id: 'scale_a_minus', letter: 'A-', minPercentage: 90, gpaPoints: 3.7 },
+  { id: 'scale_b_plus', letter: 'B+', minPercentage: 87, gpaPoints: 3.3 },
+  { id: 'scale_b', letter: 'B', minPercentage: 83, gpaPoints: 3.0 },
+  { id: 'scale_b_minus', letter: 'B-', minPercentage: 80, gpaPoints: 2.7 },
+  { id: 'scale_c_plus', letter: 'C+', minPercentage: 77, gpaPoints: 2.3 },
+  { id: 'scale_c', letter: 'C', minPercentage: 73, gpaPoints: 2.0 },
+  { id: 'scale_c_minus', letter: 'C-', minPercentage: 70, gpaPoints: 1.7 },
+  { id: 'scale_d', letter: 'D', minPercentage: 60, gpaPoints: 1.0 },
+  { id: 'scale_f', letter: 'F', minPercentage: 0, gpaPoints: 0.0 },
+];
+
+type ScaleListener = (scale: GradeScaleEntry[]) => void;
+const scaleListeners = new Set<ScaleListener>();
+
+function normalizeScale(scale: GradeScaleEntry[]): GradeScaleEntry[] {
+  return [...scale]
+    .map((entry, idx) => ({
+      id: entry.id || `scale_${idx}_${Date.now()}`,
+      letter: (entry.letter || '').trim() || 'Grade',
+      minPercentage: Math.max(0, Math.min(100, Number(entry.minPercentage) || 0)),
+      gpaPoints: Math.max(0, Number(entry.gpaPoints) || 0),
+    }))
+    .sort((a, b) => b.minPercentage - a.minPercentage);
+}
+
+let cachedScale: GradeScaleEntry[] | null = null;
+
+export function getGradingScale(): GradeScaleEntry[] {
+  if (cachedScale) return cachedScale;
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(GRADING_SCALE_STORAGE_KEY) : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        cachedScale = normalizeScale(parsed);
+        return cachedScale;
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+  cachedScale = [...DEFAULT_GRADING_SCALE];
+  return cachedScale;
+}
+
+export function saveGradingScale(scale: GradeScaleEntry[]): GradeScaleEntry[] {
+  const normalized = normalizeScale(scale.length > 0 ? scale : DEFAULT_GRADING_SCALE);
+  cachedScale = normalized;
+  try {
+    localStorage.setItem(GRADING_SCALE_STORAGE_KEY, JSON.stringify(normalized));
+  } catch {
+    // ignore storage errors
+  }
+  scaleListeners.forEach((listener) => listener(normalized));
+  return normalized;
+}
+
+export function resetGradingScale(): GradeScaleEntry[] {
+  return saveGradingScale(DEFAULT_GRADING_SCALE);
+}
+
+export function subscribeToGradingScale(listener: ScaleListener): () => void {
+  scaleListeners.add(listener);
+  return () => {
+    scaleListeners.delete(listener);
+  };
+}
+
+export function getLetterBadgeStyle(letter: string): { color: string; badgeBg: string } {
+  const upper = letter.trim().toUpperCase();
+  if (upper === 'A+') return { color: 'text-emerald-700', badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+  if (upper.startsWith('A')) return { color: 'text-blue-700', badgeBg: 'bg-blue-50 text-blue-700 border-blue-200' };
+  if (upper.startsWith('B')) return { color: 'text-cyan-700', badgeBg: 'bg-cyan-50 text-cyan-700 border-cyan-200' };
+  if (upper.startsWith('C')) return { color: 'text-amber-700', badgeBg: 'bg-amber-50 text-amber-700 border-amber-200' };
+  if (upper.startsWith('D')) return { color: 'text-orange-700', badgeBg: 'bg-orange-50 text-orange-700 border-orange-200' };
+  return { color: 'text-rose-700', badgeBg: 'bg-rose-50 text-rose-700 border-rose-200' };
+}
 
 /**
  * Rounds a number to a specified number of decimal places using EPSILON for stability.
@@ -10,20 +101,22 @@ export function roundTo(val: number, decimals: number = 2): number {
 }
 
 /**
- * Computes the letter grade corresponding to a percentage.
+ * Computes the letter grade corresponding to a percentage using the active grading scale.
  */
-export function getLetterGrade(percentage: number): { letter: string; color: string; badgeBg: string } {
-  if (percentage >= 97) return { letter: 'A+', color: 'text-emerald-700', badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-  if (percentage >= 93) return { letter: 'A', color: 'text-blue-700', badgeBg: 'bg-blue-50 text-blue-700 border-blue-200' };
-  if (percentage >= 90) return { letter: 'A-', color: 'text-blue-600', badgeBg: 'bg-blue-50 text-blue-600 border-blue-200' };
-  if (percentage >= 87) return { letter: 'B+', color: 'text-cyan-700', badgeBg: 'bg-cyan-50 text-cyan-700 border-cyan-200' };
-  if (percentage >= 83) return { letter: 'B', color: 'text-cyan-700', badgeBg: 'bg-cyan-50 text-cyan-700 border-cyan-200' };
-  if (percentage >= 80) return { letter: 'B-', color: 'text-cyan-600', badgeBg: 'bg-cyan-50 text-cyan-600 border-cyan-200' };
-  if (percentage >= 77) return { letter: 'C+', color: 'text-amber-700', badgeBg: 'bg-amber-50 text-amber-700 border-amber-200' };
-  if (percentage >= 73) return { letter: 'C', color: 'text-amber-700', badgeBg: 'bg-amber-50 text-amber-700 border-amber-200' };
-  if (percentage >= 70) return { letter: 'C-', color: 'text-amber-600', badgeBg: 'bg-amber-50 text-amber-600 border-amber-200' };
-  if (percentage >= 60) return { letter: 'D', color: 'text-orange-700', badgeBg: 'bg-orange-50 text-orange-700 border-orange-200' };
-  return { letter: 'F', color: 'text-rose-700', badgeBg: 'bg-rose-50 text-rose-700 border-rose-200' };
+export function getLetterGrade(
+  percentage: number,
+  customScale?: GradeScaleEntry[]
+): { letter: string; color: string; badgeBg: string } {
+  const scale = customScale ? normalizeScale(customScale) : getGradingScale();
+  for (const entry of scale) {
+    if (percentage >= entry.minPercentage) {
+      const style = getLetterBadgeStyle(entry.letter);
+      return { letter: entry.letter, ...style };
+    }
+  }
+  const fallback = scale[scale.length - 1] || { letter: 'F' };
+  const style = getLetterBadgeStyle(fallback.letter);
+  return { letter: fallback.letter, ...style };
 }
 
 /**
@@ -181,7 +274,7 @@ export function calculateOverallAverage(classes: ClassItem[]): OverallCalculatio
     return {
       overallAverage: 100,
       classCount: 0,
-      letterGrade: 'A+',
+      letterGrade: getLetterGrade(100).letter,
     };
   }
 
@@ -213,32 +306,44 @@ export function equalizeCategoryWeights(categories: Category[]): Category[] {
 }
 
 /**
- * Standard North American 4.0 GPA scale conversion
+ * Grade point conversion using the active grading scale
  */
-export function getGradePoint(percentage: number): number {
-  if (percentage >= 93) return 4.0;
-  if (percentage >= 90) return 3.7;
-  if (percentage >= 87) return 3.3;
-  if (percentage >= 83) return 3.0;
-  if (percentage >= 80) return 2.7;
-  if (percentage >= 77) return 2.3;
-  if (percentage >= 73) return 2.0;
-  if (percentage >= 70) return 1.7;
-  if (percentage >= 67) return 1.3;
-  if (percentage >= 65) return 1.0;
-  return 0.0;
+export function getGradePoint(percentage: number, customScale?: GradeScaleEntry[]): number {
+  const scale = customScale ? normalizeScale(customScale) : getGradingScale();
+  for (const entry of scale) {
+    if (percentage >= entry.minPercentage) {
+      return roundTo(entry.gpaPoints, 2);
+    }
+  }
+  const fallback = scale[scale.length - 1];
+  return fallback ? roundTo(fallback.gpaPoints, 2) : 0.0;
 }
 
 /**
- * Computes credit-weighted Cumulative GPA on a 4.0 scale
+ * Computes the maximum GPA scale value from the active grading scale (e.g. 4.0 or 4.33)
  */
-export function calculateCumulativeGPA(classes: ClassItem[]): {
+export function getMaxGpaScale(customScale?: GradeScaleEntry[]): number {
+  const scale = customScale ? normalizeScale(customScale) : getGradingScale();
+  if (scale.length === 0) return 4.0;
+  const maxPts = Math.max(...scale.map((s) => s.gpaPoints));
+  return maxPts > 0 ? roundTo(maxPts, 2) : 4.0;
+}
+
+/**
+ * Computes credit-weighted Cumulative GPA using the active grading scale
+ */
+export function calculateCumulativeGPA(
+  classes: ClassItem[],
+  customScale?: GradeScaleEntry[]
+): {
   gpa: number;
   totalCredits: number;
   unweightedGpa: number;
+  maxGpa: number;
 } {
+  const maxGpa = getMaxGpaScale(customScale);
   if (!classes || classes.length === 0) {
-    return { gpa: 4.0, totalCredits: 0, unweightedGpa: 4.0 };
+    return { gpa: maxGpa, totalCredits: 0, unweightedGpa: maxGpa, maxGpa };
   }
 
   let totalQualityPoints = 0;
@@ -247,7 +352,7 @@ export function calculateCumulativeGPA(classes: ClassItem[]): {
 
   for (const c of classes) {
     const avg = calculateClassAverage(c).average;
-    const gradePoint = getGradePoint(avg);
+    const gradePoint = getGradePoint(avg, customScale);
     const credits = typeof c.credits === 'number' && c.credits > 0 ? c.credits : 3.0;
 
     totalQualityPoints += gradePoint * credits;
@@ -255,9 +360,9 @@ export function calculateCumulativeGPA(classes: ClassItem[]): {
     unweightedPointsSum += gradePoint;
   }
 
-  const gpa = totalCredits > 0 ? roundTo(totalQualityPoints / totalCredits, 2) : 4.0;
+  const gpa = totalCredits > 0 ? roundTo(totalQualityPoints / totalCredits, 2) : maxGpa;
   const unweightedGpa = roundTo(unweightedPointsSum / classes.length, 2);
 
-  return { gpa, totalCredits, unweightedGpa };
+  return { gpa, totalCredits, unweightedGpa, maxGpa };
 }
 

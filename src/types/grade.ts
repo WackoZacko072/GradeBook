@@ -45,6 +45,13 @@ export interface ClassCalculation {
   letterGrade: string;
 }
 
+export interface GradeScaleEntry {
+  id: string;
+  letter: string;
+  minPercentage: number;
+  gpaPoints: number;
+}
+
 export interface OverallCalculation {
   overallAverage: number;
   classCount: number;

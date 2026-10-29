@@ -21,13 +21,14 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ModalPortal } from './ModalPortal';
+import { GradingScaleModal } from './GradingScaleModal';
 import {
   subscribeToSyncStatus,
   getSyncStatus,
   forceSyncToCloud,
   type SyncStatusInfo,
 } from '../utils/gradebookService';
-import { calculateClassAverage } from '../utils/gradeCalculations';
+import { calculateClassAverage, getGradingScale } from '../utils/gradeCalculations';
 import type { ClassItem } from '../types/grade';
 
 interface HeaderProps {
@@ -87,6 +88,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isGradingScaleOpen, setIsGradingScaleOpen] = useState(false);
 
   const appsMenuRef = useRef<HTMLDivElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
@@ -468,6 +470,26 @@ export const Header: React.FC<HeaderProps> = ({
                         {theme === 'dark' ? 'Light' : 'Dark'}
                       </button>
                     </div>
+
+                    {/* Grading Scale & GPA */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSettingsOpen(false);
+                        setIsGradingScaleOpen(true);
+                      }}
+                      className="w-full text-left px-3 py-2.5 text-xs text-slate-800 dark:text-[#e8eaed] hover:bg-slate-100/80 dark:hover:bg-[#202123] rounded-xl flex items-center gap-3 cursor-pointer transition-colors google-btn-press"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                        <GraduationCap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-bold">Grading Scale & GPA</div>
+                        <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">
+                          Customize letter grades, percentages & GPA points
+                        </div>
+                      </div>
+                    </button>
 
                     {/* Help item */}
                     <button
@@ -1622,7 +1644,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
             <h4 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] mb-1">3. Cumulative GPA Scale</h4>
-            <p className="leading-relaxed">Weighted GPA is calculated on the standard 4.0 scale (A+ / A = 4.0, A- = 3.7, B+ = 3.3, B = 3.0, B- = 2.7, C+ = 2.3, C = 2.0, D = 1.0, F = 0.0) weighted by course credit hours.</p>
+            <p className="leading-relaxed">
+              Weighted GPA is calculated using your configured Grading Scale ({getGradingScale().map((s) => `${s.letter} ≥ ${s.minPercentage}% = ${s.gpaPoints.toFixed(1)}`).join(', ')}) weighted by course credit hours.
+            </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#202123] border border-slate-200/60 dark:border-[#26282a]">
@@ -1641,6 +1665,12 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
       </ModalPortal>
+
+      {/* Grading Scale & GPA Customization Modal */}
+      <GradingScaleModal
+        isOpen={isGradingScaleOpen}
+        onClose={() => setIsGradingScaleOpen(false)}
+      />
     </>
   );
 };

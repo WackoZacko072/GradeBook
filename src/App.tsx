@@ -33,6 +33,7 @@ import { TranscriptModal } from './components/TranscriptModal';
 import { FirebaseConfigModal } from './components/FirebaseConfigModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { AiAdvisorDrawer } from './components/AiAdvisorDrawer';
+import { subscribeToGradingScale } from './utils/gradeCalculations';
 
 const SLABS_STORAGE_KEY = 'gradeslate_slabs_v1';
 
@@ -89,6 +90,13 @@ export const App: React.FC = () => {
   const [selectedSlabId, setSelectedSlabId] = useState<string | null>(null);
 
   const [_isDataLoaded, setIsDataLoaded] = useState(false);
+  const [_gradingScaleTick, setGradingScaleTick] = useState(0);
+
+  useEffect(() => {
+    return subscribeToGradingScale(() => {
+      setGradingScaleTick((prev) => prev + 1);
+    });
+  }, []);
 
   // Modals & Navigation state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);

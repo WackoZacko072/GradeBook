@@ -4,6 +4,7 @@ import {
   calculateClassAverage,
   calculateOverallAverage,
   calculateCumulativeGPA,
+  getGradingScale,
   roundTo,
 } from './gradeCalculations';
 
@@ -181,8 +182,14 @@ export function buildGradebookContext(classes: ClassItem[]): any {
       overallLetterGrade: overall.letterGrade,
       cumulativeGPA: gpaInfo.gpa,
       unweightedGPA: gpaInfo.unweightedGpa,
+      maxGpaScale: gpaInfo.maxGpa,
       totalCredits: gpaInfo.totalCredits,
     },
+    gradingScale: getGradingScale().map((s) => ({
+      letter: s.letter,
+      minPercentage: s.minPercentage,
+      gpaPoints: s.gpaPoints,
+    })),
     courses: courseSnapshots,
   };
 }

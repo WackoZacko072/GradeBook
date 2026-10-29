@@ -5,6 +5,7 @@ import {
   calculateOverallAverage,
   calculateCumulativeGPA,
   getGradePoint,
+  getGradingScale,
 } from './gradeCalculations';
 
 export interface TranscriptOptions {
@@ -205,10 +206,10 @@ export function generateTranscriptPdf(
   const statCardHeight = 15;
 
   const statData = [
-    { label: 'CUMULATIVE GPA', value: `${gpaInfo.gpa.toFixed(2)}`, sub: 'Scale of 4.00', color: [30, 58, 138] },
+    { label: 'CUMULATIVE GPA', value: `${gpaInfo.gpa.toFixed(2)}`, sub: `Scale of ${gpaInfo.maxGpa.toFixed(2)}`, color: [30, 58, 138] },
     { label: 'WEIGHTED AVG', value: `${overall.overallAverage.toFixed(1)}%`, sub: `Letter: ${overall.letterGrade}`, color: [2, 132, 199] },
     { label: 'TOTAL CREDITS', value: `${gpaInfo.totalCredits}`, sub: `${classes.length} Courses`, color: [13, 148, 136] },
-    { label: 'UNWEIGHTED GPA', value: `${gpaInfo.unweightedGpa.toFixed(2)}`, sub: 'Unweighted 4.00', color: [99, 102, 241] },
+    { label: 'UNWEIGHTED GPA', value: `${gpaInfo.unweightedGpa.toFixed(2)}`, sub: `Unweighted ${gpaInfo.maxGpa.toFixed(2)}`, color: [99, 102, 241] },
   ];
 
   statData.forEach((stat, idx) => {
@@ -437,6 +438,15 @@ export function generateTranscriptPdf(
   }
 
   // Official Grading Scale Legend
+  const scaleEntries = getGradingScale();
+  const formattedScale = scaleEntries.map(
+    (s) => `${s.letter} (≥${s.minPercentage}% | ${s.gpaPoints.toFixed(1)})`
+  );
+  const midIdx = Math.ceil(formattedScale.length / 2);
+  const scaleLine1 = formattedScale.slice(0, midIdx).join('   •   ');
+  const scaleLine2 =
+    formattedScale.slice(midIdx).join('   •   ') + '   •   Cumulative GPA = Quality Points / Credits';
+
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(226, 232, 240);
   doc.setLineWidth(0.3);
@@ -445,21 +455,13 @@ export function generateTranscriptPdf(
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(6.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('OFFICIAL 4.0 GRADING & CONVERSION KEY:', leftMargin + 3, curY + 4);
+  doc.text(`OFFICIAL ${gpaInfo.maxGpa.toFixed(1)} GRADING & CONVERSION KEY:`, leftMargin + 3, curY + 4);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6);
   doc.setTextColor(71, 85, 105);
-  doc.text(
-    'A+ (97-100% | 4.0)   •   A (93-96% | 4.0)   •   A- (90-92% | 3.7)   •   B+ (87-89% | 3.3)   •   B (83-86% | 3.0)   •   B- (80-82% | 2.7)',
-    leftMargin + 3,
-    curY + 7.5
-  );
-  doc.text(
-    'C+ (77-79% | 2.3)   •   C (73-76% | 2.0)   •   C- (70-72% | 1.7)   •   D (60-69% | 1.0)   •   F (<60% | 0.0)   •   Cumulative GPA = Quality Points / Credits',
-    leftMargin + 3,
-    curY + 10.5
-  );
+  doc.text(scaleLine1, leftMargin + 3, curY + 7.5);
+  doc.text(scaleLine2, leftMargin + 3, curY + 10.5);
 
   curY += 17;
 

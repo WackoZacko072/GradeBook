@@ -97,7 +97,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-xs text-white text-xs font-bold border border-white/25 select-none shadow-2xs">
                 <GraduationCap className="w-3.5 h-3.5 text-white" />
-                <span>GPA: {classes.length > 0 ? `${gpaInfo.gpa.toFixed(2)} / 4.0` : '--'}</span>
+                <span>GPA: {classes.length > 0 ? `${gpaInfo.gpa.toFixed(2)} / ${gpaInfo.maxGpa.toFixed(1)}` : '--'}</span>
               </div>
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-xs text-white text-xs font-medium border border-white/10 select-none">
                 <span>Letter: {classes.length > 0 ? overallCalc.letterGrade : '--'}</span>
