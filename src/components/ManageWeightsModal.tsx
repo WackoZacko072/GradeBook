@@ -11,18 +11,27 @@ interface ManageWeightsModalProps {
   onSaveCategories: (updatedCategories: Category[]) => void;
 }
 
+interface DraftCategoryItem extends Omit<Category, 'weight'> {
+  weight: string;
+}
+
 export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
   isOpen,
   onClose,
   categories,
   onSaveCategories,
 }) => {
-  const [draftCategories, setDraftCategories] = useState<Category[]>([]);
+  const [draftCategories, setDraftCategories] = useState<DraftCategoryItem[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setDraftCategories(JSON.parse(JSON.stringify(categories)));
+      setDraftCategories(
+        categories.map((c) => ({
+          ...JSON.parse(JSON.stringify(c)),
+          weight: String(c.weight),
+        }))
+      );
       setValidationError(null);
     }
   }, [isOpen, categories]);
@@ -30,7 +39,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
   if (!isOpen) return null;
 
   const totalWeight = roundTo(
-    draftCategories.reduce((acc, c) => acc + (Number(c.weight) || 0), 0),
+    draftCategories.reduce((acc, c) => acc + (parseFloat(c.weight) || 0), 0),
     2
   );
   const isValid = Math.abs(totalWeight - 100) < 0.001;
@@ -42,18 +51,17 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
   };
 
   const handleUpdateWeight = (id: string, rawVal: string) => {
-    const parsed = rawVal === '' ? 0 : parseFloat(rawVal);
     setDraftCategories((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, weight: Math.max(0, parsed) } : c))
+      prev.map((c) => (c.id === id ? { ...c, weight: rawVal } : c))
     );
   };
 
   const handleAddCategory = () => {
     const remaining = Math.max(0, roundTo(100 - totalWeight, 2));
-    const newCat: Category = {
+    const newCat: DraftCategoryItem = {
       id: 'cat_' + Math.random().toString(36).substring(2, 9),
       name: `Category ${draftCategories.length + 1}`,
-      weight: remaining,
+      weight: String(remaining),
       assessments: [],
     };
     setDraftCategories((prev) => [...prev, newCat]);
@@ -74,7 +82,17 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
   };
 
   const handleEqualize = () => {
-    setDraftCategories(equalizeCategoryWeights(draftCategories));
+    const numericCats: Category[] = draftCategories.map((c) => ({
+      ...c,
+      weight: Math.max(0, parseFloat(c.weight) || 0),
+    }));
+    const equalized = equalizeCategoryWeights(numericCats);
+    setDraftCategories(
+      equalized.map((c) => ({
+        ...c,
+        weight: String(c.weight),
+      }))
+    );
     setValidationError(null);
   };
 
@@ -88,7 +106,11 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
       return;
     }
 
-    onSaveCategories(draftCategories);
+    const finalCategories: Category[] = draftCategories.map((c) => ({
+      ...c,
+      weight: Math.max(0, parseFloat(c.weight) || 0),
+    }));
+    onSaveCategories(finalCategories);
     onClose();
   };
 
@@ -208,6 +230,7 @@ export const ManageWeightsModal: React.FC<ManageWeightsModalProps> = ({
                     min="0"
                     max="100"
                     step="any"
+                    placeholder="0"
                     value={cat.weight}
                     onChange={(e) => handleUpdateWeight(cat.id, e.target.value)}
                     className="w-full pl-2.5 pr-7 py-2 text-sm font-bold text-right bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 min-h-[38px]"

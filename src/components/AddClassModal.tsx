@@ -13,7 +13,7 @@ interface AddClassModalProps {
 interface DraftCategory {
   id: string;
   name: string;
-  weight: number;
+  weight: string;
 }
 
 export const AddClassModal: React.FC<AddClassModalProps> = ({
@@ -22,13 +22,13 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
   onAddClass,
 }) => {
   const [className, setClassName] = useState('');
-  const [credits, setCredits] = useState<number>(3);
+  const [credits, setCredits] = useState<string>('3');
   const [categories, setCategories] = useState<DraftCategory[]>([]);
 
   if (!isOpen) return null;
 
   const totalWeight = roundTo(
-    categories.reduce((acc, c) => acc + (Number(c.weight) || 0), 0),
+    categories.reduce((acc, c) => acc + (parseFloat(c.weight) || 0), 0),
     2
   );
   const isCategoriesValid = categories.length === 0 || Math.abs(totalWeight - 100) < 0.001;
@@ -40,7 +40,7 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
       {
         id: 'draft_' + Math.random().toString(36).substring(2, 9),
         name: '',
-        weight: remaining,
+        weight: String(remaining),
       },
     ]);
   };
@@ -63,21 +63,23 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
     const initialCategories: Category[] = categories.map((c, idx) => ({
       id: 'cat_' + Math.random().toString(36).substring(2, 9),
       name: c.name.trim() || `Category ${idx + 1}`,
-      weight: Number(c.weight) || 0,
+      weight: parseFloat(c.weight) || 0,
       assessments: [],
     }));
 
+    const parsedCredits = parseFloat(credits);
     const newClass: ClassItem = {
       id: 'class_' + Math.random().toString(36).substring(2, 9),
       name: trimmed,
       color: '#2563EB',
-      credits: Number(credits) || 3,
+      credits: !isNaN(parsedCredits) && parsedCredits > 0 ? parsedCredits : 3,
       createdAt: Date.now(),
       categories: initialCategories,
     };
 
     onAddClass(newClass);
     setClassName('');
+    setCredits('3');
     setCategories([]);
     onClose();
   };
@@ -143,8 +145,9 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                 min="0.5"
                 max="10"
                 step="0.5"
+                placeholder="3"
                 value={credits}
-                onChange={(e) => setCredits(parseFloat(e.target.value) || 3)}
+                onChange={(e) => setCredits(e.target.value)}
                 className="w-full px-3 py-3 bg-slate-100 dark:bg-[#131314] border border-transparent focus:border-blue-500 dark:focus:border-blue-400 rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none text-sm min-h-[44px] transition-all"
               />
             </div>
@@ -191,8 +194,9 @@ export const AddClassModal: React.FC<AddClassModalProps> = ({
                         min="0"
                         max="100"
                         step="any"
+                        placeholder="0"
                         value={cat.weight}
-                        onChange={(e) => handleUpdateCategory(cat.id, { weight: parseFloat(e.target.value) || 0 })}
+                        onChange={(e) => handleUpdateCategory(cat.id, { weight: e.target.value })}
                         className="w-full pr-5 pl-2 py-1.5 text-xs font-bold text-right bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] text-slate-900 dark:text-[#e8eaed] rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-600 min-h-[36px]"
                       />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-[#9aa0a6] font-bold pointer-events-none">%</span>

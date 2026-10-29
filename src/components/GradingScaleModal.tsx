@@ -17,6 +17,22 @@ import {
   getLetterBadgeStyle,
 } from '../utils/gradeCalculations';
 
+interface DraftGradeScaleEntry {
+  id: string;
+  letter: string;
+  minPercentage: string;
+  gpaPoints: string;
+}
+
+function toDraftEntries(scale: GradeScaleEntry[]): DraftGradeScaleEntry[] {
+  return scale.map((s) => ({
+    id: s.id,
+    letter: s.letter,
+    minPercentage: String(s.minPercentage),
+    gpaPoints: String(s.gpaPoints),
+  }));
+}
+
 interface GradingScaleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,13 +42,15 @@ export const GradingScaleModal: React.FC<GradingScaleModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [entries, setEntries] = useState<GradeScaleEntry[]>(() => getGradingScale());
+  const [entries, setEntries] = useState<DraftGradeScaleEntry[]>(() =>
+    toDraftEntries(getGradingScale())
+  );
   const [error, setError] = useState<string | null>(null);
   const [savedToast, setSavedToast] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setEntries(getGradingScale());
+      setEntries(toDraftEntries(getGradingScale()));
       setError(null);
       setSavedToast(false);
     }
@@ -49,14 +67,7 @@ export const GradingScaleModal: React.FC<GradingScaleModalProps> = ({
     setEntries((prev) =>
       prev.map((item) => {
         if (item.id !== id) return item;
-        if (field === 'letter') {
-          return { ...item, letter: value };
-        }
-        const parsed = value === '' ? 0 : parseFloat(value);
-        if (field === 'minPercentage') {
-          return { ...item, minPercentage: isNaN(parsed) ? 0 : Math.max(0, Math.min(100, parsed)) };
-        }
-        return { ...item, gpaPoints: isNaN(parsed) ? 0 : Math.max(0, parsed) };
+        return { ...item, [field]: value };
       })
     );
   };
@@ -68,8 +79,8 @@ export const GradingScaleModal: React.FC<GradingScaleModalProps> = ({
       {
         id: 'scale_' + Math.random().toString(36).substring(2, 9),
         letter: '',
-        minPercentage: 50,
-        gpaPoints: 1.0,
+        minPercentage: '',
+        gpaPoints: '',
       },
     ]);
   };
@@ -82,7 +93,7 @@ export const GradingScaleModal: React.FC<GradingScaleModalProps> = ({
 
   const handleReset = () => {
     setError(null);
-    setEntries([...DEFAULT_GRADING_SCALE]);
+    setEntries(toDraftEntries(DEFAULT_GRADING_SCALE));
   };
 
   const handleSave = (e: React.FormEvent) => {
@@ -93,8 +104,19 @@ export const GradingScaleModal: React.FC<GradingScaleModalProps> = ({
       return;
     }
 
-    const saved = saveGradingScale(cleaned);
-    setEntries(saved);
+    const parsedEntries: GradeScaleEntry[] = cleaned.map((item) => {
+      const minPct = parseFloat(item.minPercentage);
+      const gpa = parseFloat(item.gpaPoints);
+      return {
+        id: item.id,
+        letter: item.letter.trim(),
+        minPercentage: isNaN(minPct) ? 0 : Math.max(0, Math.min(100, minPct)),
+        gpaPoints: isNaN(gpa) ? 0 : Math.max(0, gpa),
+      };
+    });
+
+    const saved = saveGradingScale(parsedEntries);
+    setEntries(toDraftEntries(saved));
     setSavedToast(true);
     setTimeout(() => {
       setSavedToast(false);
@@ -189,6 +211,7 @@ export const GradingScaleModal: React.FC<GradingScaleModalProps> = ({
                       min="0"
                       max="100"
                       step="any"
+                      placeholder="0"
                       value={entry.minPercentage}
                       onChange={(e) => handleUpdateEntry(entry.id, 'minPercentage', e.target.value)}
                       aria-label={`Minimum percentage for ${entry.letter}`}
@@ -206,6 +229,7 @@ export const GradingScaleModal: React.FC<GradingScaleModalProps> = ({
                       min="0"
                       max="10"
                       step="0.01"
+                      placeholder="0.0"
                       value={entry.gpaPoints}
                       onChange={(e) => handleUpdateEntry(entry.id, 'gpaPoints', e.target.value)}
                       aria-label={`GPA points for ${entry.letter}`}

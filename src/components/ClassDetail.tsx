@@ -646,6 +646,15 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(category.name);
+  const [weightInput, setWeightInput] = useState<string>(String(category.weight));
+
+  React.useEffect(() => {
+    setWeightInput((prev) => {
+      if (prev === '' && category.weight === 0) return '';
+      if (parseFloat(prev) === category.weight) return prev;
+      return String(category.weight);
+    });
+  }, [category.weight]);
 
   const saveName = () => {
     if (nameInput.trim()) {
@@ -760,8 +769,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
                 max="100"
                 step="any"
                 inputMode="decimal"
-                value={category.weight}
-                onChange={(e) => onWeightChange(e.target.value)}
+                placeholder="0"
+                value={weightInput}
+                onChange={(e) => {
+                  setWeightInput(e.target.value);
+                  onWeightChange(e.target.value);
+                }}
+                onBlur={() => {
+                  if (weightInput.trim() === '') {
+                    setWeightInput('0');
+                  }
+                }}
                 className="w-20 pl-2.5 pr-6 py-1.5 text-sm font-bold text-right bg-white dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-xl text-slate-900 dark:text-[#e8eaed] focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
               />
               <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-[#80868b] pointer-events-none">
@@ -860,6 +878,18 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
   onReset,
 }) => {
   const isPointsMode = assessment.mode === 'points';
+  const [maxInput, setMaxInput] = useState<string>(
+    assessment.maxScore !== undefined ? String(assessment.maxScore) : '100'
+  );
+
+  React.useEffect(() => {
+    setMaxInput((prev) => {
+      if (prev === '') return '';
+      const currentMax = assessment.maxScore !== undefined ? assessment.maxScore : 100;
+      if (parseFloat(prev) === currentMax) return prev;
+      return String(currentMax);
+    });
+  }, [assessment.maxScore]);
 
   // Points inputs handler
   const handlePointsEarnedChange = (valStr: string) => {
@@ -874,7 +904,10 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
   };
 
   const handlePointsMaxChange = (valStr: string) => {
-    const max = valStr === '' ? 100 : parseFloat(valStr);
+    setMaxInput(valStr);
+    if (valStr === '') return;
+    const max = parseFloat(valStr);
+    if (isNaN(max)) return;
     const earned = assessment.earnedScore;
     if (earned === undefined) {
       onUpdate({ maxScore: max });
@@ -952,8 +985,14 @@ const AssessmentRow: React.FC<AssessmentRowProps> = ({
               step="any"
               inputMode="decimal"
               placeholder="Total"
-              value={assessment.maxScore !== undefined ? assessment.maxScore : 100}
+              value={maxInput}
               onChange={(e) => handlePointsMaxChange(e.target.value)}
+              onBlur={() => {
+                if (maxInput.trim() === '') {
+                  setMaxInput('100');
+                  handlePointsMaxChange('100');
+                }
+              }}
               className="w-16 px-2 py-1.5 text-sm font-bold text-right text-slate-900 dark:text-[#e8eaed] bg-slate-50 dark:bg-[#0f0f10] border border-slate-200 dark:border-[#26282a] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-[#8ab4f8] min-h-[38px]"
             />
           </div>
