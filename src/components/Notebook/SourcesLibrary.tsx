@@ -13,15 +13,20 @@ import {
   ChevronRight,
   BookOpen,
   FilePlus,
+  Sparkles,
+  Presentation,
 } from 'lucide-react';
 import { ModalPortal } from '../ModalPortal';
 import type { NoteSource } from '../../types/notebook';
 import type { ClassItem } from '../../types/grade';
 import { extractTextFromPdf } from '../../utils/pdfExtractor';
+import { SourceSummarizerView } from './SourceSummarizerView';
 
 interface SourcesLibraryProps {
   sources: NoteSource[];
   classes: ClassItem[];
+  selectedSourceId?: string | null;
+  onSelectSource?: (sourceId: string | null) => void;
   onAddSource: (source: NoteSource) => void;
   onUpdateSource: (source: NoteSource) => void;
   onDeleteSource: (sourceId: string) => void;
@@ -37,12 +42,41 @@ interface SourcesLibraryProps {
 export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
   sources,
   classes,
+  selectedSourceId = null,
+  onSelectSource,
   onAddSource,
+  onUpdateSource,
   onDeleteSource,
   onAddClass,
+  onOpenCreateSlab,
 }) => {
   // Navigation: null = show class cards grid; string = active class notebook library
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
+  const [internalSelectedSourceId, setInternalSelectedSourceId] = useState<string | null>(null);
+
+  const activeSourceId = selectedSourceId !== undefined ? selectedSourceId : internalSelectedSourceId;
+  const activeSource = sources.find((s) => s.id === activeSourceId) || null;
+
+  const handleOpenSourceSummarizer = (source: NoteSource) => {
+    const updatedSource: NoteSource = {
+      ...source,
+      lastOpenedAt: Date.now(),
+    };
+    onUpdateSource(updatedSource);
+    if (onSelectSource) {
+      onSelectSource(source.id);
+    } else {
+      setInternalSelectedSourceId(source.id);
+    }
+  };
+
+  const handleCloseSourceSummarizer = () => {
+    if (onSelectSource) {
+      onSelectSource(null);
+    } else {
+      setInternalSelectedSourceId(null);
+    }
+  };
 
   // Search filter inside active class library
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,16 +156,24 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
         }
 
         if (extractedText && extractedText.trim().length > 0) {
+          const lowerFile = file.name.toLowerCase();
+          const isSlides =
+            lowerFile.includes('slide') ||
+            lowerFile.includes('lecture') ||
+            lowerFile.endsWith('.ppt') ||
+            lowerFile.endsWith('.pptx');
+
           const newSource: NoteSource = {
             id: `source_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 6)}`,
             name: file.name,
-            type: isPdf ? 'pdf' : 'file',
+            type: isSlides ? 'slides' : isPdf ? 'pdf' : 'file',
             content: extractedText,
             fileSize: formatFileSize(file.size),
             classId: activeClass?.id,
             className: activeClass?.name,
             extractedWordCount: countWords(extractedText),
             addedAt: Date.now(),
+            lastOpenedAt: Date.now(),
           };
 
           onAddSource(newSource);
@@ -170,6 +212,7 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
       className: activeClass?.name,
       extractedWordCount: countWords(noteContent),
       addedAt: Date.now(),
+      lastOpenedAt: Date.now(),
     };
 
     onAddSource(newSource);
@@ -197,6 +240,27 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
 
   // Check if unassigned sources exist
   const unassignedCount = sources.filter((s) => !s.classId).length;
+
+  // If a specific source is selected for AI Summarization & Study, render SourceSummarizerView
+  if (activeSource) {
+    return (
+      <SourceSummarizerView
+        source={activeSource}
+        classes={classes}
+        onBack={handleCloseSourceSummarizer}
+        onUpdateSource={onUpdateSource}
+        onDeleteSource={(id) => {
+          onDeleteSource(id);
+          handleCloseSourceSummarizer();
+        }}
+        onOpenCreateSlab={(opts) => {
+          if (onOpenCreateSlab) {
+            onOpenCreateSlab(opts);
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-scale">
@@ -502,33 +566,47 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
               {filteredClassSources.map((source) => {
                 const words = source.extractedWordCount || countWords(source.content);
                 const size = source.fileSize || 'Note';
+                const hasSummary = Boolean(source.aiSummary);
 
                 return (
                   <div
                     key={source.id}
-                    className="bg-white dark:bg-[#18191b] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-[#26282a] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between space-y-3 group google-card min-w-0"
+                    onClick={() => handleOpenSourceSummarizer(source)}
+                    className="bg-white dark:bg-[#18191b] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-[#26282a] shadow-xs hover:shadow-md hover:border-blue-300 dark:hover:border-[#8ab4f8] transition-all flex flex-col justify-between space-y-3 group google-card min-w-0 cursor-pointer"
                   >
                     {/* Top: Icon + Title + Delete */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0">
-                          {source.type === 'pdf' ? (
+                        <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center flex-shrink-0">
+                          {source.type === 'slides' ? (
+                            <Presentation className="w-4 h-4 stroke-[2.2]" />
+                          ) : source.type === 'pdf' ? (
                             <FileText className="w-4 h-4 stroke-[2.2]" />
                           ) : (
                             <File className="w-4 h-4 stroke-[2.2]" />
                           )}
                         </div>
-                        <h3
-                          className="text-sm font-extrabold text-slate-900 dark:text-[#e8eaed] truncate"
-                          title={source.name}
-                        >
-                          {source.name}
-                        </h3>
+                        <div className="min-w-0">
+                          <h3
+                            className="text-sm font-extrabold text-slate-900 dark:text-[#e8eaed] truncate group-hover:text-blue-600 dark:group-hover:text-[#8ab4f8] transition-colors"
+                            title={source.name}
+                          >
+                            {source.name}
+                          </h3>
+                          <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-[#9aa0a6] mt-0.5">
+                            <span>{words.toLocaleString()} words</span>
+                            <span>&bull;</span>
+                            <span>{size}</span>
+                          </div>
+                        </div>
                       </div>
 
                       <button
                         type="button"
-                        onClick={() => setSourceToDelete(source)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSourceToDelete(source);
+                        }}
                         className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors cursor-pointer"
                         title="Delete source"
                       >
@@ -536,22 +614,35 @@ export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({
                       </button>
                     </div>
 
-                    {/* Amount of words & Size */}
-                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-[#9aa0a6]">
-                      <span>{words.toLocaleString()} words</span>
-                      <span>&bull;</span>
-                      <span>{size}</span>
-                    </div>
+                    {/* AI Summarizer Preview / Status */}
+                    {hasSummary && source.aiSummary ? (
+                      <p className="text-xs text-slate-600 dark:text-[#c4c7c5] line-clamp-2 leading-relaxed">
+                        {source.aiSummary.conciseSummary}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-400 dark:text-[#80868b] line-clamp-2 leading-relaxed">
+                        Click to generate AI summary, key concepts, definitions & flashcards.
+                      </p>
+                    )}
 
-                    {/* Small text: view extracted content */}
-                    <div className="pt-2 border-t border-slate-100 dark:border-[#26282a]">
+                    {/* Bottom actions */}
+                    <div className="pt-2.5 border-t border-slate-100 dark:border-[#26282a] flex items-center justify-between gap-2">
                       <button
                         type="button"
-                        onClick={() => setPreviewingSource(source)}
-                        className="text-xs text-blue-600 dark:text-[#8ab4f8] hover:underline cursor-pointer font-medium"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreviewingSource(source);
+                        }}
+                        className="text-[11px] text-slate-500 dark:text-[#9aa0a6] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:underline cursor-pointer font-medium"
                       >
-                        view extracted content
+                        Raw text
                       </button>
+
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-[#8ab4f8] group-hover:translate-x-0.5 transition-transform">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>{hasSummary ? 'Open AI Summary' : 'AI Summarize'}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
                     </div>
                   </div>
                 );

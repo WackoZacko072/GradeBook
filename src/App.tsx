@@ -27,6 +27,7 @@ import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClassDetail } from './components/ClassDetail';
 import { NotebookView } from './components/Notebook/NotebookView';
+import { SourceSummarizerView } from './components/Notebook/SourceSummarizerView';
 import { SlabView } from './components/Slab/SlabView';
 import { AddClassModal } from './components/AddClassModal';
 import { TranscriptModal } from './components/TranscriptModal';
@@ -83,6 +84,7 @@ export const App: React.FC = () => {
 
   // Sources Hub state (replaces notetaking)
   const [sources, setSources] = useState<NoteSource[]>(() => getInitialSources());
+  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
 
   // External Slab creation modal config (triggered from Sources Hub)
   const [slabModalConfig, setSlabModalConfig] = useState<{
@@ -155,13 +157,29 @@ export const App: React.FC = () => {
 
   // Handle Tab Switch with Directional Slide Transition
   const handleTabChange = (nextTab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => {
-    if (nextTab === activeTab) return;
+    if (nextTab === activeTab) {
+      if (nextTab === 'gradebook') {
+        setSelectedClassId(null);
+        setSelectedSourceId(null);
+      }
+      if (nextTab === 'notebook') {
+        setSelectedNoteId(null);
+        setSelectedSourceId(null);
+      }
+      return;
+    }
     const prevIdx = TAB_INDEX_MAP[activeTab];
     const nextIdx = TAB_INDEX_MAP[nextTab];
     setSlideDirection(nextIdx > prevIdx ? 'right' : 'left');
     setActiveTab(nextTab);
-    if (nextTab === 'gradebook') setSelectedClassId(null);
-    if (nextTab === 'notebook') setSelectedNoteId(null);
+    if (nextTab === 'gradebook') {
+      setSelectedClassId(null);
+      setSelectedSourceId(null);
+    }
+    if (nextTab === 'notebook') {
+      setSelectedNoteId(null);
+      setSelectedSourceId(null);
+    }
     if (nextTab === 'slab') setSelectedSlabId(null);
   };
 
@@ -249,10 +267,11 @@ export const App: React.FC = () => {
     if (mainContentRef.current) {
       mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [selectedClassId, selectedNoteId, selectedSlabId, activeTab]);
+  }, [selectedClassId, selectedNoteId, selectedSourceId, selectedSlabId, activeTab]);
 
-  // Active selected class
+  // Active selected class & source
   const activeClass = classes.find((c) => c.id === selectedClassId) || null;
+  const activeSource = sources.find((s) => s.id === selectedSourceId) || null;
 
   // Add class handler
   const handleAddClass = (newClass: ClassItem) => {
@@ -427,11 +446,13 @@ export const App: React.FC = () => {
         onSelectClass={(id) => {
           setSlideDirection('right');
           setActiveTab('gradebook');
+          setSelectedSourceId(null);
           setSelectedClassId(id);
         }}
         onSelectOverview={() => {
           setSlideDirection('left');
           setActiveTab('gradebook');
+          setSelectedSourceId(null);
           setSelectedClassId(null);
         }}
         noteCount={sources.length}
@@ -464,17 +485,30 @@ export const App: React.FC = () => {
           onSelectOverview={() => {
             setSlideDirection('left');
             setActiveTab('gradebook');
+            setSelectedSourceId(null);
             setSelectedClassId(null);
           }}
           onSelectClass={(id) => {
             setSlideDirection('right');
             setActiveTab('gradebook');
+            setSelectedSourceId(null);
             setSelectedClassId(id);
           }}
           onSelectNote={(id) => {
             setSlideDirection(id ? 'right' : 'left');
             setActiveTab('notebook');
+            setSelectedSourceId(null);
             setSelectedNoteId(id);
+          }}
+          onSelectSource={(id) => {
+            if (id) {
+              const target = sources.find((s) => s.id === id);
+              if (target) {
+                handleUpdateSource({ ...target, lastOpenedAt: Date.now() });
+              }
+            }
+            setSlideDirection(id ? 'right' : 'left');
+            setSelectedSourceId(id);
           }}
           onSelectSlab={(id) => {
             setSlideDirection(id ? 'right' : 'left');
@@ -511,7 +545,13 @@ export const App: React.FC = () => {
         >
           <div className="w-full max-w-[1840px] mx-auto px-3 sm:px-6 md:px-8 xl:px-10 py-4 sm:py-7 transition-all duration-300">
             <div
-              key={activeTab + (selectedClassId || '') + (selectedNoteId || '') + (selectedSlabId || '')}
+              key={
+                activeTab +
+                (selectedClassId || '') +
+                (selectedNoteId || '') +
+                (selectedSourceId || '') +
+                (selectedSlabId || '')
+              }
               className={slideDirection === 'right' ? 'animate-slide-right' : 'animate-slide-left'}
             >
               {activeTab === 'gemini' ? (
@@ -550,11 +590,32 @@ export const App: React.FC = () => {
                 <NotebookView
                   sources={sources}
                   classes={classes}
+                  selectedSourceId={selectedSourceId}
+                  onSelectSource={(id) => {
+                    setSlideDirection(id ? 'right' : 'left');
+                    setSelectedSourceId(id);
+                  }}
                   onAddSource={handleAddSource}
                   onUpdateSource={handleUpdateSource}
                   onDeleteSource={handleDeleteSource}
                   onAddClass={handleQuickAddClass}
                   onOpenSlateAi={(prompt) => handleOpenAiAdvisor(prompt)}
+                  onOpenCreateSlab={handleOpenCreateSlabFromSource}
+                />
+              ) : activeSource ? (
+                <SourceSummarizerView
+                  source={activeSource}
+                  classes={classes}
+                  onBack={() => {
+                    setSlideDirection('left');
+                    setSelectedSourceId(null);
+                  }}
+                  onUpdateSource={handleUpdateSource}
+                  onDeleteSource={(id) => {
+                    handleDeleteSource(id);
+                    setSlideDirection('left');
+                    setSelectedSourceId(null);
+                  }}
                   onOpenCreateSlab={handleOpenCreateSlabFromSource}
                 />
               ) : activeClass ? (
@@ -571,11 +632,22 @@ export const App: React.FC = () => {
               ) : (
                 <Dashboard
                   classes={classes}
+                  sources={sources}
                   onSelectClass={(id) => {
                     setSlideDirection('right');
                     setSelectedClassId(id);
                   }}
                   onOpenAddClass={() => setIsAddModalOpen(true)}
+                  onSelectSource={(source) => {
+                    handleUpdateSource({
+                      ...source,
+                      lastOpenedAt: Date.now(),
+                    });
+                    setSlideDirection('right');
+                    setSelectedSourceId(source.id);
+                  }}
+                  onAddSource={handleAddSource}
+                  onOpenCreateSlabFromSource={handleOpenCreateSlabFromSource}
                   onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
                   onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
                   viewMode={viewMode}

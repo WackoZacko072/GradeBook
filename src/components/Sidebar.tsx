@@ -32,6 +32,7 @@ interface SidebarProps {
   onSelectOverview: () => void;
   onSelectClass: (id: string) => void;
   onSelectNote?: (id: string | null) => void;
+  onSelectSource?: (id: string | null) => void;
   onSelectSlab?: (id: string | null) => void;
   onSelectChatSession?: (id: string) => void;
   onOpenAddClass: () => void;
@@ -62,6 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectOverview,
   onSelectClass,
   onSelectNote,
+  onSelectSource,
   onSelectSlab,
   onSelectChatSession,
   onOpenAddClass,
@@ -492,9 +494,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               ) : (
                 sources.map((s) => {
                   return (
-                    <div
+                    <button
                       key={s.id}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]"
+                      type="button"
+                      onClick={() => {
+                        onSelectSource?.(s.id);
+                        onMobileClose?.();
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] cursor-pointer google-btn-press"
                     >
                       <div className="flex items-center gap-2.5 truncate">
                         <FileText className="w-4 h-4 text-indigo-500 dark:text-[#c58af9] flex-shrink-0" />
@@ -505,7 +512,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           {s.className}
                         </span>
                       )}
-                    </div>
+                    </button>
                   );
                 })
               )}

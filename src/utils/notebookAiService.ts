@@ -3,6 +3,8 @@ import type {
   LongAnswerQuestion,
   FlashcardItem,
   NoteSource,
+  SourceAiSummary,
+  SourceChatMessage,
 } from '../types/notebook';
 import {
   getGeminiApiKey,
@@ -13,6 +15,9 @@ import {
 
 // Priority order: latest stable flash models with working endpoints
 const FALLBACK_MODELS: GeminiModel[] = [
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash',
   'gemini-3.5-flash-lite',
   'gemini-3.5-flash',
   'gemini-3.6-flash',
@@ -448,4 +453,251 @@ ${studentResponse || '(No response written)'}`;
       feedback: 'Good effort. Review the sample answer and key rubric points to refine your derivation.',
     };
   }
+}
+
+/**
+ * Repairs single-backslash LaTeX commands inside raw JSON strings before JSON.parse
+ */
+function repairJsonLatexEscapes(rawJson: string): string {
+  const DOUBLE_BS_TOKEN = '__DBL_BS_PLACEHOLDER__';
+  let s = rawJson.replace(/\\\\/g, DOUBLE_BS_TOKEN);
+
+  s = s.replace(
+    /\\(frac|forall|flat|fbox|beta|binom|boxed|bar|begin|bf|Big|big|bigl|bigr|bm|bmod|bowtie|bullet|theta|times|text|textbf|textit|textrm|texttt|to|tan|tau|triangle|tilde|top|tfrac|neq|ne|nu|nabla|notin|ni|natural|neg|nmid|nparallel|nsim|nsubseteq|rho|rightarrow|Rightarrow|right|rangle|rceil|rfloor|rbrace|rbrack|Re|rightleftharpoons|underline|uparrow|Uparrow|updownarrow|upsilon|Upsilon)\b/g,
+    DOUBLE_BS_TOKEN + '$1'
+  );
+
+  s = s.replace(/\\(?![/\\bfnrt"]|u[0-9a-fA-F]{4})/g, DOUBLE_BS_TOKEN);
+
+  return s.replaceAll(DOUBLE_BS_TOKEN, '\\\\');
+}
+
+function parseJsonObjectRobust(raw: string): any {
+  if (!raw) return null;
+  let cleaned = raw.trim();
+
+  if (cleaned.includes('```')) {
+    cleaned = cleaned
+      .replace(/^[\s\S]*?```(?:json)?\s*/i, '')
+      .replace(/\s*```[\s\S]*$/, '')
+      .trim();
+  }
+
+  const tryParse = (candidate: string): any => {
+    for (const attempt of [repairJsonLatexEscapes(candidate), candidate]) {
+      try {
+        const parsed = JSON.parse(attempt);
+        if (parsed && typeof parsed === 'object') return parsed;
+      } catch {
+        // continue
+      }
+    }
+    return null;
+  };
+
+  let res = tryParse(cleaned);
+  if (res) return res;
+
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    res = tryParse(cleaned.slice(firstBrace, lastBrace + 1));
+    if (res) return res;
+  }
+
+  return null;
+}
+
+/**
+ * Generates an AI Summary, Key Takeaways, Important Concepts, and Key Definitions from a NoteSource
+ */
+export async function generateSourceSummary(source: NoteSource): Promise<SourceAiSummary> {
+  const systemPrompt = `You are Gemini AI Notes & Lecture Summarizer, an elite academic study assistant.
+Analyze the student's uploaded lecture slides, PDF, or notes and extract a structured, crystal-clear study guide.
+
+CRITICAL FORMATTING & LANGUAGE RULES:
+1. Use Canadian English spelling (e.g., colour, behaviour, centre, analyse).
+2. For mathematical equations, physical formulas, or scientific notation, use clean LaTeX enclosed in single dollar signs ($...$) for inline math and double dollar signs ($$...$$) for block equations. Double-escape backslashes in JSON strings (e.g., "$\\\\frac{a}{b}$").
+3. Ground every summary point, concept, and definition strictly in the provided document content.
+4. Output ONLY a valid JSON object matching this exact schema:
+{
+  "conciseSummary": "A clear, well-structured 2-3 paragraph executive summary of the entire lecture/document.",
+  "keyTakeaways": [
+    "High-impact takeaway point 1",
+    "High-impact takeaway point 2",
+    "High-impact takeaway point 3",
+    "High-impact takeaway point 4"
+  ],
+  "importantConcepts": [
+    {
+      "title": "Name of Core Concept / Principle / Mechanism",
+      "explanation": "Thorough, intuitive explanation of how and why this concept works and why it matters on exams.",
+      "formulaOrExample": "Optional key formula in $LaTeX$ or concrete real-world example"
+    }
+  ],
+  "keyDefinitions": [
+    {
+      "term": "Exact Key Term / Vocabulary",
+      "definition": "Crisp, exam-ready definition of the term"
+    }
+  ]
+}`;
+
+  const contentSlice = source.content.slice(0, 24000);
+  const userPrompt = `SOURCE NAME: ${source.name}
+CLASS: ${source.className || 'General Course'}
+SOURCE TYPE: ${source.type.toUpperCase()}
+
+DOCUMENT CONTENT:
+${contentSlice}
+
+Please generate a comprehensive AI study summary, 4-6 key takeaways, 4-8 important concepts, and 6-12 key definitions from this material.`;
+
+  const rawJson = await callGemini(systemPrompt, userPrompt);
+  const parsed = parseJsonObjectRobust(rawJson);
+
+  if (!parsed) {
+    throw new Error('Could not parse AI summary response. Please try again.');
+  }
+
+  const conciseSummary = String(
+    parsed.conciseSummary ||
+      parsed.summary ||
+      'This document covers core principles and foundational concepts from your course material.'
+  );
+
+  const keyTakeaways = Array.isArray(parsed.keyTakeaways)
+    ? parsed.keyTakeaways.map((t: any) => String(t)).filter(Boolean)
+    : [];
+
+  const importantConcepts = Array.isArray(parsed.importantConcepts)
+    ? parsed.importantConcepts
+        .map((c: any) => ({
+          title: String(c.title || c.name || c.concept || 'Core Concept'),
+          explanation: String(c.explanation || c.description || ''),
+          formulaOrExample: c.formulaOrExample ? String(c.formulaOrExample) : undefined,
+        }))
+        .filter((c: any) => c.explanation.trim().length > 0)
+    : [];
+
+  const keyDefinitions = Array.isArray(parsed.keyDefinitions)
+    ? parsed.keyDefinitions
+        .map((d: any) => ({
+          term: String(d.term || d.name || 'Term'),
+          definition: String(d.definition || d.meaning || ''),
+        }))
+        .filter((d: any) => d.definition.trim().length > 0)
+    : [];
+
+  return {
+    conciseSummary,
+    keyTakeaways,
+    importantConcepts,
+    keyDefinitions,
+    generatedAt: Date.now(),
+  };
+}
+
+/**
+ * Answers a student's question grounded directly in an uploaded document/source
+ */
+export async function askQuestionAboutSource(
+  source: NoteSource,
+  question: string,
+  history: SourceChatMessage[] = []
+): Promise<string> {
+  const apiKey = getGeminiApiKey();
+  if (!apiKey) {
+    throw new Error('Gemini API key is missing. Please check your settings.');
+  }
+
+  const preferredModel = getSelectedGeminiModel() || 'gemini-2.5-flash';
+  const modelsToTry: GeminiModel[] = [
+    preferredModel,
+    ...FALLBACK_MODELS.filter((m) => m !== preferredModel),
+  ];
+
+  const systemPrompt = `You are Gemini Document Tutor, an expert academic AI assistant helping a student understand their uploaded source material.
+SOURCE TITLE: "${source.name}"
+COURSE / CLASS: "${source.className || 'General'}"
+SOURCE TYPE: ${source.type.toUpperCase()}
+
+UPLOADED DOCUMENT CONTENT:
+${source.content.slice(0, 25000)}
+
+INSTRUCTIONS:
+1. Answer the student's question directly and accurately using the uploaded document content above.
+2. If the student asks about something not explicitly in the document, first state what the document covers and then provide helpful academic context.
+3. Use Canadian English spelling (e.g., colour, behaviour, centre, analyse).
+4. Format mathematical equations and scientific notation in LaTeX ($...$ for inline, $$...$$ for display blocks).
+5. Use clear formatting with bold key terms and bullet points where helpful.`;
+
+  const contents: Array<{ role: 'user' | 'model'; parts: [{ text: string }] }> = [];
+
+  for (const msg of history) {
+    const text = msg.content?.trim();
+    if (!text) continue;
+    const role: 'user' | 'model' = msg.role === 'user' ? 'user' : 'model';
+    if (contents.length === 0 && role !== 'user') continue;
+    if (contents.length > 0 && contents[contents.length - 1].role === role) {
+      contents[contents.length - 1].parts[0].text += `\n\n${text}`;
+    } else {
+      contents.push({ role, parts: [{ text }] });
+    }
+  }
+
+  if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
+    contents[contents.length - 1].parts[0].text += `\n\n${question}`;
+  } else {
+    contents.push({ role: 'user', parts: [{ text: question }] });
+  }
+
+  let lastError: Error | null = null;
+
+  for (const model of modelsToTry) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents,
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 2048,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => null);
+        const errMsg = errJson?.error?.message || `HTTP ${response.status}`;
+        if (response.status === 503 || response.status === 404 || response.status >= 500) {
+          lastError = new Error(errMsg);
+          continue;
+        }
+        throw new Error(errMsg);
+      }
+
+      const data = await response.json();
+      const parts = data?.candidates?.[0]?.content?.parts || [];
+      const nonThought = parts.filter((p: any) => !p.thought && typeof p.text === 'string');
+      const text = (
+        nonThought.length > 0
+          ? nonThought.map((p: any) => p.text).join('')
+          : parts.map((p: any) => p.text || '').join('')
+      ).trim();
+
+      if (text) {
+        saveSelectedGeminiModel(model);
+        return text;
+      }
+    } catch (err: any) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('Failed to get an answer from Gemini AI.');
 }
