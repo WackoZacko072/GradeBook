@@ -6,6 +6,10 @@ import {
   saveSelectedGeminiModel,
   type GeminiModel,
 } from './aiAdvisorService';
+import {
+  recoverControlCharLatex,
+  normalizeBareLatexInTextSegment,
+} from '../components/LatexRenderer';
 
 const FAST_MODELS: GeminiModel[] = [
   'gemini-2.5-flash',
@@ -223,8 +227,10 @@ function repairJsonLatexEscapes(rawJson: string): string {
 
   // Escape LaTeX commands that start with valid JSON escape letters (b, f, n, r, t, u)
   // before JSON.parse can turn \f, \b, \t, \n, \r into ASCII control characters!
+  // Any \b, \f, \t, \r followed by an ASCII letter is a LaTeX command (e.g. \frac, \beta, \theta, \times, \text, \rho, \right)
+  s = s.replace(/\\([bftr][a-zA-Z]+)/g, DOUBLE_BS_TOKEN + '$1');
   s = s.replace(
-    /\\(frac|forall|flat|fbox|beta|binom|boxed|bar|begin|bf|Big|big|bigl|bigr|bm|bmod|bowtie|bullet|theta|times|text|textbf|textit|textrm|texttt|to|tan|tau|triangle|tilde|top|tfrac|neq|ne|nu|nabla|notin|ni|natural|neg|nmid|nparallel|nsim|nsubseteq|rho|rightarrow|Rightarrow|right|rangle|rceil|rfloor|rbrace|rbrack|Re|rightleftharpoons|underline|uparrow|Uparrow|updownarrow|upsilon|Upsilon)\b/g,
+    /\\(neq|ne|nu|nabla|notin|ni|natural|neg|nmid|nparallel|nsim|ncong|nsubseteq|nsupseteq|nleq|ngeq|nless|ngtr|not|underline|uparrow|Uparrow|updownarrow|upsilon|Upsilon)(?![a-zA-Z])/g,
     DOUBLE_BS_TOKEN + '$1'
   );
 
@@ -326,13 +332,7 @@ export interface GenerateSlabOptions {
 
 function sanitizeLatexString(text: string): string {
   if (!text) return '';
-  let s = text
-    // Recover control characters if \frac, \beta, \theta, \text, \neq, \right were ever unescaped in JSON
-    .replace(/\f(rac|orall|lat|box)/g, '\\f$1')
-    .replace(/[\b](eta|inom|oxed|ar|egin|f|ig|m|mod|owtie|ullet)/g, '\\b$1')
-    .replace(/\t(heta|imes|ext|o|an|au|riangle|ilde|op|frac)/g, '\\t$1')
-    .replace(/\n(eq|e\b|u\b|abla|otin|i\b|atural|eg\b)/g, '\\n$1')
-    .replace(/\r(ho\b|ightarrow|ight|angle|ceil|floor|brace|brack|e\b)/g, '\\r$1')
+  let s = recoverControlCharLatex(text)
     // Collapse double-escaped backslashes before LaTeX commands: \\frac -> \frac
     .replace(/\\\\([a-zA-Z]+)/g, '\\$1')
     // Normalize display and inline math delimiters using callbacks so '$' is never misinterpreted by JS replace
@@ -341,31 +341,13 @@ function sanitizeLatexString(text: string): string {
     .replace(/\\\(/g, () => '$')
     .replace(/\\\)/g, () => '$')
     // Trim spaces inside inline math ($ x + 1 $ -> $x + 1$)
-    .replace(/\$(?!\$)\s*([^$\n]+?)\s*\$(?!\$)/g, (_m, inner) => `$${inner.trim()}$`);
+    .replace(/\$(?!\$)\s*([^$\n]+?)\s*\$(?![$a-zA-Z0-9\\])/g, (_m, inner) => `$${inner.trim()}$`);
 
-  // If the entire string has no '$' delimiters at all, check if it contains bare LaTeX commands
-  if (!s.includes('$')) {
-    // Unwrap standalone \text{...} or \mathrm{...} when not part of a math expression
-    s = s.replace(/\\(?:text|mathrm|mathbf|textit)\{([^}]*)\}(?![_^])/g, '$1');
-
-    // If it still has structural LaTeX commands (\frac, \sqrt, \int, \sum, \binom, _{...}, ^{...}),
-    // wrap bare LaTeX segments so KaTeX renders them properly
-    if (/\\(?:frac|sqrt|binom|int|sum|prod|lim|vec|hat|bar|overline)\b|\^\{[^}]+\}|_\{[^}]+\}/.test(s)) {
-      // If the whole string looks like a standalone math expression/option (e.g. "\frac{1}{2}mv^2" or "3.0 \times 10^8")
-      const wordCount = s.replace(/\\[a-zA-Z]+(\{[^}]*\})*/g, '').trim().split(/\s+/).filter(Boolean).length;
-      if (wordCount <= 4) {
-        s = `$${s.trim()}$`;
-      } else {
-        // Wrap individual bare LaTeX command expressions inline
-        s = s.replace(
-          /((?:[0-9a-zA-Z.]+\s*\\(?:times|cdot)\s*)?(?:\\(?:frac|binom)\{[^}]*\}\{[^}]*\}|\\(?:sqrt|vec|hat|bar|overline)\{[^}]*\}|[0-9a-zA-Z)]+(?:\^\{[^}]+\}|_\{[^}]+\}|\^[0-9+-]+)+)(?:\s*[+\-*/=<>]\s*(?:\\(?:frac|binom)\{[^}]*\}\{[^}]*\}|\\(?:sqrt|vec|hat|bar|overline)\{[^}]*\}|[0-9a-zA-Z.^{}_+-]+))*)/g,
-          (m) => `$${m.trim()}$`
-        );
-      }
-    }
-  }
-
-  return s;
+  // Normalize bare LaTeX commands and spelled-out "pi"/"theta" in all segments outside $...$
+  const segments = s.split(/(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g);
+  return segments
+    .map((seg) => (seg.startsWith('$') && seg.endsWith('$') ? seg : normalizeBareLatexInTextSegment(seg)))
+    .join('');
 }
 
 function buildDifficultyInstruction(difficulty: 'easy' | 'medium' | 'hard'): string {
@@ -412,11 +394,12 @@ Generate a high-yield study set grounded in the student's materials that strictl
 
 ${difficultyInstruction}
 ${avoidClause}
-CANADIAN ENGLISH, CONCRETE NUMBERS & CLEAN NOTATION:
+CANADIAN ENGLISH, CONCRETE NUMBERS & CLEAN MATH SYMBOLS:
 - Use Canadian English spelling (e.g., colour, behaviour, centre, analyse).
 - USE ACTUAL NUMBERS IN MCQs: For any quantitative, math, science, or problem-solving MCQ, give concrete numerical values in the question and compute the ACTUAL final numerical answers for the 4 options (e.g., "14.7 m/s", "240 J", "0.125 mol/L", "37.5%") instead of leaving options as raw symbolic LaTeX formulas.
-- DO NOT OUTPUT RAW LATEX CODE: Never output bare LaTeX commands like \\frac, \\text, \\times, \\cdot, \\Delta, or \\sqrt as raw text. For numbers, units, and simple expressions, write clean readable text and Unicode symbols (e.g., "25 m/s", "3.0 × 10⁸ m/s", "ΔH = -285 kJ/mol", "x² + 2x + 1").
-- If a complex multi-term equation requires LaTeX rendering, wrap it in single dollar signs ($...$) with no spaces inside the dollar signs, and double-escape backslashes in JSON (e.g., "$\\\\frac{a}{b}$").
+- USE THE ACTUAL π SYMBOL & REAL MATH SYMBOLS (NEVER SPELL OUT "pi" OR "theta"): Never write English words like "pi", "pi/2", "2pi", "3pi/4", "theta", "alpha", "beta", "delta", or "sqrt(2)". Always use the real mathematical symbols: π (e.g., "π", "π/2", "2π", "3π/4"), θ, α, β, Δ, √, ∞, °, ±, ≤, ≥, ≠, ×, ÷.
+- DO NOT OUTPUT RAW LATEX CODE: Never output bare un-delimited LaTeX commands like \\frac, \\text, \\times, \\cdot, \\Delta, \\sqrt, \\sin, \\cos, \\left, or \\right as raw text. For numbers, units, angles, and simple expressions, write clean readable text with real Unicode symbols (e.g., "π/2", "2π rad", "25 m/s", "3.0 × 10⁸ m/s", "ΔH = -285 kJ/mol", "x² + 2x + 1").
+- If a complex multi-term equation or fraction requires LaTeX rendering, wrap the entire formula in single dollar signs ($...$) with no spaces inside the dollar signs, and double-escape backslashes in JSON (e.g., "$\\\\frac{\\\\pi}{2}$").
 
 JSON SCHEMA:
 Return ONLY a valid JSON object matching this schema:

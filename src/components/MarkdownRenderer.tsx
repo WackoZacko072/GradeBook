@@ -1,22 +1,35 @@
 import React from 'react';
-import { LatexRenderer } from './LatexRenderer';
+import {
+  LatexRenderer,
+  recoverControlCharLatex,
+  normalizeBareLatexInTextSegment,
+  convertLatexToCleanUnicode,
+} from './LatexRenderer';
 
 interface MarkdownRendererProps {
   content: string;
+  className?: string;
 }
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
-  const blocks = splitIntoBlocks(content);
+const CURRENCY_DOLLAR_TOKEN = '%%CURRENCY_DOLLAR_SIGN%%';
+
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className }) => {
+  const safeContent = recoverControlCharLatex(content);
+  const blocks = splitIntoBlocks(safeContent);
 
   return (
-    <div className="space-y-2.5 text-xs sm:text-[13px] text-slate-800 dark:text-[#e8eaed] leading-relaxed overflow-hidden">
+    <div
+      className={`space-y-2.5 text-slate-800 dark:text-[#e8eaed] leading-relaxed overflow-hidden ${
+        className || 'text-sm sm:text-[15px]'
+      }`}
+    >
       {blocks.map((block, index) => {
         // Display Math Block ($$...$$ or \[...\])
         if (block.type === 'mathblock') {
           return (
             <div
               key={index}
-              className="my-3 p-3 bg-slate-50/80 dark:bg-[#0f0f10] rounded-xl border border-slate-200/90 dark:border-[#26282a] overflow-x-auto text-center shadow-2xs"
+              className="my-3 p-3.5 bg-slate-50/80 dark:bg-[#0f0f10] rounded-xl border border-slate-200/90 dark:border-[#26282a] overflow-x-auto text-center shadow-2xs"
             >
               <LatexRenderer content={block.content} block />
             </div>
@@ -28,7 +41,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <h3
                 key={index}
-                className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-[#e8eaed] mt-3.5 mb-1.5 border-b border-slate-200 dark:border-[#26282a] pb-1"
+                className="text-[1.2em] font-extrabold text-slate-900 dark:text-[#e8eaed] mt-3.5 mb-1.5 border-b border-slate-200 dark:border-[#26282a] pb-1"
               >
                 {renderInline(block.content)}
               </h3>
@@ -38,7 +51,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <h4
                 key={index}
-                className="text-xs sm:text-sm font-extrabold text-blue-700 dark:text-blue-400 mt-3 mb-1"
+                className="text-[1.1em] font-extrabold text-blue-700 dark:text-blue-400 mt-3 mb-1"
               >
                 {renderInline(block.content)}
               </h4>
@@ -48,7 +61,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <h5
                 key={index}
-                className="text-xs sm:text-sm font-bold text-slate-900 dark:text-[#e8eaed] mt-2.5 mb-1"
+                className="text-[1.05em] font-bold text-slate-900 dark:text-[#e8eaed] mt-2.5 mb-1"
               >
                 {renderInline(block.content)}
               </h5>
@@ -58,7 +71,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <h6
               key={index}
-              className="text-xs font-bold text-slate-800 dark:text-[#e8eaed] mt-2 mb-0.5"
+              className="text-[1em] font-bold text-slate-800 dark:text-[#e8eaed] mt-2 mb-0.5"
             >
               {renderInline(block.content)}
             </h6>
@@ -70,7 +83,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           const rows = block.rows || [];
           return (
             <div key={index} className="my-2.5 overflow-x-auto rounded-xl border border-slate-200 dark:border-[#26282a] shadow-2xs">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full text-left border-collapse text-[0.92em]">
                 <thead>
                   <tr className="bg-slate-100/80 dark:bg-[#0f0f10] border-b border-slate-200 dark:border-[#26282a]">
                     {headers.map((h, i) => (
@@ -109,7 +122,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                   return (
                     <li key={i} className="flex items-start gap-2.5 text-slate-700 dark:text-[#c4c7c5]">
                       <span
-                        className={`w-4 h-4 rounded-md mt-0.5 flex items-center justify-center flex-shrink-0 border text-[11px] font-bold ${
+                        className={`w-4 h-4 rounded-md mt-1 flex items-center justify-center flex-shrink-0 border text-[11px] font-bold ${
                           isChecked
                             ? 'bg-blue-600 border-blue-600 text-white'
                             : 'border-slate-300 dark:border-[#5f6368] bg-white dark:bg-[#0f0f10] shadow-2xs'
@@ -125,8 +138,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                 }
 
                 return (
-                  <li key={i} className="flex items-start gap-2 text-slate-700 dark:text-[#c4c7c5]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
+                  <li key={i} className="flex items-start gap-2.5 text-slate-700 dark:text-[#c4c7c5]">
+                    <span className="w-2 h-2 rounded-full bg-blue-500 mt-2.5 flex-shrink-0" />
                     <span>{renderInline(item)}</span>
                   </li>
                 );
@@ -144,7 +157,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <div
                 key={index}
-                className="my-3 p-3.5 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 rounded-xl text-xs sm:text-[13px] shadow-2xs leading-relaxed"
+                className="my-3 p-3.5 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 rounded-xl text-[0.95em] shadow-2xs leading-relaxed"
               >
                 {renderInline(block.content)}
               </div>
@@ -155,7 +168,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <div
                 key={index}
-                className="my-3 p-3.5 bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/90 dark:border-rose-900/60 text-rose-950 dark:text-rose-200 rounded-xl text-xs sm:text-[13px] shadow-2xs leading-relaxed"
+                className="my-3 p-3.5 bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/90 dark:border-rose-900/60 text-rose-950 dark:text-rose-200 rounded-xl text-[0.95em] shadow-2xs leading-relaxed"
               >
                 {renderInline(block.content)}
               </div>
@@ -165,7 +178,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <div
               key={index}
-              className="my-2.5 p-3 bg-blue-50/70 dark:bg-blue-950/40 border-l-4 border-blue-600 dark:border-blue-400 text-blue-950 dark:text-blue-200 rounded-r-xl text-xs sm:text-[13px] shadow-2xs"
+              className="my-2.5 p-3 bg-blue-50/70 dark:bg-blue-950/40 border-l-4 border-blue-600 dark:border-blue-400 text-blue-950 dark:text-blue-200 rounded-r-xl text-[0.95em] shadow-2xs"
             >
               {renderInline(block.content)}
             </div>
@@ -177,7 +190,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
             return (
               <div
                 key={index}
-                className="my-3 p-3 bg-slate-50/80 dark:bg-[#0f0f10] rounded-xl border border-slate-200/90 dark:border-[#26282a] overflow-x-auto text-center shadow-2xs"
+                className="my-3 p-3.5 bg-slate-50/80 dark:bg-[#0f0f10] rounded-xl border border-slate-200/90 dark:border-[#26282a] overflow-x-auto text-center shadow-2xs"
               >
                 <LatexRenderer content={block.content} block />
               </div>
@@ -186,7 +199,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <pre
               key={index}
-              className="my-2 p-3 bg-slate-900 dark:bg-[#0f0f10] text-slate-100 rounded-xl font-mono text-[11px] overflow-x-auto border border-transparent dark:border-[#26282a]"
+              className="my-2 p-3 bg-slate-900 dark:bg-[#0f0f10] text-slate-100 rounded-xl font-mono text-[0.88em] overflow-x-auto border border-transparent dark:border-[#26282a]"
             >
               <code>{block.content}</code>
             </pre>
@@ -195,7 +208,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
 
         // Paragraph
         return (
-          <p key={index} className="text-slate-700 dark:text-[#e8eaed]">
+          <p key={index} className="text-slate-800 dark:text-[#e8eaed]">
             {renderInline(block.content)}
           </p>
         );
@@ -342,98 +355,48 @@ function splitIntoBlocks(text: string): Block[] {
 // Inline Formatting & LaTeX Tokenizer
 // ==========================================
 
-/**
- * Normalizes text where bold/italic tags cross over LaTeX boundaries,
- * e.g., "**Formula: $E=mc^2$**" -> "**Formula:** $E=mc^2$"
- * This prevents math delimiters from splitting bold pairs and leaving stray asterisks.
- */
-function replaceBareLatexOutsideMath(segment: string): string {
-  if (!segment) return '';
-
-  // 1. Unwrap plain \text{...} or \mathrm{...} not attached to superscripts/subscripts
-  let s = segment.replace(/\\(?:text|mathrm|mathbf|textit)\{([^}]*)\}(?![_^])/g, '$1');
-
-  // 2. Wrap bare structural LaTeX commands (\frac, \sqrt, \binom, etc.) in $...$ so KaTeX renders them
-  if (/\\(?:frac|sqrt|binom|int|sum|prod|lim|vec|hat|bar|overline)\b|\^\{[^}]+\}|_\{[^}]+\}/.test(s)) {
-    const wordCount = s.replace(/\\[a-zA-Z]+(\{[^}]*\})*/g, '').trim().split(/\s+/).filter(Boolean).length;
-    if (wordCount <= 4) {
-      return `$${s.trim()}$`;
-    }
-    s = s.replace(
-      /((?:[0-9a-zA-Z.]+\s*\\(?:times|cdot)\s*)?(?:\\(?:frac|binom)\{[^}]*\}\{[^}]*\}|\\(?:sqrt|vec|hat|bar|overline)\{[^}]*\}|[0-9a-zA-Z)]+(?:\^\{[^}]+\}|_\{[^}]+\}|\^[0-9+-]+)+)(?:\s*[+\-*/=<>]\s*(?:\\(?:frac|binom)\{[^}]*\}\{[^}]*\}|\\(?:sqrt|vec|hat|bar|overline)\{[^}]*\}|[0-9a-zA-Z.^{}_+-]+))*)/g,
-      (m) => `$${m.trim()}$`
-    );
-  }
-
-  // 3. Replace any remaining standalone bare LaTeX symbols with clean Unicode characters
-  s = s
-    .replace(/\\times\b/g, '×')
-    .replace(/\\cdot\b/g, '·')
-    .replace(/\\div\b/g, '÷')
-    .replace(/\\pm\b/g, '±')
-    .replace(/\\mp\b/g, '∓')
-    .replace(/\\le(?:q)?\b/g, '≤')
-    .replace(/\\ge(?:q)?\b/g, '≥')
-    .replace(/\\ne(?:q)?\b/g, '≠')
-    .replace(/\\approx\b/g, '≈')
-    .replace(/\\equiv\b/g, '≡')
-    .replace(/\\propto\b/g, '∝')
-    .replace(/\\infty\b/g, '∞')
-    .replace(/\\(?:rightarrow|to)\b/g, '→')
-    .replace(/\\leftarrow\b/g, '←')
-    .replace(/\\(?:leftrightarrow|rightleftharpoons)\b/g, '⇌')
-    .replace(/\\Rightarrow\b/g, '⇒')
-    .replace(/\\Delta\b/g, 'Δ')
-    .replace(/\\alpha\b/g, 'α')
-    .replace(/\\beta\b/g, 'β')
-    .replace(/\\gamma\b/g, 'γ')
-    .replace(/\\delta\b/g, 'δ')
-    .replace(/\\(?:epsilon|varepsilon)\b/g, 'ε')
-    .replace(/\\theta\b/g, 'θ')
-    .replace(/\\lambda\b/g, 'λ')
-    .replace(/\\mu\b/g, 'μ')
-    .replace(/\\nu\b/g, 'ν')
-    .replace(/\\pi\b/g, 'π')
-    .replace(/\\rho\b/g, 'ρ')
-    .replace(/\\sigma\b/g, 'σ')
-    .replace(/\\tau\b/g, 'τ')
-    .replace(/\\(?:phi|varphi)\b/g, 'φ')
-    .replace(/\\omega\b/g, 'ω')
-    .replace(/\\Omega\b/g, 'Ω')
-    .replace(/\\degree\b|\^\\circ/g, '°')
-    .replace(/\\%/g, '%');
-
-  return s;
-}
-
 function normalizeMathAsterisks(text: string): string {
   if (!text) return '';
 
-  // 0. Recover control characters if \frac, \beta, \theta, \text were unescaped in saved JSON
-  let normalized = text
-    .replace(/\f(rac|orall|lat|box)/g, '\\f$1')
-    .replace(/[\b](eta|inom|oxed|ar|egin|f|ig|m|mod|owtie|ullet)/g, '\\b$1')
-    .replace(/\t(heta|imes|ext|o|an|au|riangle|ilde|op|frac)/g, '\\t$1');
+  // 0. Recover control characters if \frac, \beta, \theta, \text, \neq, \right were unescaped in saved JSON
+  let normalized = recoverControlCharLatex(text);
 
-  // 1. Normalize \[ ... \] to $$ ... $$ and \( ... \) to $ ... $
+  // 1. Protect escaped dollar signs \$ and currency dollar signs (e.g., $100 followed by plain words)
+  normalized = normalized.replace(/\\\$/g, CURRENCY_DOLLAR_TOKEN);
+  normalized = normalized.replace(
+    /\$(?!\$)(\d[\d,.]*)(?=\s+(?:and|or|for|per|each|to|in|of|on|at|from|with|by|is|was|are|were|will|would|can|could|should|has|have|had|that|which|if|when|after|before|more|less|than|profit|cost|price|fee|tax|total|discount|bonus|hourly|daily|monthly|annual|year|month|week|day|hour|item|ticket|unit|share|dollar|bucks)(?!\s*[+\-*/=<>^_]))/gi,
+    `${CURRENCY_DOLLAR_TOKEN}$1`
+  );
+
+  // 2. Normalize \[ ... \] to $$ ... $$ and \( ... \) to $ ... $
   normalized = normalized
     .replace(/\\\[([\s\S]+?)\\\]/g, (_m, inner) => `$$${inner.trim()}$$`)
     .replace(/\\\(([\s\S]+?)\\\)/g, (_m, inner) => `$${inner.trim()}$`);
 
-  // 2. Normalize double-escaped commands like \\frac -> \frac
+  // 3. Normalize double-escaped commands like \\frac -> \frac
   normalized = normalized.replace(/\\\\([a-zA-Z]+)/g, '\\$1');
 
-  // 3. Normalize spaced math like $ x $ -> $x$
-  normalized = normalized.replace(/\$(?!\$)\s*([^$\n]+?)\s*\$(?!\$)/g, (_m, inner) => `$${inner.trim()}$`);
+  // 4. Normalize spaced math like $ x $ -> $x$ (only when closing $ is not immediately followed by a word/number)
+  normalized = normalized.replace(
+    /\$(?!\$)\s*([^$\n]+?)\s*\$(?![$a-zA-Z0-9\\])/g,
+    (_m, inner) => `$${inner.trim()}$`
+  );
 
-  // 3b. Convert any bare LaTeX commands outside $...$ blocks so raw LaTeX is never displayed
+  // 5. Convert any bare LaTeX commands and spelled-out "pi" outside $...$ blocks so raw LaTeX is never displayed
   const mathSplitRegex = /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)/g;
   const segments = normalized.split(mathSplitRegex);
   normalized = segments
-    .map((seg) => (seg.startsWith('$') && seg.endsWith('$') ? seg : replaceBareLatexOutsideMath(seg)))
+    .map((seg) => {
+      if (seg.startsWith('$') && seg.endsWith('$')) {
+        return seg;
+      }
+      // Any leftover single '$' in an outside-math segment is an unmatched dollar sign; protect it before wrapping bare LaTeX
+      const protectedSeg = seg.replace(/\$/g, CURRENCY_DOLLAR_TOKEN);
+      return normalizeBareLatexInTextSegment(protectedSeg);
+    })
     .join('');
 
-  // 4. Bold wrapping math: **prefix $math$ suffix**
+  // 6. Bold wrapping math: **prefix $math$ suffix**
   normalized = normalized.replace(
     /\*\*([^*$\n]*?)(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)([^*$\n]*?)\*\*/g,
     (_match, p1, math, p2) => {
@@ -443,7 +406,7 @@ function normalizeMathAsterisks(text: string): string {
     }
   );
 
-  // 5. Single asterisk italic wrapping math: *prefix $math$ suffix*
+  // 7. Single asterisk italic wrapping math: *prefix $math$ suffix*
   normalized = normalized.replace(
     /(?<!\*)\*([^*$\n]+?)(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$)([^*$\n]*?)\*(?!\*)/g,
     (_match, p1, math, p2) => {
@@ -504,6 +467,10 @@ function renderInline(text: string): React.ReactNode {
   return <>{parts}</>;
 }
 
+function restorePlainTextTokens(str: string): string {
+  return convertLatexToCleanUnicode(str.replaceAll(CURRENCY_DOLLAR_TOKEN, '$'));
+}
+
 /**
  * Robust Markdown inline formatting:
  * - Bold + Italic: ***text***
@@ -547,7 +514,7 @@ function renderFormattingOnly(text: string): React.ReactNode {
     if (candidates.length === 0) {
       // No more paired markdown tags found.
       // Clean up any stray dangling asterisks like stray "** " or " *"
-      const cleaned = remaining.replace(/\*{1,3}/g, '');
+      const cleaned = restorePlainTextTokens(remaining.replace(/\*{1,3}/g, ''));
       if (cleaned) {
         parts.push(cleaned);
       }
@@ -560,7 +527,7 @@ function renderFormattingOnly(text: string): React.ReactNode {
 
     // Push preceding text (cleaned of any stray unclosed asterisks)
     if (best.before) {
-      const cleanBefore = best.before.replace(/\*{1,3}/g, '');
+      const cleanBefore = restorePlainTextTokens(best.before.replace(/\*{1,3}/g, ''));
       if (cleanBefore) parts.push(cleanBefore);
     }
 
@@ -568,27 +535,27 @@ function renderFormattingOnly(text: string): React.ReactNode {
       parts.push(
         <code
           key={keyIndex++}
-          className="px-1.5 py-0.5 bg-slate-100 dark:bg-[#0f0f10] text-blue-700 dark:text-blue-400 font-mono text-[11px] rounded-md border border-slate-200 dark:border-[#26282a]"
+          className="px-1.5 py-0.5 bg-slate-100 dark:bg-[#0f0f10] text-blue-700 dark:text-blue-400 font-mono text-[0.9em] rounded-md border border-slate-200 dark:border-[#26282a]"
         >
-          {best.content}
+          {restorePlainTextTokens(best.content)}
         </code>
       );
     } else if (best.type === 'boldItalic') {
       parts.push(
         <strong key={keyIndex++} className="font-extrabold italic text-slate-900 dark:text-white">
-          {best.content}
+          {restorePlainTextTokens(best.content)}
         </strong>
       );
     } else if (best.type === 'bold') {
       parts.push(
         <strong key={keyIndex++} className="font-bold text-slate-900 dark:text-white">
-          {best.content}
+          {restorePlainTextTokens(best.content)}
         </strong>
       );
     } else if (best.type === 'italic') {
       parts.push(
         <em key={keyIndex++} className="italic text-slate-800 dark:text-[#e8eaed]">
-          {best.content}
+          {restorePlainTextTokens(best.content)}
         </em>
       );
     }

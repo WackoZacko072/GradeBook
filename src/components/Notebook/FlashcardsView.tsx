@@ -253,10 +253,10 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
           {/* Flip Card Container with 3D Perspective */}
           <div
             onClick={handleFlip}
-            className="relative w-full min-h-[260px] sm:min-h-[300px] cursor-pointer select-none perspective-1000 group"
+            className="relative w-full min-h-[340px] sm:min-h-[420px] cursor-pointer select-none perspective-1000 group"
           >
             <div
-              className={`relative w-full h-full min-h-[260px] sm:min-h-[300px] rounded-2xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl border-2 ${
+              className={`relative w-full h-full min-h-[340px] sm:min-h-[420px] rounded-3xl p-8 sm:p-12 flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl border-2 ${
                 isFlipped
                   ? 'bg-gradient-to-br from-indigo-50/90 to-blue-50/90 border-blue-300'
                   : 'bg-white border-slate-200 hover:border-blue-400'
@@ -264,7 +264,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
             >
               {/* Card Header info */}
               <div className="flex items-center justify-between text-xs text-slate-400">
-                <span className="font-extrabold uppercase tracking-wider text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/50">
+                <span className="font-extrabold uppercase tracking-wider text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200/50">
                   {isFlipped ? 'Answer / Explanation (Back)' : 'Concept / Question (Front)'}
                 </span>
 
@@ -273,16 +273,16 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                     type="button"
                     onClick={() => handleToggleMastered(currentCard.id)}
                     title={currentCard.mastered ? 'Mastered' : 'Mark as Mastered'}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                       currentCard.mastered
                         ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                         : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                     }`}
                   >
                     {currentCard.mastered ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     ) : (
-                      <Circle className="w-3.5 h-3.5 text-slate-400" />
+                      <Circle className="w-4 h-4 text-slate-400" />
                     )}
                     <span>{currentCard.mastered ? 'Mastered' : 'Learn'}</span>
                   </button>
@@ -291,7 +291,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
                     type="button"
                     onClick={() => handleDeleteCard(currentCard.id)}
                     title="Delete Card"
-                    className="p-1 text-slate-300 hover:text-rose-600 rounded-md transition-colors cursor-pointer"
+                    className="p-1.5 text-slate-300 hover:text-rose-600 rounded-md transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -299,12 +299,12 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               </div>
 
               {/* Card Body Content with LaTeX */}
-              <div className="my-auto py-4 text-center">
+              <div className="my-auto py-6 text-center">
                 <div
                   className={`leading-relaxed ${
                     isFlipped
-                      ? 'text-xs sm:text-sm text-slate-800'
-                      : 'text-sm sm:text-base font-bold text-slate-900'
+                      ? 'text-lg sm:text-xl md:text-2xl font-medium text-slate-800'
+                      : 'text-xl sm:text-2xl md:text-3xl font-bold text-slate-900'
                   }`}
                 >
                   <LatexRenderer content={isFlipped ? currentCard.back : currentCard.front} />
@@ -312,7 +312,7 @@ export const FlashcardsView: React.FC<FlashcardsViewProps> = ({
               </div>
 
               {/* Card Footer prompt */}
-              <div className="text-center text-[11px] text-slate-400 font-medium">
+              <div className="text-center text-xs sm:text-sm text-slate-400 font-medium">
                 Click anywhere on card to flip &bull; Card {currentIndex + 1} of {flashcards.length}
               </div>
             </div>

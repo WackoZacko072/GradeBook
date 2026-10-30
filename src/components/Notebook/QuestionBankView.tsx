@@ -353,15 +353,15 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
               return (
                 <div
                   key={q.id}
-                  className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs transition-all"
+                  className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xs transition-all"
                 >
                   {/* Question Stem */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-start gap-2.5">
-                      <span className="w-6 h-6 rounded-lg bg-blue-50 text-blue-700 font-extrabold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex items-start gap-3">
+                      <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 font-extrabold text-sm flex items-center justify-center flex-shrink-0 mt-0.5">
                         {qIndex + 1}
                       </span>
-                      <div className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+                      <div className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
                         <LatexRenderer content={q.question} />
                       </div>
                     </div>
@@ -376,7 +376,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                   </div>
 
                   {/* Options */}
-                  <div className="space-y-2 mt-3">
+                  <div className="space-y-3 mt-4">
                     {q.options.map((optionText, optIndex) => {
                       const isOptionSelected = selectedOpt === optIndex;
                       const isOptionCorrect = optIndex === q.correctIndex;
@@ -397,9 +397,9 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                           key={optIndex}
                           type="button"
                           onClick={() => handleSelectOption(q.id, optIndex)}
-                          className={`w-full text-left p-3 rounded-xl border text-xs sm:text-sm transition-all flex items-start justify-between gap-3 cursor-pointer ${btnStyle}`}
+                          className={`w-full text-left p-4 sm:p-5 rounded-2xl border-2 text-base sm:text-lg transition-all flex items-start justify-between gap-3 cursor-pointer ${btnStyle}`}
                         >
-                          <div className="flex items-start gap-2.5">
+                          <div className="flex items-start gap-3">
                             <span className="font-bold text-slate-500 uppercase mt-0.5">
                               {String.fromCharCode(65 + optIndex)}.
                             </span>
@@ -411,10 +411,10 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                           {isAnswered && (
                             <div className="flex-shrink-0 mt-0.5">
                               {isOptionCorrect && (
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 stroke-[2.5]" />
                               )}
                               {isOptionSelected && !isCorrect && (
-                                <XCircle className="w-4 h-4 text-rose-500 stroke-[2.5]" />
+                                <XCircle className="w-5 h-5 text-rose-500 stroke-[2.5]" />
                               )}
                             </div>
                           )}
@@ -425,7 +425,7 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
 
                   {/* Explanation Toggle & Content */}
                   {q.explanation && (
-                    <div className="mt-3 pt-3 border-t border-slate-100">
+                    <div className="mt-4 pt-4 border-t border-slate-100">
                       <button
                         type="button"
                         onClick={() =>
@@ -434,15 +434,15 @@ export const QuestionBankView: React.FC<QuestionBankViewProps> = ({
                             [q.id]: !prev[q.id],
                           }))
                         }
-                        className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+                        className="text-xs sm:text-sm font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 cursor-pointer"
                       >
-                        {isExplShowing ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        {isExplShowing ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         <span>{isExplShowing ? 'Hide Explanation' : 'Show Explanation & Derivation'}</span>
                       </button>
 
                       {isExplShowing && (
-                        <div className="mt-2 p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-700 leading-relaxed animate-in fade-in duration-150">
-                          <p className="font-bold text-slate-900 mb-1 flex items-center gap-1">
+                        <div className="mt-3 p-4 bg-slate-50 rounded-2xl border border-slate-200/80 text-sm sm:text-base text-slate-700 leading-relaxed animate-in fade-in duration-150">
+                          <p className="font-bold text-slate-900 mb-1.5 flex items-center gap-1.5">
                             <span className="text-emerald-600">Correct Answer:</span>
                             <span>Option {String.fromCharCode(65 + q.correctIndex)}</span>
                           </p>
