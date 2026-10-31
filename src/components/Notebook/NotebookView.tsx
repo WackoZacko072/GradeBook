@@ -7,8 +7,6 @@ interface NotebookViewProps {
   sources?: NoteSource[];
   notes?: NoteItem[];
   classes?: ClassItem[];
-  selectedSourceId?: string | null;
-  onSelectSource?: (sourceId: string | null) => void;
   selectedNoteId?: string | null;
   onSelectNote?: (noteId: string | null) => void;
   onAddNote?: (newNote: NoteItem) => void;
@@ -29,8 +27,6 @@ interface NotebookViewProps {
 export const NotebookView: React.FC<NotebookViewProps> = ({
   sources = [],
   classes = [],
-  selectedSourceId,
-  onSelectSource,
   onAddSource,
   onUpdateSource,
   onDeleteSource,
@@ -42,8 +38,6 @@ export const NotebookView: React.FC<NotebookViewProps> = ({
     <SourcesLibrary
       sources={sources}
       classes={classes}
-      selectedSourceId={selectedSourceId}
-      onSelectSource={onSelectSource}
       onAddSource={onAddSource}
       onUpdateSource={onUpdateSource}
       onDeleteSource={onDeleteSource}
