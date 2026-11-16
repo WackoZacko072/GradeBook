@@ -1,18 +1,16 @@
 import React from 'react';
-import { BookOpen, BookMarked, BookCheck } from 'lucide-react';
+import { BookOpen, BookMarked } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  activeTab: 'gradebook' | 'notebook' | 'slab' | 'gemini';
-  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => void;
+  activeTab: 'gradebook' | 'notebook' | 'gemini';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'gemini') => void;
   selectedClassId: string | null;
   classCount?: number;
   noteCount?: number;
-  slabCount?: number;
   onSelectOverview: () => void;
   onOpenMobileDrawer?: () => void;
   onOpenAddClass?: () => void;
   onOpenAddNote?: () => void;
-  onOpenAddSlab?: () => void;
   onOpenTranscript?: () => void;
   onOpenAiAdvisor: () => void;
 }
@@ -22,7 +20,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onChangeTab,
   selectedClassId: _selectedClassId,
   noteCount = 0,
-  slabCount = 0,
   onSelectOverview,
   onOpenAiAdvisor,
 }) => {
@@ -93,39 +90,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         </span>
       </button>
 
-      {/* 3. Office Tab (renamed from Slab) */}
-      <button
-        type="button"
-        onClick={() => onChangeTab('slab')}
-        className="flex flex-col items-center justify-center flex-1 cursor-pointer transition-all group"
-      >
-        <div
-          className={`w-14 h-8 rounded-full flex items-center justify-center relative transition-all ${
-            activeTab === 'slab'
-              ? 'bg-[#c2e7ff] dark:bg-[#004a77] text-[#001d35] dark:text-[#c2e7ff]'
-              : 'text-slate-600 dark:text-[#9aa0a6] hover:bg-slate-200/50 dark:hover:bg-white/5'
-          }`}
-        >
-          <BookCheck className="w-5 h-5 stroke-[2]" />
-          {slabCount > 0 && (
-            <span className="absolute top-0.5 right-2 px-1 text-[9px] font-bold bg-blue-600 dark:bg-blue-400 text-white dark:text-black rounded-full leading-tight">
-              {slabCount}
-            </span>
-          )}
-        </div>
-        <span
-          className={`text-[11px] mt-0.5 tracking-tight ${
-            activeTab === 'slab'
-              ? 'font-semibold text-slate-900 dark:text-white'
-              : 'font-normal text-slate-600 dark:text-[#9aa0a6]'
-          }`}
-          style={{ fontFamily: "'Google Sans', sans-serif" }}
-        >
-          Office
-        </span>
-      </button>
-
-      {/* 4. Gemini Tab */}
+      {/* 3. Gemini Tab */}
       <button
         type="button"
         onClick={() => {

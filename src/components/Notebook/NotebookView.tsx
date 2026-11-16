@@ -17,11 +17,6 @@ interface NotebookViewProps {
   onDeleteSource: (sourceId: string) => void;
   onAddClass?: (name: string, color?: string) => void;
   onOpenSlateAi?: (prompt?: string) => void;
-  onOpenCreateSlab?: (options: {
-    prompt: string;
-    type: 'flashcards' | 'mcq' | 'both';
-    sourceId: string;
-  }) => void;
 }
 
 export const NotebookView: React.FC<NotebookViewProps> = ({
@@ -32,7 +27,6 @@ export const NotebookView: React.FC<NotebookViewProps> = ({
   onDeleteSource,
   onAddClass,
   onOpenSlateAi,
-  onOpenCreateSlab,
 }) => {
   return (
     <SourcesLibrary
@@ -43,7 +37,6 @@ export const NotebookView: React.FC<NotebookViewProps> = ({
       onDeleteSource={onDeleteSource}
       onAddClass={onAddClass}
       onOpenSlateAi={onOpenSlateAi}
-      onOpenCreateSlab={onOpenCreateSlab}
     />
   );
 };

@@ -4,7 +4,6 @@ import {
   X,
   BookOpen,
   BookMarked,
-  BookCheck,
   FileText,
   MessageSquare,
   Edit2,
@@ -13,30 +12,25 @@ import {
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem, NoteSource } from '../types/notebook';
-import type { SlabItem } from '../types/slab';
 import type { ChatSession } from './AiAdvisorDrawer';
 import { calculateClassAverage } from '../utils/gradeCalculations';
 
 interface SidebarProps {
-  activeTab: 'gradebook' | 'notebook' | 'slab' | 'gemini';
-  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => void;
+  activeTab: 'gradebook' | 'notebook' | 'gemini';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'gemini') => void;
   classes: ClassItem[];
   notes?: NoteItem[];
   sources?: NoteSource[];
-  slabs?: SlabItem[];
   chatSessions?: ChatSession[];
   selectedClassId: string | null;
   selectedNoteId?: string | null;
-  selectedSlabId?: string | null;
   selectedChatSessionId?: string | null;
   onSelectOverview: () => void;
   onSelectClass: (id: string) => void;
   onSelectNote?: (id: string | null) => void;
-  onSelectSlab?: (id: string | null) => void;
   onSelectChatSession?: (id: string) => void;
   onOpenAddClass: () => void;
   onCreateNote?: () => void;
-  onCreateSlab?: () => void;
   onCreateChatSession?: () => void;
   onRenameChatSession?: (id: string, title: string) => void;
   onDeleteChatSession?: (id: string) => void;
@@ -53,20 +47,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   classes,
   notes: _notes = [],
   sources = [],
-  slabs = [],
   chatSessions = [],
   selectedClassId,
   selectedNoteId = null,
-  selectedSlabId = null,
   selectedChatSessionId = null,
   onSelectOverview,
   onSelectClass,
   onSelectNote,
-  onSelectSlab,
   onSelectChatSession,
   onOpenAddClass,
   onCreateNote: _onCreateNote,
-  onCreateSlab,
   onCreateChatSession,
   onRenameChatSession,
   onDeleteChatSession,
@@ -155,36 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </button>
 
-            {/* Office Tab Button */}
-            <button
-              type="button"
-              onClick={() => {
-                onChangeTab('slab');
-                onSelectSlab?.(null);
-                onMobileClose?.();
-              }}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] google-btn-press ${
-                activeTab === 'slab' && selectedSlabId === null
-                  ? 'bg-violet-50 dark:bg-[#c58af9]/15 text-violet-700 dark:text-[#c58af9] shadow-2xs font-bold'
-                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <BookCheck className="w-4 h-4 text-violet-600 dark:text-[#c58af9]" />
-                <span>Office</span>
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
-                  activeTab === 'slab' && selectedSlabId === null
-                    ? 'bg-violet-600 dark:bg-[#c58af9] text-white dark:text-[#0f0f10]'
-                    : 'bg-slate-200 dark:bg-[#202123] text-slate-600 dark:text-[#9aa0a6]'
-                }`}
-              >
-                {slabs.length}
-              </span>
-            </button>
-
-            {/* Gemini Tab Button (same format as Gradebook, Notebook, Office) */}
+            {/* Gemini Tab Button (same format as Gradebook, Notebook) */}
             <button
               type="button"
               onClick={() => {
@@ -334,71 +295,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </>
                       )}
                     </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        ) : activeTab === 'slab' ? (
-          <div>
-            <div className="flex items-center justify-between px-3 mb-2">
-              <span className="text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider">
-                Your Office Sets
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  onCreateSlab?.();
-                  onMobileClose?.();
-                }}
-                className="p-1.5 text-slate-400 dark:text-[#80868b] hover:text-slate-800 dark:hover:text-[#e8eaed] hover:bg-slate-200/80 dark:hover:bg-[#202123] rounded-lg transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center google-btn-press"
-                title="Create new Office set"
-                aria-label="Create new Office set"
-              >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
-              </button>
-            </div>
-
-            <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
-              {slabs.length === 0 ? (
-                <div className="px-3 py-3 text-center bg-slate-100/60 dark:bg-[#18191b] rounded-xl border border-dashed border-slate-200 dark:border-[#26282a]">
-                  <p className="text-xs text-slate-500 dark:text-[#9aa0a6] font-medium">No study sets yet</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onCreateSlab?.();
-                      onMobileClose?.();
-                    }}
-                    className="mt-2 text-xs font-bold text-violet-600 dark:text-[#c58af9] hover:underline inline-flex items-center gap-1 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Create Set
-                  </button>
-                </div>
-              ) : (
-                slabs.map((s) => {
-                  const isSelected = selectedSlabId === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => {
-                        onSelectSlab?.(s.id);
-                        onMobileClose?.();
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer min-h-[44px] google-btn-press ${
-                        isSelected
-                          ? 'bg-white dark:bg-[#202123] text-violet-700 dark:text-[#c58af9] font-semibold shadow-2xs border border-slate-200/80 dark:border-[#26282a]'
-                          : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123] font-medium'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 truncate">
-                        <BookCheck className="w-4 h-4 text-violet-500 dark:text-[#c58af9] flex-shrink-0" />
-                        <span className="truncate">{s.title || 'Untitled Set'}</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400 dark:text-[#80868b] flex-shrink-0">
-                        {s.flashcards.length + s.mcqs.length}
-                      </span>
-                    </button>
                   );
                 })
               )}
@@ -556,25 +452,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span className="text-[10px] tracking-tight">Sources</span>
         </button>
 
-        {/* 3. Office / Slab */}
-        <button
-          type="button"
-          onClick={() => {
-            onChangeTab('slab');
-            onSelectSlab?.(null);
-          }}
-          title={`Office (${slabs.length} sets)`}
-          className={`w-14 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer google-btn-press ${
-            activeTab === 'slab' && selectedSlabId === null
-              ? 'bg-violet-50 dark:bg-[#c58af9]/20 text-violet-700 dark:text-[#c58af9] font-bold shadow-2xs'
-              : 'text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
-          }`}
-        >
-          <BookCheck className="w-5 h-5 stroke-[2]" />
-          <span className="text-[10px] tracking-tight">Office</span>
-        </button>
-
-        {/* 4. Gemini */}
+        {/* 3. Gemini */}
         <button
           type="button"
           onClick={() => {

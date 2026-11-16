@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem, NoteSource } from '../types/notebook';
-import type { SlabItem } from '../types/slab';
 import {
   streamSlateAiMessage,
   type ChatMessage,
@@ -88,7 +87,6 @@ interface AiAdvisorDrawerProps {
   classes: ClassItem[];
   notes?: NoteItem[];
   sources?: NoteSource[];
-  slabs?: SlabItem[];
   sessions?: ChatSession[];
   currentSessionId?: string;
   onUpdateSessions?: React.Dispatch<React.SetStateAction<ChatSession[]>>;
@@ -96,7 +94,7 @@ interface AiAdvisorDrawerProps {
   prefilledPrompt?: string;
   initialPrompt?: string;
   onClearPrefilledPrompt?: () => void;
-  onNavigate?: (tab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => void;
+  onNavigate?: (tab: 'gradebook' | 'notebook' | 'gemini') => void;
   onNavigateToClass?: (id: string) => void;
   onNavigateToNote?: (id: string) => void;
 }

@@ -27,11 +27,6 @@ interface SourcesLibraryProps {
   onDeleteSource: (sourceId: string) => void;
   onAddClass?: (name: string, color?: string) => void;
   onOpenSlateAi?: (prompt?: string) => void;
-  onOpenCreateSlab?: (options: {
-    prompt: string;
-    type: 'flashcards' | 'mcq' | 'both';
-    sourceId: string;
-  }) => void;
 }
 
 export const SourcesLibrary: React.FC<SourcesLibraryProps> = ({

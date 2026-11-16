@@ -32,13 +32,12 @@ import { calculateClassAverage, getGradingScale } from '../utils/gradeCalculatio
 import type { ClassItem } from '../types/grade';
 
 interface HeaderProps {
-  activeTab: 'gradebook' | 'notebook' | 'slab' | 'gemini';
-  onChangeTab: (tab: 'gradebook' | 'notebook' | 'slab' | 'gemini') => void;
+  activeTab: 'gradebook' | 'notebook' | 'gemini';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'gemini') => void;
   classes: ClassItem[];
   onSelectClass?: (id: string) => void;
   onSelectOverview?: () => void;
   noteCount?: number;
-  slabCount?: number;
   onOpenTranscript: () => void;
   onOpenFirebaseConfig: () => void;
   onOpenMobileDrawer?: () => void;
@@ -55,7 +54,6 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectClass,
   onSelectOverview,
   noteCount: _noteCount = 0,
-  slabCount: _slabCount = 0,
   onOpenTranscript,
   onOpenFirebaseConfig,
   onOpenMobileDrawer: _onOpenMobileDrawer,
