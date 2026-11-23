@@ -647,12 +647,16 @@ export const App: React.FC = () => {
                 ) : (
                   <Dashboard
                     classes={classes}
+                    todos={todos}
+                    todoLists={todoLists}
                     onSelectClass={(id) => {
                       setSlideDirection('right');
                       setSelectedClassId(id);
                     }}
                     onOpenAddClass={() => setIsAddModalOpen(true)}
                     onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
+                    onToggleTodo={handleUpdateTodo}
+                    onOpenTodo={() => handleTabChange('todo')}
                     viewMode={viewMode}
                   />
                 )}

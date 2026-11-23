@@ -6,8 +6,13 @@ import {
   Sliders,
   ChevronRight,
   GraduationCap,
+  CheckSquare,
+  Check,
+  Calendar,
+  Sparkles,
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
+import type { TodoItem, TodoList } from '../types/todo';
 import {
   calculateClassAverage,
   calculateOverallAverage,
@@ -18,17 +23,25 @@ import {
 
 interface DashboardProps {
   classes: ClassItem[];
+  todos?: TodoItem[];
+  todoLists?: TodoList[];
   onSelectClass: (classId: string) => void;
   onOpenAddClass: () => void;
   onOpenAiAdvisor?: (prompt?: string) => void;
+  onToggleTodo?: (todo: TodoItem) => void;
+  onOpenTodo?: () => void;
   viewMode?: 'grid' | 'list';
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   classes,
+  todos = [],
+  todoLists = [],
   onSelectClass,
   onOpenAddClass,
   onOpenAiAdvisor: _onOpenAiAdvisor,
+  onToggleTodo,
+  onOpenTodo,
   viewMode = 'grid',
 }) => {
   // Overall calculations across all classes
@@ -401,6 +414,143 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <span className="font-semibold text-blue-600 dark:text-[#8ab4f8] group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
                       Open <ChevronRight className="w-3.5 h-3.5" />
                     </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 3. To-Do Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-500/20">
+              <CheckSquare className="w-4 h-4 stroke-[2.2]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2
+                  className="text-lg font-bold text-slate-900 dark:text-[#e8eaed] tracking-tight"
+                  style={{ fontFamily: "'Google Sans', sans-serif" }}
+                >
+                  To-Do
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-900/60">
+                  {todos.filter((t) => !t.completed).length} left
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {onOpenTodo && (
+            <button
+              type="button"
+              onClick={onOpenTodo}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-[#8ab4f8] hover:text-blue-700 dark:hover:text-[#aecbfa] px-3 py-1.5 rounded-xl hover:bg-blue-50 dark:hover:bg-[#8ab4f8]/10 transition-colors cursor-pointer"
+            >
+              <span>Open To-Do</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {todoLists.length === 0 ? (
+          <div className="bg-white dark:bg-[#18191b] rounded-2xl border border-dashed border-slate-200 dark:border-[#26282a] p-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Sparkles className="w-5 h-5 text-slate-400" />
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6]">
+                No To-Do lists yet. Create one in the To-Do tab to track assignments and reminders here.
+              </p>
+            </div>
+            {onOpenTodo && (
+              <button
+                type="button"
+                onClick={onOpenTodo}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex-shrink-0 cursor-pointer google-btn-press"
+              >
+                Go to To-Do
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {todoLists.map((list) => {
+              const pendingTasks = todos.filter((t) => t.classId === list.id && !t.completed);
+              return (
+                <div
+                  key={list.id}
+                  className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] shadow-2xs overflow-hidden flex flex-col"
+                >
+                  <div className="h-1 w-full" style={{ backgroundColor: list.color }} />
+                  <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100 dark:border-[#222426]">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: list.color }}
+                      />
+                      <h3 className="font-bold text-sm text-slate-900 dark:text-[#e8eaed] truncate">
+                        {list.name}
+                      </h3>
+                    </div>
+                    <span
+                      className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: `${list.color}18`, color: list.color }}
+                    >
+                      {pendingTasks.length}
+                    </span>
+                  </div>
+
+                  <div className="p-3 space-y-1.5 flex-1">
+                    {pendingTasks.length === 0 ? (
+                      <p className="text-xs text-slate-400 dark:text-[#80868b] py-3 text-center">
+                        All caught up
+                      </p>
+                    ) : (
+                      pendingTasks.slice(0, 5).map((todo) => (
+                        <div
+                          key={todo.id}
+                          className="flex items-start gap-2.5 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-[#202123] transition-colors"
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onToggleTodo?.({
+                                ...todo,
+                                completed: true,
+                                completedAt: Date.now(),
+                              })
+                            }
+                            className="mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform cursor-pointer"
+                            style={{ borderColor: list.color }}
+                            title="Mark complete"
+                          >
+                            <Check className="w-2.5 h-2.5 text-transparent hover:text-current" style={{ color: list.color }} />
+                          </button>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-slate-800 dark:text-[#e8eaed] leading-snug break-words">
+                              {todo.title}
+                            </p>
+                            {todo.dueDate && (
+                              <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 dark:text-[#9aa0a6] mt-0.5">
+                                <Calendar className="w-2.5 h-2.5" />
+                                {todo.dueDate}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    {pendingTasks.length > 5 && onOpenTodo && (
+                      <button
+                        type="button"
+                        onClick={onOpenTodo}
+                        className="w-full text-center text-[11px] font-semibold text-blue-600 dark:text-[#8ab4f8] pt-1 hover:underline cursor-pointer"
+                      >
+                        +{pendingTasks.length - 5} more
+                      </button>
+                    )}
                   </div>
                 </div>
               );
