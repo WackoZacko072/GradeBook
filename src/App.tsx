@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { ClassItem } from './types/grade';
 import type { NoteItem, NoteSource } from './types/notebook';
-import type { TodoItem } from './types/todo';
+import type { TodoItem, TodoList } from './types/todo';
 import {
   getInitialClasses,
   subscribeToUserClasses,
@@ -47,10 +47,14 @@ import {
 } from './utils/userSettingsService';
 import {
   getInitialTodos,
+  getInitialTodoLists,
   subscribeToUserTodos,
   saveUserTodos,
+  saveUserTodoLists,
   loadGuestTodos,
   saveGuestTodos,
+  loadGuestTodoLists,
+  saveGuestTodoLists,
 } from './utils/todoService';
 
 const TAB_INDEX_MAP: Record<'gradebook' | 'notebook' | 'todo' | 'gemini', number> = {
@@ -79,8 +83,18 @@ export const App: React.FC = () => {
   // Sources Hub state (replaces notetaking)
   const [sources, setSources] = useState<NoteSource[]>(() => getInitialSources());
 
-  // To-Do tasks state
+  // To-Do tasks and lists state
   const [todos, setTodos] = useState<TodoItem[]>(() => getInitialTodos());
+  const [todoLists, setTodoLists] = useState<TodoList[]>(() => {
+    const saved = getInitialTodoLists();
+    if (saved !== null) return saved;
+    return getInitialClasses().map((c) => ({
+      id: c.id,
+      name: c.name,
+      color: c.color || '#2563EB',
+      createdAt: c.createdAt || Date.now(),
+    }));
+  });
 
   const [_isDataLoaded, setIsDataLoaded] = useState(false);
   const [_gradingScaleTick, setGradingScaleTick] = useState(0);
@@ -165,17 +179,27 @@ export const App: React.FC = () => {
     };
   }, [user, authLoading]);
 
-  // Real-time synchronization for To-Do tasks
+  // Real-time synchronization for To-Do tasks and lists
   useEffect(() => {
     let unsubscribeTodos: (() => void) | null = null;
     if (authLoading) return;
 
     if (user) {
-      unsubscribeTodos = subscribeToUserTodos(user.uid, (cloudTodos) => {
-        setTodos(cloudTodos);
-      });
+      unsubscribeTodos = subscribeToUserTodos(
+        user.uid,
+        (cloudTodos) => {
+          setTodos(cloudTodos);
+        },
+        (cloudLists) => {
+          setTodoLists(cloudLists);
+        }
+      );
     } else {
       setTodos(loadGuestTodos());
+      const guestLists = loadGuestTodoLists();
+      if (guestLists !== null) {
+        setTodoLists(guestLists);
+      }
     }
 
     return () => {
@@ -394,6 +418,45 @@ export const App: React.FC = () => {
     });
   };
 
+  const persistTodoLists = (nextLists: TodoList[]) => {
+    if (user) {
+      void saveUserTodoLists(user.uid, nextLists);
+    } else {
+      saveGuestTodoLists(nextLists);
+    }
+  };
+
+  const handleAddTodoList = (newList: TodoList) => {
+    setTodoLists((prev) => {
+      const next = [...prev, newList];
+      persistTodoLists(next);
+      return next;
+    });
+  };
+
+  const handleDeleteTodoList = (listId: string) => {
+    setTodoLists((prev) => {
+      const next = prev.filter((l) => l.id !== listId);
+      persistTodoLists(next);
+      return next;
+    });
+    setTodos((prev) => {
+      const next = prev.filter((t) => t.classId !== listId);
+      persistTodos(next);
+      return next;
+    });
+  };
+
+  const handleReorderTodoLists = (newLists: TodoList[]) => {
+    setTodoLists(newLists);
+    persistTodoLists(newLists);
+  };
+
+  const handleReorderTodos = (newTodos: TodoItem[]) => {
+    setTodos(newTodos);
+    persistTodos(newTodos);
+  };
+
   const handleClearCompletedTodos = () => {
     setTodos((prev) => {
       const next = prev.filter((t) => !t.completed);
@@ -481,6 +544,7 @@ export const App: React.FC = () => {
           notes={notes}
           sources={sources}
           todos={todos}
+          todoLists={todoLists}
           chatSessions={chatSessions}
           selectedClassId={selectedClassId}
           selectedNoteId={selectedNoteId}
@@ -558,13 +622,16 @@ export const App: React.FC = () => {
                   />
                 ) : activeTab === 'todo' ? (
                   <TodoView
-                    classes={classes}
+                    lists={todoLists}
                     todos={todos}
+                    onAddList={handleAddTodoList}
+                    onDeleteList={handleDeleteTodoList}
+                    onReorderLists={handleReorderTodoLists}
                     onAddTodo={handleAddTodo}
                     onUpdateTodo={handleUpdateTodo}
                     onDeleteTodo={handleDeleteTodo}
+                    onReorderTodos={handleReorderTodos}
                     onClearCompleted={handleClearCompletedTodos}
-                    onOpenAddClass={() => setIsAddModalOpen(true)}
                   />
                 ) : activeClass ? (
                   <ClassDetail

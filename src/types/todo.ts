@@ -1,12 +1,16 @@
-export type TodoPriority = 'low' | 'medium' | 'high';
+export interface TodoList {
+  id: string;
+  name: string;
+  color: string;
+  createdAt: number;
+}
 
 export interface TodoItem {
   id: string;
-  classId: string; // ClassItem['id'] or 'general'
+  classId: string; // References TodoList['id']
   title: string;
   completed: boolean;
   dueDate?: string; // YYYY-MM-DD
-  priority?: TodoPriority;
   createdAt: number;
   completedAt?: number;
 }

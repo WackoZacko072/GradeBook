@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem, NoteSource } from '../types/notebook';
-import type { TodoItem } from '../types/todo';
+import type { TodoItem, TodoList } from '../types/todo';
 import type { ChatSession } from './AiAdvisorDrawer';
 import { calculateClassAverage } from '../utils/gradeCalculations';
 
@@ -24,6 +24,7 @@ interface SidebarProps {
   notes?: NoteItem[];
   sources?: NoteSource[];
   todos?: TodoItem[];
+  todoLists?: TodoList[];
   chatSessions?: ChatSession[];
   selectedClassId: string | null;
   selectedNoteId?: string | null;
@@ -51,6 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   notes: _notes = [],
   sources = [],
   todos = [],
+  todoLists = [],
   chatSessions = [],
   selectedClassId,
   selectedNoteId = null,
@@ -336,39 +338,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <div className="flex items-center justify-between px-3 mb-2">
               <span className="text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider">
-                Tasks by Class
+                Your To-Do Lists
               </span>
             </div>
             <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
-              {classes.map((c) => {
-                const pendingCount = todos.filter((t) => t.classId === c.id && !t.completed).length;
-                return (
-                  <div
-                    key={c.id}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-slate-700 dark:text-[#c4c7c5]"
-                  >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: c.color || '#2563EB' }}
-                      />
-                      <span className="truncate font-medium">{c.name}</span>
+              {todoLists.length === 0 ? (
+                <p className="px-3 py-2 text-xs text-slate-400 dark:text-[#80868b]">No lists yet</p>
+              ) : (
+                todoLists.map((list) => {
+                  const pendingCount = todos.filter((t) => t.classId === list.id && !t.completed).length;
+                  return (
+                    <div
+                      key={list.id}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-slate-700 dark:text-[#c4c7c5]"
+                    >
+                      <div className="flex items-center gap-2.5 truncate">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: list.color || '#2563EB' }}
+                        />
+                        <span className="truncate font-medium">{list.name}</span>
+                      </div>
+                      <span className="text-xs font-bold text-slate-500 dark:text-[#9aa0a6] flex-shrink-0">
+                        {pendingCount}
+                      </span>
                     </div>
-                    <span className="text-xs font-bold text-slate-500 dark:text-[#9aa0a6] flex-shrink-0">
-                      {pendingCount}
-                    </span>
-                  </div>
-                );
-              })}
-              <div className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-slate-700 dark:text-[#c4c7c5]">
-                <div className="flex items-center gap-2.5 truncate">
-                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
-                  <span className="truncate font-medium">General</span>
-                </div>
-                <span className="text-xs font-bold text-slate-500 dark:text-[#9aa0a6] flex-shrink-0">
-                  {todos.filter((t) => t.classId === 'general' && !t.completed).length}
-                </span>
-              </div>
+                  );
+                })
+              )}
             </div>
           </div>
         ) : activeTab === 'gradebook' ? (

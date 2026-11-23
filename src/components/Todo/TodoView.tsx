@@ -4,50 +4,39 @@ import {
   Plus,
   Trash2,
   Calendar,
-  Flag,
   CheckCircle2,
   Edit2,
   X,
   Sparkles,
+  GripVertical,
 } from 'lucide-react';
-import type { ClassItem } from '../../types/grade';
-import type { TodoItem, TodoPriority } from '../../types/todo';
+import type { TodoItem, TodoList } from '../../types/todo';
 
 interface TodoViewProps {
-  classes: ClassItem[];
+  lists: TodoList[];
   todos: TodoItem[];
+  onAddList: (list: TodoList) => void;
+  onDeleteList: (listId: string) => void;
+  onReorderLists: (newLists: TodoList[]) => void;
   onAddTodo: (todo: TodoItem) => void;
   onUpdateTodo: (todo: TodoItem) => void;
   onDeleteTodo: (id: string) => void;
+  onReorderTodos: (newTodos: TodoItem[]) => void;
   onClearCompleted: () => void;
-  onOpenAddClass?: () => void;
 }
 
 type FilterMode = 'all' | 'active' | 'completed';
 
-const PRIORITY_WEIGHT: Record<TodoPriority, number> = {
-  high: 3,
-  medium: 2,
-  low: 1,
-};
-
-const PRIORITY_STYLES: Record<TodoPriority, { label: string; badge: string; dot: string }> = {
-  high: {
-    label: 'High',
-    badge: 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border-rose-200/70 dark:border-rose-900/60',
-    dot: 'bg-rose-500',
-  },
-  medium: {
-    label: 'Med',
-    badge: 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border-amber-200/70 dark:border-amber-900/60',
-    dot: 'bg-amber-500',
-  },
-  low: {
-    label: 'Low',
-    badge: 'bg-slate-100 dark:bg-[#202123] text-slate-500 dark:text-[#9aa0a6] border-slate-200/70 dark:border-[#2c2e33]',
-    dot: 'bg-slate-400',
-  },
-};
+const LIST_COLOR_OPTIONS = [
+  '#2563EB', // Blue
+  '#7C3AED', // Violet
+  '#10B981', // Emerald
+  '#F59E0B', // Amber
+  '#EC4899', // Pink
+  '#06B6D4', // Cyan
+  '#EF4444', // Red
+  '#6366F1', // Indigo
+];
 
 function formatDueDate(dateStr?: string): { text: string; isOverdue: boolean; isToday: boolean } | null {
   if (!dateStr) return null;
@@ -74,66 +63,73 @@ function formatDueDate(dateStr?: string): { text: string; isOverdue: boolean; is
   };
 }
 
-interface ColumnDef {
-  id: string;
-  name: string;
-  color: string;
-  isGeneral?: boolean;
-}
-
 export const TodoView: React.FC<TodoViewProps> = ({
-  classes,
+  lists,
   todos,
+  onAddList,
+  onDeleteList,
+  onReorderLists,
   onAddTodo,
   onUpdateTodo,
   onDeleteTodo,
+  onReorderTodos,
   onClearCompleted,
-  onOpenAddClass,
 }) => {
   const [filter, setFilter] = useState<FilterMode>('all');
   const [draftTitles, setDraftTitles] = useState<Record<string, string>>({});
   const [draftDates, setDraftDates] = useState<Record<string, string>>({});
-  const [draftPriorities, setDraftPriorities] = useState<Record<string, TodoPriority>>({});
-  const [expandedOptionsCol, setExpandedOptionsCol] = useState<string | null>(null);
+  const [expandedDateCol, setExpandedDateCol] = useState<string | null>(null);
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
 
-  const columns: ColumnDef[] = [
-    ...classes.map((c) => ({
-      id: c.id,
-      name: c.name,
-      color: c.color || '#2563EB',
-    })),
-    {
-      id: 'general',
-      name: 'General',
-      color: '#6366F1',
-      isGeneral: true,
-    },
-  ];
+  // Add To-Do List form state
+  const [isAddingList, setIsAddingList] = useState(false);
+  const [newListName, setNewListName] = useState('');
+  const [newListColor, setNewListColor] = useState(LIST_COLOR_OPTIONS[0]);
+
+  // Drag & Drop state for lists and tasks
+  const [draggedListId, setDraggedListId] = useState<string | null>(null);
+  const [dragOverListId, setDragOverListId] = useState<string | null>(null);
+  const [draggedTodoId, setDraggedTodoId] = useState<string | null>(null);
+  const [dragOverTodoId, setDragOverTodoId] = useState<string | null>(null);
 
   const totalPending = todos.filter((t) => !t.completed).length;
   const totalCompleted = todos.filter((t) => t.completed).length;
 
-  const handleCreateTask = (colId: string, e?: React.FormEvent) => {
+  const handleCreateList = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = newListName.trim();
+    if (!trimmed) return;
+
+    onAddList({
+      id: `todolist_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      name: trimmed,
+      color: newListColor,
+      createdAt: Date.now(),
+    });
+    setNewListName('');
+    setNewListColor(LIST_COLOR_OPTIONS[(lists.length + 1) % LIST_COLOR_OPTIONS.length]);
+    setIsAddingList(false);
+  };
+
+  const handleCreateTask = (listId: string, e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const title = (draftTitles[colId] || '').trim();
+    const title = (draftTitles[listId] || '').trim();
     if (!title) return;
 
     const newTodo: TodoItem = {
       id: `todo_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      classId: colId,
+      classId: listId,
       title,
       completed: false,
-      dueDate: draftDates[colId] || undefined,
-      priority: draftPriorities[colId] || 'medium',
+      dueDate: draftDates[listId] || undefined,
       createdAt: Date.now(),
     };
 
     onAddTodo(newTodo);
-    setDraftTitles((prev) => ({ ...prev, [colId]: '' }));
-    setDraftDates((prev) => ({ ...prev, [colId]: '' }));
-    setExpandedOptionsCol(null);
+    setDraftTitles((prev) => ({ ...prev, [listId]: '' }));
+    setDraftDates((prev) => ({ ...prev, [listId]: '' }));
+    setExpandedDateCol(null);
   };
 
   const handleToggleComplete = (todo: TodoItem) => {
@@ -141,16 +137,6 @@ export const TodoView: React.FC<TodoViewProps> = ({
       ...todo,
       completed: !todo.completed,
       completedAt: !todo.completed ? Date.now() : undefined,
-    });
-  };
-
-  const handleCyclePriority = (todo: TodoItem) => {
-    const order: TodoPriority[] = ['low', 'medium', 'high'];
-    const currentIdx = order.indexOf(todo.priority || 'medium');
-    const nextPriority = order[(currentIdx + 1) % order.length];
-    onUpdateTodo({
-      ...todo,
-      priority: nextPriority,
     });
   };
 
@@ -165,6 +151,107 @@ export const TodoView: React.FC<TodoViewProps> = ({
       onUpdateTodo({ ...todo, title: trimmed });
     }
     setEditingTodoId(null);
+  };
+
+  // List Drag & Drop Handlers
+  const handleListDragStart = (e: React.DragEvent, listId: string) => {
+    if (draggedTodoId) return;
+    setDraggedListId(listId);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', `list:${listId}`);
+  };
+
+  const handleListDragOver = (e: React.DragEvent, targetListId: string) => {
+    e.preventDefault();
+    if (draggedListId && draggedListId !== targetListId) {
+      setDragOverListId(targetListId);
+    } else if (draggedTodoId) {
+      setDragOverListId(targetListId);
+    }
+  };
+
+  const handleListDrop = (e: React.DragEvent, targetListId: string) => {
+    e.preventDefault();
+    if (draggedListId && draggedListId !== targetListId) {
+      const fromIdx = lists.findIndex((l) => l.id === draggedListId);
+      const toIdx = lists.findIndex((l) => l.id === targetListId);
+      if (fromIdx !== -1 && toIdx !== -1) {
+        const reordered = [...lists];
+        const [moved] = reordered.splice(fromIdx, 1);
+        reordered.splice(toIdx, 0, moved);
+        onReorderLists(reordered);
+      }
+    } else if (draggedTodoId) {
+      // Dropped a task onto a list column (move to end of that list)
+      const fromIdx = todos.findIndex((t) => t.id === draggedTodoId);
+      if (fromIdx !== -1) {
+        const updatedTodos = [...todos];
+        const [movedTodo] = updatedTodos.splice(fromIdx, 1);
+        updatedTodos.push({ ...movedTodo, classId: targetListId });
+        onReorderTodos(updatedTodos);
+      }
+    }
+    setDraggedListId(null);
+    setDragOverListId(null);
+    setDraggedTodoId(null);
+    setDragOverTodoId(null);
+  };
+
+  // Task Drag & Drop Handlers
+  const handleTodoDragStart = (e: React.DragEvent, todoId: string) => {
+    e.stopPropagation();
+    setDraggedTodoId(todoId);
+    setDraggedListId(null);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', `todo:${todoId}`);
+  };
+
+  const handleTodoDragOver = (e: React.DragEvent, targetTodoId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggedTodoId && draggedTodoId !== targetTodoId) {
+      setDragOverTodoId(targetTodoId);
+    }
+  };
+
+  const handleTodoDrop = (e: React.DragEvent, targetTodo: TodoItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!draggedTodoId || draggedTodoId === targetTodo.id) {
+      setDraggedTodoId(null);
+      setDragOverTodoId(null);
+      setDragOverListId(null);
+      return;
+    }
+
+    const fromIdx = todos.findIndex((t) => t.id === draggedTodoId);
+    if (fromIdx === -1) return;
+
+    const updatedTodos = [...todos];
+    const [movedTodo] = updatedTodos.splice(fromIdx, 1);
+    const updatedMoved: TodoItem = {
+      ...movedTodo,
+      classId: targetTodo.classId,
+    };
+
+    const toIdx = updatedTodos.findIndex((t) => t.id === targetTodo.id);
+    if (toIdx === -1) {
+      updatedTodos.push(updatedMoved);
+    } else {
+      updatedTodos.splice(toIdx, 0, updatedMoved);
+    }
+
+    onReorderTodos(updatedTodos);
+    setDraggedTodoId(null);
+    setDragOverTodoId(null);
+    setDragOverListId(null);
+  };
+
+  const clearDragState = () => {
+    setDraggedListId(null);
+    setDragOverListId(null);
+    setDraggedTodoId(null);
+    setDragOverTodoId(null);
   };
 
   return (
@@ -184,7 +271,7 @@ export const TodoView: React.FC<TodoViewProps> = ({
             </span>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-1">
-            Organize homework, exam prep, and deadlines side-by-side for every class.
+            Drag to reorder lists or tasks, and keep track of everything side-by-side.
           </p>
         </div>
 
@@ -217,248 +304,325 @@ export const TodoView: React.FC<TodoViewProps> = ({
             </button>
           )}
 
-          {onOpenAddClass && (
-            <button
-              type="button"
-              onClick={onOpenAddClass}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-[#8ab4f8] dark:hover:bg-[#aecbfa] dark:text-[#0f0f10] transition-colors cursor-pointer shadow-2xs google-btn-press"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Add Class</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setIsAddingList((prev) => !prev)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-[#8ab4f8] dark:hover:bg-[#aecbfa] dark:text-[#0f0f10] transition-colors cursor-pointer shadow-2xs google-btn-press"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Add To-Do</span>
+          </button>
         </div>
       </div>
 
-      {/* Side-by-Side Class Columns Board */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 items-start">
-        {columns.map((col) => {
-          const colTodos = todos
-            .filter((t) => t.classId === col.id)
-            .filter((t) => {
-              if (filter === 'active') return !t.completed;
-              if (filter === 'completed') return t.completed;
-              return true;
-            })
-            .sort((a, b) => {
-              if (a.completed !== b.completed) return a.completed ? 1 : -1;
-              const pDiff =
-                PRIORITY_WEIGHT[b.priority || 'medium'] -
-                PRIORITY_WEIGHT[a.priority || 'medium'];
-              if (pDiff !== 0) return pDiff;
-              if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
-              if (a.dueDate) return -1;
-              if (b.dueDate) return 1;
-              return b.createdAt - a.createdAt;
-            });
-
-          const pendingInCol = todos.filter((t) => t.classId === col.id && !t.completed).length;
-          const draftTitle = draftTitles[col.id] || '';
-          const draftPriority = draftPriorities[col.id] || 'medium';
-          const isOptionsOpen = expandedOptionsCol === col.id;
-
-          return (
-            <div
-              key={col.id}
-              className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] shadow-2xs overflow-hidden flex flex-col min-h-[280px] transition-all hover:shadow-sm"
+      {/* Inline Add To-Do List Creator */}
+      {isAddingList && (
+        <form
+          onSubmit={handleCreateList}
+          className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/90 dark:border-[#26282a] p-4 shadow-sm flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-scale"
+        >
+          <input
+            type="text"
+            autoFocus
+            value={newListName}
+            onChange={(e) => setNewListName(e.target.value)}
+            placeholder="List name (e.g., Pre-Calc 12, Exam Prep...)"
+            className="flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#121314] border border-slate-200 dark:border-[#2c2e33] text-sm text-slate-900 dark:text-[#e8eaed] placeholder-slate-400 focus:outline-hidden focus:border-blue-500"
+          />
+          <div className="flex items-center gap-1.5">
+            {LIST_COLOR_OPTIONS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setNewListColor(c)}
+                className={`w-6 h-6 rounded-full transition-transform cursor-pointer ${
+                  newListColor === c ? 'scale-115 ring-2 ring-offset-2 ring-slate-400 dark:ring-offset-[#18191b]' : 'opacity-75 hover:opacity-100'
+                }`}
+                style={{ backgroundColor: c }}
+                aria-label={`Select color ${c}`}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="submit"
+              disabled={!newListName.trim()}
+              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 transition-colors cursor-pointer"
             >
-              {/* Colored Top Accent Bar */}
-              <div className="h-1.5 w-full" style={{ backgroundColor: col.color }} />
+              Create List
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAddingList(false)}
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-[#e8eaed] hover:bg-slate-100 dark:hover:bg-[#202123] cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+      )}
 
-              {/* Column Header */}
-              <div className="px-4 pt-3.5 pb-2.5 flex items-center justify-between gap-2 border-b border-slate-100 dark:border-[#222426]">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: col.color }}
-                  />
-                  <h2
-                    className="font-bold text-base text-slate-900 dark:text-[#e8eaed] truncate"
-                    style={{ fontFamily: "'Google Sans', sans-serif" }}
-                  >
-                    {col.name}
-                  </h2>
-                </div>
-                <span
-                  className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-                  style={{
-                    backgroundColor: `${col.color}18`,
-                    color: col.color,
-                  }}
-                >
-                  {pendingInCol}
-                </span>
-              </div>
+      {/* Empty State if all lists were deleted */}
+      {lists.length === 0 ? (
+        <div className="bg-white dark:bg-[#18191b] rounded-3xl border border-dashed border-slate-300 dark:border-[#2c2e33] py-16 px-6 flex flex-col items-center text-center">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-[#8ab4f8] flex items-center justify-center mb-3">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <h2 className="text-base font-bold text-slate-900 dark:text-[#e8eaed]">No To-Do lists yet</h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-1 max-w-sm">
+            Click <span className="font-semibold text-slate-700 dark:text-[#e8eaed]">Add To-Do</span> to create your first list column.
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsAddingList(true)}
+            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 cursor-pointer google-btn-press"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>Add To-Do</span>
+          </button>
+        </div>
+      ) : (
+        /* Side-by-Side Class Columns Board */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 items-start">
+          {lists.map((col) => {
+            const rawColTodos = todos.filter((t) => t.classId === col.id);
+            const activeTodos = rawColTodos.filter((t) => !t.completed);
+            const completedTodos = rawColTodos.filter((t) => t.completed);
 
-              {/* Quick Add Form */}
-              <form
-                onSubmit={(e) => handleCreateTask(col.id, e)}
-                className="px-3 pt-3 pb-2 border-b border-slate-100/80 dark:border-[#222426]/80 bg-slate-50/50 dark:bg-[#141517]"
+            const colTodos =
+              filter === 'active'
+                ? activeTodos
+                : filter === 'completed'
+                ? completedTodos
+                : [...activeTodos, ...completedTodos];
+
+            const pendingInCol = activeTodos.length;
+            const draftTitle = draftTitles[col.id] || '';
+            const isDateOpen = expandedDateCol === col.id;
+            const isListDragTarget = dragOverListId === col.id && draggedListId !== col.id;
+
+            return (
+              <div
+                key={col.id}
+                draggable
+                onDragStart={(e) => handleListDragStart(e, col.id)}
+                onDragOver={(e) => handleListDragOver(e, col.id)}
+                onDrop={(e) => handleListDrop(e, col.id)}
+                onDragEnd={clearDragState}
+                className={`bg-white dark:bg-[#18191b] rounded-2xl border shadow-2xs overflow-hidden flex flex-col min-h-[280px] transition-all ${
+                  draggedListId === col.id
+                    ? 'opacity-50 scale-[0.98] border-blue-400'
+                    : isListDragTarget
+                    ? 'ring-2 ring-blue-500 border-blue-500 dark:ring-[#8ab4f8] dark:border-[#8ab4f8]'
+                    : 'border-slate-200/80 dark:border-[#26282a] hover:shadow-sm'
+                }`}
               >
-                <div className="flex items-center gap-1.5 bg-white dark:bg-[#1e1f20] border border-slate-200/90 dark:border-[#2c2e33] focus-within:border-blue-500 dark:focus-within:border-[#8ab4f8] rounded-xl px-2.5 py-1.5 transition-colors">
-                  <input
-                    type="text"
-                    value={draftTitle}
-                    onChange={(e) =>
-                      setDraftTitles((prev) => ({ ...prev, [col.id]: e.target.value }))
-                    }
-                    onFocus={() => setExpandedOptionsCol(col.id)}
-                    placeholder={`Add task...`}
-                    className="flex-1 min-w-0 text-xs sm:text-sm bg-transparent text-slate-800 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#80868b] focus:outline-hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setExpandedOptionsCol((prev) => (prev === col.id ? null : col.id))
-                    }
-                    className={`p-1 rounded-lg transition-colors cursor-pointer ${
-                      isOptionsOpen || draftDates[col.id]
-                        ? 'text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-blue-950/40'
-                        : 'text-slate-400 hover:text-slate-600 dark:hover:text-[#c4c7c5]'
-                    }`}
-                    title="Due date & priority"
-                  >
-                    <Calendar className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!draftTitle.trim()}
-                    className="p-1 rounded-lg text-white disabled:opacity-30 transition-all cursor-pointer flex-shrink-0"
-                    style={{ backgroundColor: col.color }}
-                    title="Add task"
-                  >
-                    <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                  </button>
+                {/* Colored Top Accent Bar */}
+                <div className="h-1.5 w-full" style={{ backgroundColor: col.color }} />
+
+                {/* Column Header (Drag Handle + Title + Count + Delete List) */}
+                <div className="px-3.5 pt-3 pb-2.5 flex items-center justify-between gap-2 border-b border-slate-100 dark:border-[#222426] cursor-grab active:cursor-grabbing group/header">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <GripVertical className="w-4 h-4 text-slate-300 dark:text-[#5f6368] group-hover/header:text-slate-500 dark:group-hover/header:text-[#9aa0a6] flex-shrink-0" />
+                    <span
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: col.color }}
+                    />
+                    <h2
+                      className="font-bold text-base text-slate-900 dark:text-[#e8eaed] truncate"
+                      style={{ fontFamily: "'Google Sans', sans-serif" }}
+                    >
+                      {col.name}
+                    </h2>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span
+                      className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: `${col.color}18`,
+                        color: col.color,
+                      }}
+                    >
+                      {pendingInCol}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteList(col.id)}
+                      className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                      title={`Delete ${col.name} list`}
+                      aria-label={`Delete ${col.name} list`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
-                {isOptionsOpen && (
-                  <div className="flex items-center justify-between gap-2 mt-2 px-0.5">
+                {/* Quick Add Form */}
+                <form
+                  onSubmit={(e) => handleCreateTask(col.id, e)}
+                  className="px-3 pt-3 pb-2 border-b border-slate-100/80 dark:border-[#222426]/80 bg-slate-50/50 dark:bg-[#141517]"
+                >
+                  <div className="flex items-center gap-1.5 bg-white dark:bg-[#1e1f20] border border-slate-200/90 dark:border-[#2c2e33] focus-within:border-blue-500 dark:focus-within:border-[#8ab4f8] rounded-xl px-2.5 py-1.5 transition-colors">
                     <input
-                      type="date"
-                      value={draftDates[col.id] || ''}
+                      type="text"
+                      value={draftTitle}
                       onChange={(e) =>
-                        setDraftDates((prev) => ({ ...prev, [col.id]: e.target.value }))
+                        setDraftTitles((prev) => ({ ...prev, [col.id]: e.target.value }))
                       }
-                      className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-[#2c2e33] text-slate-600 dark:text-[#c4c7c5] focus:outline-hidden"
+                      placeholder="Add task..."
+                      className="flex-1 min-w-0 text-xs sm:text-sm bg-transparent text-slate-800 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#80868b] focus:outline-hidden"
                     />
-                    <div className="flex items-center gap-1">
-                      {(['low', 'medium', 'high'] as TodoPriority[]).map((p) => (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedDateCol((prev) => (prev === col.id ? null : col.id))
+                      }
+                      className={`p-1 rounded-lg transition-colors cursor-pointer ${
+                        isDateOpen || draftDates[col.id]
+                          ? 'text-blue-600 dark:text-[#8ab4f8] bg-blue-50 dark:bg-blue-950/40'
+                          : 'text-slate-400 hover:text-slate-600 dark:hover:text-[#c4c7c5]'
+                      }`}
+                      title="Add due date"
+                    >
+                      <Calendar className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!draftTitle.trim()}
+                      className="p-1 rounded-lg text-white disabled:opacity-30 transition-all cursor-pointer flex-shrink-0"
+                      style={{ backgroundColor: col.color }}
+                      title="Add task"
+                    >
+                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                    </button>
+                  </div>
+
+                  {isDateOpen && (
+                    <div className="mt-2 px-0.5 flex items-center justify-between gap-2">
+                      <input
+                        type="date"
+                        value={draftDates[col.id] || ''}
+                        onChange={(e) =>
+                          setDraftDates((prev) => ({ ...prev, [col.id]: e.target.value }))
+                        }
+                        className="text-[11px] px-2 py-1 rounded-lg bg-white dark:bg-[#1e1f20] border border-slate-200 dark:border-[#2c2e33] text-slate-600 dark:text-[#c4c7c5] focus:outline-hidden"
+                      />
+                      {draftDates[col.id] && (
                         <button
-                          key={p}
                           type="button"
                           onClick={() =>
-                            setDraftPriorities((prev) => ({ ...prev, [col.id]: p }))
+                            setDraftDates((prev) => ({ ...prev, [col.id]: '' }))
                           }
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${
-                            draftPriority === p
-                              ? PRIORITY_STYLES[p].badge
-                              : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-[#c4c7c5]'
-                          }`}
+                          className="text-[11px] text-slate-400 hover:text-slate-600 cursor-pointer"
                         >
-                          {PRIORITY_STYLES[p].label}
+                          Clear
                         </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </form>
-
-              {/* Task Items List */}
-              <div className="p-3 flex-1 space-y-2 max-h-[420px] overflow-y-auto">
-                {colTodos.length === 0 ? (
-                  <div className="py-10 px-3 flex flex-col items-center justify-center text-center">
-                    <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#202123] flex items-center justify-center mb-2 text-slate-400 dark:text-[#80868b]">
-                      {filter === 'completed' ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : (
-                        <Sparkles className="w-4 h-4" />
                       )}
                     </div>
-                    <p className="text-xs font-medium text-slate-400 dark:text-[#80868b]">
-                      {filter === 'completed'
-                        ? 'No completed tasks'
-                        : 'All caught up'}
-                    </p>
-                  </div>
-                ) : (
-                  colTodos.map((todo) => {
-                    const dueInfo = formatDueDate(todo.dueDate);
-                    const priority = todo.priority || 'medium';
-                    const isEditing = editingTodoId === todo.id;
+                  )}
+                </form>
 
-                    return (
-                      <div
-                        key={todo.id}
-                        className={`group flex items-start gap-2.5 p-2.5 rounded-xl border transition-all ${
-                          todo.completed
-                            ? 'bg-slate-50/70 dark:bg-[#131416] border-slate-100 dark:border-[#202123] opacity-70'
-                            : 'bg-white dark:bg-[#1e1f20] border-slate-200/70 dark:border-[#2a2c30] hover:border-slate-300 dark:hover:border-[#3a3d42] shadow-2xs'
-                        }`}
-                      >
-                        {/* Custom Check Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleToggleComplete(todo)}
-                          className="mt-0.5 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
-                          style={
-                            todo.completed
-                              ? { backgroundColor: col.color, borderColor: col.color }
-                              : { borderColor: col.color }
-                          }
-                          aria-label={todo.completed ? 'Mark incomplete' : 'Mark complete'}
+                {/* Task Items List */}
+                <div className="p-3 flex-1 space-y-2 max-h-[420px] overflow-y-auto">
+                  {colTodos.length === 0 ? (
+                    <div className="py-10 px-3 flex flex-col items-center justify-center text-center">
+                      <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#202123] flex items-center justify-center mb-2 text-slate-400 dark:text-[#80868b]">
+                        {filter === 'completed' ? (
+                          <CheckCircle2 className="w-4 h-4" />
+                        ) : (
+                          <Sparkles className="w-4 h-4" />
+                        )}
+                      </div>
+                      <p className="text-xs font-medium text-slate-400 dark:text-[#80868b]">
+                        {filter === 'completed' ? 'No completed tasks' : 'All caught up'}
+                      </p>
+                    </div>
+                  ) : (
+                    colTodos.map((todo) => {
+                      const dueInfo = formatDueDate(todo.dueDate);
+                      const isEditing = editingTodoId === todo.id;
+                      const isTodoDragTarget = dragOverTodoId === todo.id && draggedTodoId !== todo.id;
+
+                      return (
+                        <div
+                          key={todo.id}
+                          draggable={!isEditing}
+                          onDragStart={(e) => handleTodoDragStart(e, todo.id)}
+                          onDragOver={(e) => handleTodoDragOver(e, todo.id)}
+                          onDrop={(e) => handleTodoDrop(e, todo)}
+                          onDragEnd={clearDragState}
+                          className={`group flex items-start gap-2 p-2.5 rounded-xl border transition-all ${
+                            draggedTodoId === todo.id
+                              ? 'opacity-40 scale-[0.98] border-blue-400'
+                              : isTodoDragTarget
+                              ? 'border-blue-500 ring-2 ring-blue-500/30 dark:border-[#8ab4f8]'
+                              : todo.completed
+                              ? 'bg-slate-50/70 dark:bg-[#131416] border-slate-100 dark:border-[#202123] opacity-70'
+                              : 'bg-white dark:bg-[#1e1f20] border-slate-200/70 dark:border-[#2a2c30] hover:border-slate-300 dark:hover:border-[#3a3d42] shadow-2xs'
+                          }`}
                         >
-                          {todo.completed && <Check className="w-3 h-3 text-white stroke-[3]" />}
-                        </button>
+                          {/* Task Drag Handle */}
+                          <div
+                            className="mt-0.5 text-slate-300 dark:text-[#5f6368] group-hover:text-slate-400 dark:group-hover:text-[#9aa0a6] cursor-grab active:cursor-grabbing flex-shrink-0"
+                            title="Drag to reorder"
+                          >
+                            <GripVertical className="w-3.5 h-3.5" />
+                          </div>
 
-                        {/* Task Title + Meta */}
-                        <div className="flex-1 min-w-0">
-                          {isEditing ? (
-                            <div className="flex items-center gap-1">
-                              <input
-                                type="text"
-                                autoFocus
-                                value={editingTitle}
-                                onChange={(e) => setEditingTitle(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') handleSaveEdit(todo);
-                                  if (e.key === 'Escape') setEditingTodoId(null);
-                                }}
-                                onBlur={() => handleSaveEdit(todo)}
-                                className="w-full text-xs sm:text-sm px-2 py-0.5 rounded-md bg-slate-50 dark:bg-[#121314] border border-blue-500 text-slate-900 dark:text-[#e8eaed] focus:outline-hidden"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setEditingTodoId(null)}
-                                className="p-0.5 text-slate-400 hover:text-slate-600"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          ) : (
-                            <p
-                              onDoubleClick={() => handleStartEdit(todo)}
-                              className={`text-xs sm:text-sm leading-snug break-words ${
-                                todo.completed
-                                  ? 'line-through text-slate-400 dark:text-[#80868b]'
-                                  : 'text-slate-800 dark:text-[#e8eaed] font-medium'
-                              }`}
-                            >
-                              {todo.title}
-                            </p>
-                          )}
+                          {/* Custom Check Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleComplete(todo)}
+                            className="mt-0.5 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
+                            style={
+                              todo.completed
+                                ? { backgroundColor: col.color, borderColor: col.color }
+                                : { borderColor: col.color }
+                            }
+                            aria-label={todo.completed ? 'Mark incomplete' : 'Mark complete'}
+                          >
+                            {todo.completed && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                          </button>
 
-                          {/* Badges Row */}
-                          {(dueInfo || priority === 'high') && !isEditing && (
-                            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                              {priority === 'high' && !todo.completed && (
-                                <span
-                                  className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${PRIORITY_STYLES.high.badge}`}
+                          {/* Task Title + Due Date */}
+                          <div className="flex-1 min-w-0">
+                            {isEditing ? (
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  value={editingTitle}
+                                  onChange={(e) => setEditingTitle(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSaveEdit(todo);
+                                    if (e.key === 'Escape') setEditingTodoId(null);
+                                  }}
+                                  onBlur={() => handleSaveEdit(todo)}
+                                  className="w-full text-xs sm:text-sm px-2 py-0.5 rounded-md bg-slate-50 dark:bg-[#121314] border border-blue-500 text-slate-900 dark:text-[#e8eaed] focus:outline-hidden"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingTodoId(null)}
+                                  className="p-0.5 text-slate-400 hover:text-slate-600"
                                 >
-                                  <span className={`w-1.5 h-1.5 rounded-full ${PRIORITY_STYLES.high.dot}`} />
-                                  High
-                                </span>
-                              )}
-                              {dueInfo && (
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <p
+                                onDoubleClick={() => handleStartEdit(todo)}
+                                className={`text-xs sm:text-sm leading-snug break-words ${
+                                  todo.completed
+                                    ? 'line-through text-slate-400 dark:text-[#80868b]'
+                                    : 'text-slate-800 dark:text-[#e8eaed] font-medium'
+                                }`}
+                              >
+                                {todo.title}
+                              </p>
+                            )}
+
+                            {dueInfo && !isEditing && (
+                              <div className="mt-1.5">
                                 <span
                                   className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${
                                     todo.completed
@@ -473,49 +637,41 @@ export const TodoView: React.FC<TodoViewProps> = ({
                                   <Calendar className="w-2.5 h-2.5" />
                                   {dueInfo.text}
                                 </span>
-                              )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Hover Actions */}
+                          {!isEditing && (
+                            <div className="flex items-center gap-0.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEdit(todo)}
+                                className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] rounded-md transition-colors cursor-pointer"
+                                title="Edit task"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onDeleteTodo(todo.id)}
+                                className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-md transition-colors cursor-pointer"
+                                title="Delete task"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
                             </div>
                           )}
                         </div>
-
-                        {/* Hover Actions */}
-                        {!isEditing && (
-                          <div className="flex items-center gap-0.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => handleCyclePriority(todo)}
-                              className="p-1 text-slate-400 hover:text-amber-500 rounded-md transition-colors cursor-pointer"
-                              title={`Priority: ${PRIORITY_STYLES[priority].label} (click to cycle)`}
-                            >
-                              <Flag className="w-3 h-3" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleStartEdit(todo)}
-                              className="p-1 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] rounded-md transition-colors cursor-pointer"
-                              title="Edit task"
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => onDeleteTodo(todo.id)}
-                              className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-md transition-colors cursor-pointer"
-                              title="Delete task"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
+                      );
+                    })
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
