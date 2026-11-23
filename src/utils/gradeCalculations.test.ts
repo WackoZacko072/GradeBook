@@ -222,22 +222,22 @@ export function runAllCalculationTests(): boolean {
       name: 'Class A',
       credits: 4,
       createdAt: 1,
-      categories: [{ id: 'cat', name: 'All', weight: 100, assessments: [{ id: 'a1', name: 'Exam', score: 95 }] }], // 95% = 4.0
+      categories: [{ id: 'cat', name: 'All', weight: 100, assessments: [{ id: 'a1', name: 'Exam', score: 90 }] }], // 90% = A (4.0)
     },
     {
       id: 'c2',
       name: 'Class B',
       credits: 3,
       createdAt: 2,
-      categories: [{ id: 'cat', name: 'All', weight: 100, assessments: [{ id: 'a2', name: 'Exam', score: 85 }] }], // 85% = 3.0
+      categories: [{ id: 'cat', name: 'All', weight: 100, assessments: [{ id: 'a2', name: 'Exam', score: 80 }] }], // 80% = B (3.0)
     },
   ];
   // Quality points: (4.0 * 4) + (3.0 * 3) = 16 + 9 = 25 / 7 = 3.57 GPA
   const gpaResult = calculateCumulativeGPA(testClassesForGPA);
   assert(gpaResult.gpa === 3.57, `15. Weighted GPA calculated accurately: got ${gpaResult.gpa} (expected 3.57)`);
   assert(gpaResult.totalCredits === 7, `15. Total credits calculated accurately: got ${gpaResult.totalCredits} (expected 7)`);
-  assert(getGradePoint(95) === 4.0, '15. Grade point for 95% is 4.0');
-  assert(getGradePoint(88) === 3.3, '15. Grade point for 88% is 3.3');
+  assert(getGradePoint(90) === 4.0, '15. Grade point for 90% is 4.0');
+  assert(getGradePoint(68) === 2.5, '15. Grade point for 68% is 2.5');
 
   console.log('=====================================================');
   if (allPassed) {

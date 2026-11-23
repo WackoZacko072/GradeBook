@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Send,
+  ArrowUp,
   Trash2,
-  User,
   AlertCircle,
   Copy,
   Check,
   Plus,
-  MessageSquare,
   X,
   Edit2,
 } from 'lucide-react';
@@ -314,11 +312,10 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-145px)] md:h-[calc(100vh-110px)] bg-white dark:bg-[#18191b] rounded-3xl border border-slate-200/80 dark:border-[#26282a] shadow-2xs overflow-hidden transition-colors">
-      {/* Chat Session Top Bar */}
-      <div className="px-4 sm:px-6 py-3 border-b border-slate-100 dark:border-[#26282a] flex items-center justify-between gap-3 flex-shrink-0 bg-slate-50/50 dark:bg-[#202123]/50">
+    <div className="flex flex-col h-full w-full bg-[#FAFBFD] dark:bg-[#0f0f10] transition-colors">
+      {/* Minimal Gemini-style Top Bar */}
+      <div className="px-4 sm:px-8 py-2.5 flex items-center justify-between gap-3 flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <MessageSquare className="w-4 h-4 text-blue-600 dark:text-[#8ab4f8] flex-shrink-0" />
           {isEditingTitle ? (
             <div className="flex items-center gap-1.5">
               <input
@@ -331,7 +328,7 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
                   if (e.key === 'Escape') setIsEditingTitle(false);
                 }}
                 onBlur={handleSaveRename}
-                className="text-xs sm:text-sm font-bold px-2.5 py-1 bg-white dark:bg-[#0f0f10] border border-blue-500 rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-hidden"
+                className="text-sm font-medium px-2.5 py-1 bg-white dark:bg-[#1e1f20] border border-blue-500 rounded-lg text-slate-900 dark:text-[#e8eaed] focus:outline-hidden"
               />
               <button
                 type="button"
@@ -354,21 +351,21 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
             <button
               type="button"
               onClick={handleStartRename}
-              className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-800 dark:text-[#e8eaed] hover:text-blue-600 dark:hover:text-[#8ab4f8] transition-colors truncate cursor-pointer group"
+              className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-[#c4c7c5] hover:text-slate-950 dark:hover:text-[#e8eaed] transition-colors truncate cursor-pointer group py-1 px-2 rounded-lg hover:bg-slate-200/50 dark:hover:bg-[#1e1f20]"
               title="Click to rename chat"
             >
               <span className="truncate max-w-[200px] sm:max-w-xs">{currentSession.title}</span>
-              <Edit2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-[#8ab4f8] flex-shrink-0" />
+              <Edit2 className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           {sessions.length > 1 && (
             <button
               type="button"
               onClick={() => handleDeleteSession(currentSession.id)}
-              className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+              className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-200/60 dark:hover:bg-[#1e1f20] rounded-full transition-colors cursor-pointer"
               title="Delete current chat"
             >
               <Trash2 className="w-4 h-4" />
@@ -377,169 +374,175 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
           <button
             type="button"
             onClick={handleNewChat}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-[#8ab4f8] bg-blue-50 dark:bg-[#8ab4f8]/15 hover:bg-blue-100 dark:hover:bg-[#8ab4f8]/25 rounded-xl transition-colors cursor-pointer google-btn-press"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-[#e3e3e3] bg-[#eef2f6] dark:bg-[#1e1f20] hover:bg-slate-200/80 dark:hover:bg-[#282a2c] rounded-full transition-colors cursor-pointer google-btn-press"
             title="Start a new chat"
           >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>New Chat</span>
+            <Plus className="w-3.5 h-3.5 stroke-[2.2]" />
+            <span>New chat</span>
           </button>
         </div>
       </div>
 
       {/* Error Banner */}
       {errorBanner && (
-        <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border-b border-rose-200 dark:border-rose-900 text-rose-900 dark:text-rose-200 text-xs flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
-            <span className="leading-relaxed">{errorBanner}</span>
+        <div className="max-w-3xl w-full mx-auto px-4 mb-2 flex-shrink-0">
+          <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 rounded-2xl text-rose-900 dark:text-rose-200 text-xs flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
+              <span className="leading-relaxed">{errorBanner}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setErrorBanner(null)}
+              className="text-rose-800 dark:text-rose-300 font-bold hover:text-rose-950 dark:hover:text-rose-100 text-xs ml-2 cursor-pointer flex-shrink-0"
+            >
+              Dismiss
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setErrorBanner(null)}
-            className="text-rose-800 dark:text-rose-300 font-bold hover:text-rose-950 dark:hover:text-rose-100 text-xs ml-2 cursor-pointer flex-shrink-0"
-          >
-            Dismiss
-          </button>
         </div>
       )}
 
-      {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 bg-[#FAFBFD]/50 dark:bg-[#0f0f10]/40">
-        <div className="max-w-4xl w-full mx-auto space-y-6">
+      {/* Messages Scroll Area (Edge-to-Edge Canvas like actual Gemini) */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-2 pb-6">
+        <div className="max-w-3xl w-full mx-auto h-full flex flex-col">
           {currentSession.messages.length === 0 ? (
             /* Clean Gemini-Style Welcome Canvas */
-            <div className="py-12 sm:py-16 px-4 flex flex-col items-center text-center max-w-xl mx-auto">
-              <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-4">
-                <img src="/gemini-icon.png" alt="Gemini" className="w-11 h-11 object-contain" />
+            <div className="my-auto py-10 px-2 flex flex-col items-start sm:items-center sm:text-center max-w-2xl mx-auto w-full">
+              <div className="flex items-center gap-3 mb-3">
+                <img src="/gemini-icon.png" alt="Gemini" className="w-9 h-9 object-contain" />
+                <h2
+                  className="font-medium text-3xl sm:text-4xl tracking-tight bg-gradient-to-r from-[#4285F4] via-[#9B72CB] to-[#D96570] bg-clip-text text-transparent"
+                  style={{ fontFamily: "'Google Sans', sans-serif" }}
+                >
+                  Hello, Student
+                </h2>
               </div>
-              <h2
-                className="font-semibold text-slate-900 dark:text-[#e8eaed] text-2xl tracking-tight"
-                style={{ fontFamily: "'Google Sans', sans-serif" }}
-              >
-                Ask Gemini
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-[#9aa0a6] mt-2 leading-relaxed">
-                Ask anything about your grades, university admissions, course marks, or study sources.
+              <p className="text-base sm:text-xl font-normal text-slate-500 dark:text-[#9aa0a6] mb-8">
+                How can I help with your classes or studying today?
               </p>
+
+              {/* Quick Suggestion Chips */}
+              <div className="flex flex-wrap sm:justify-center gap-2.5 w-full">
+                {[
+                  'How are my grades looking?',
+                  'What do I need on my final?',
+                  'Help me build a study plan',
+                  'Summarize my study sources',
+                ].map((chip) => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => handleSend(chip)}
+                    className="px-4 py-2.5 rounded-2xl bg-[#f0f4f9] dark:bg-[#1e1f20] hover:bg-[#e3e9f2] dark:hover:bg-[#282a2c] text-xs sm:text-sm font-medium text-slate-700 dark:text-[#e3e3e3] transition-colors cursor-pointer google-btn-press"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             /* Conversation Message Stream */
-            <>
+            <div className="space-y-8 py-4">
               {currentSession.messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start gap-4'}`}
                 >
                   {msg.role === 'model' && (
-                    <div className="w-8 h-8 rounded-xl bg-transparent flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-7 h-7 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <img src="/gemini-icon.png" alt="Gemini" className="w-6 h-6 object-contain" />
                     </div>
                   )}
 
-                  <div
-                    className={`rounded-2xl shadow-2xs relative group leading-relaxed ${
-                      msg.role === 'user'
-                        ? 'bg-blue-600 text-white p-4 max-w-2xl text-xs sm:text-sm font-medium rounded-br-xs'
-                        : 'bg-white dark:bg-[#18191b] border border-slate-200/90 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] p-5 sm:p-6 w-full max-w-3xl rounded-bl-xs'
-                    }`}
-                  >
-                    {msg.role === 'user' ? (
+                  {msg.role === 'user' ? (
+                    <div className="bg-[#e9eef6] dark:bg-[#282a2c] text-slate-900 dark:text-[#e3e3e3] px-5 py-3.5 rounded-3xl rounded-tr-sm max-w-[85%] sm:max-w-[75%] text-sm leading-relaxed">
                       <p className="whitespace-pre-wrap">{msg.content}</p>
-                    ) : (
-                      <>
-                        <MarkdownRenderer content={msg.content} />
-                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100 dark:border-[#26282a] text-[11px] text-slate-400 dark:text-[#9aa0a6]">
-                          <span className="flex items-center gap-1.5 text-slate-400 dark:text-[#9aa0a6]">
-                            <img src="/gemini-icon.png" alt="Gemini" className="w-3.5 h-3.5 object-contain" />
-                            <span>Gemini</span>
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyMessage(msg.id, msg.content)}
-                            className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-[#202123] font-semibold google-btn-press"
-                          >
-                            {copiedId === msg.id ? (
-                              <>
-                                <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                                <span className="text-emerald-600 dark:text-emerald-400">Copied!</span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="w-3.5 h-3.5" />
-                                <span>Copy</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {msg.role === 'user' && (
-                    <div className="w-8 h-8 rounded-xl bg-slate-200 dark:bg-[#202123] text-slate-600 dark:text-[#c4c7c5] flex items-center justify-center flex-shrink-0 mt-1">
-                      <User className="w-4 h-4" />
+                    </div>
+                  ) : (
+                    <div className="flex-1 min-w-0 text-slate-800 dark:text-[#e3e3e3] leading-relaxed group">
+                      <MarkdownRenderer content={msg.content} />
+                      <div className="flex items-center gap-2 mt-3 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyMessage(msg.id, msg.content)}
+                          className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#9aa0a6] hover:text-slate-900 dark:hover:text-[#e3e3e3] transition-colors cursor-pointer px-2.5 py-1.5 rounded-full hover:bg-slate-200/60 dark:hover:bg-[#1e1f20]"
+                          title="Copy response"
+                        >
+                          {copiedId === msg.id ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">Copied</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               ))}
 
-              {/* Streaming live response bubble */}
+              {/* Streaming live response */}
               {isLoading && streamingText && streamingText.length > 0 && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-8 h-8 rounded-xl bg-transparent flex items-center justify-center flex-shrink-0 mt-1">
+                <div className="flex justify-start gap-4">
+                  <div className="w-7 h-7 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <img src="/gemini-icon.png" alt="Gemini" className="w-6 h-6 object-contain" />
                   </div>
-                  <div className="bg-white dark:bg-[#18191b] border border-slate-200/90 dark:border-[#26282a] text-slate-800 dark:text-[#e8eaed] p-5 sm:p-6 w-full max-w-3xl rounded-2xl rounded-bl-xs shadow-2xs leading-relaxed">
+                  <div className="flex-1 min-w-0 text-slate-800 dark:text-[#e3e3e3] leading-relaxed">
                     <MarkdownRenderer content={streamingText} />
                     <span className="inline-block w-2 h-4 ml-1 bg-blue-500 rounded-xs animate-pulse align-middle" />
                   </div>
                 </div>
               )}
 
-              {/* Thinking skeleton before first token */}
+              {/* Thinking indicator before first token */}
               {isLoading && (!streamingText || streamingText.length === 0) && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-8 h-8 rounded-xl bg-transparent flex items-center justify-center flex-shrink-0 mt-1">
-                    <img src="/gemini-icon.png" alt="Gemini" className="w-6 h-6 object-contain animate-pulse" />
+                <div className="flex justify-start gap-4 items-center">
+                  <div className="w-7 h-7 flex items-center justify-center flex-shrink-0">
+                    <img src="/gemini-icon.png" alt="Gemini" className="w-6 h-6 object-contain animate-spin" style={{ animationDuration: '2.5s' }} />
                   </div>
-                  <div className="bg-white dark:bg-[#18191b] border border-slate-200 dark:border-[#26282a] rounded-2xl rounded-bl-xs p-4 shadow-2xs">
-                    <div className="flex items-center gap-2.5 text-slate-600 dark:text-[#c4c7c5] text-xs font-medium">
-                      <div className="w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-ping" />
-                      <span>Gemini is thinking...</span>
-                    </div>
-                  </div>
+                  <span className="text-sm text-slate-500 dark:text-[#9aa0a6] font-medium">
+                    Thinking...
+                  </span>
                 </div>
               )}
               <div ref={messagesEndRef} />
-            </>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Bottom Prompt Input Area */}
-      <div className="p-3 sm:p-4 bg-white dark:bg-[#18191b] border-t border-slate-200/80 dark:border-[#26282a] flex-shrink-0">
-        <div className="max-w-4xl w-full mx-auto">
-          <div className="relative flex items-center bg-slate-50 dark:bg-[#0f0f10] hover:bg-slate-100/70 dark:hover:bg-[#121314] focus-within:bg-white dark:focus-within:bg-[#0f0f10] focus-within:ring-2 focus-within:ring-blue-500 border border-slate-200 dark:border-[#26282a] rounded-2xl transition-all p-1.5 shadow-2xs">
+      {/* Bottom Floating Gemini Pill Input */}
+      <div className="px-4 sm:px-6 pb-3 pt-1 flex-shrink-0">
+        <div className="max-w-3xl w-full mx-auto">
+          <div className="relative flex items-end bg-[#f0f4f9] dark:bg-[#1e1f20] focus-within:bg-white dark:focus-within:bg-[#242628] border border-slate-200/70 dark:border-[#333537] rounded-[28px] transition-all px-4 py-2.5 shadow-2xs">
             <textarea
               ref={inputRef}
-              rows={2}
+              rows={1}
               value={inputPrompt}
               onChange={(e) => setInputPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask Gemini anything..."
+              placeholder="Ask Gemini"
               disabled={isLoading}
-              className="w-full resize-none pr-14 pl-3.5 py-2 text-xs sm:text-sm bg-transparent focus:outline-hidden text-slate-800 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#9aa0a6] leading-relaxed min-h-[48px]"
+              className="w-full resize-none pr-12 pl-1 py-1.5 text-sm bg-transparent focus:outline-hidden text-slate-900 dark:text-[#e3e3e3] placeholder-slate-500 dark:placeholder-[#9aa0a6] leading-relaxed max-h-40 min-h-[36px]"
             />
             <button
               type="button"
               disabled={!inputPrompt.trim() || isLoading}
               onClick={() => handleSend()}
-              className="absolute right-3 bottom-3 p-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-30 disabled:hover:bg-blue-600 text-white rounded-xl transition-all cursor-pointer shadow-xs google-btn-press"
+              className="absolute right-2.5 bottom-2.5 w-9 h-9 flex items-center justify-center bg-[#0b57d0] hover:bg-[#0842a0] dark:bg-[#a8c7fa] dark:hover:bg-[#8ab4f8] disabled:opacity-30 text-white dark:text-[#041e49] rounded-full transition-all cursor-pointer google-btn-press"
               aria-label="Send message"
             >
-              <Send className="w-4 h-4" />
+              <ArrowUp className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
+          <p className="text-[11px] text-center text-slate-400 dark:text-[#80868b] mt-2">
+            Gemini can make mistakes, so double-check important grade calculations.
+          </p>
         </div>
       </div>
     </div>

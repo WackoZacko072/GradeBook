@@ -21,6 +21,7 @@ import {
   saveGuestSources,
 } from './utils/sourceService';
 import { useAuth } from './context/AuthContext';
+import { useTheme } from './context/ThemeContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
@@ -28,7 +29,6 @@ import { ClassDetail } from './components/ClassDetail';
 import { NotebookView } from './components/Notebook/NotebookView';
 import { AddClassModal } from './components/AddClassModal';
 import { TranscriptModal } from './components/TranscriptModal';
-import { FirebaseConfigModal } from './components/FirebaseConfigModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import {
   AiAdvisorDrawer,
@@ -37,7 +37,12 @@ import {
   SESSIONS_STORAGE_KEY,
   type ChatSession,
 } from './components/AiAdvisorDrawer';
-import { subscribeToGradingScale } from './utils/gradeCalculations';
+import { subscribeToGradingScale, applyCloudGradingScale } from './utils/gradeCalculations';
+import {
+  setActiveSettingsUserId,
+  subscribeToUserSettings,
+  saveUserSettings,
+} from './utils/userSettingsService';
 
 const TAB_INDEX_MAP: Record<'gradebook' | 'notebook' | 'gemini', number> = {
   gradebook: 0,
@@ -47,6 +52,7 @@ const TAB_INDEX_MAP: Record<'gradebook' | 'notebook' | 'gemini', number> = {
 
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
+  const { setTheme } = useTheme();
 
   // Top level active tab: Gradebook vs Notebook vs Gemini
   const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook' | 'gemini'>('gradebook');
@@ -75,7 +81,6 @@ export const App: React.FC = () => {
   // Modals & Navigation state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isTranscriptModalOpen, setIsTranscriptModalOpen] = useState(false);
-  const [isFirebaseConfigOpen, setIsFirebaseConfigOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   // AI Advisor / Gemini Chat state
@@ -102,6 +107,7 @@ export const App: React.FC = () => {
   const handleToggleViewMode = (mode: 'grid' | 'list') => {
     setViewMode(mode);
     localStorage.setItem('gemini_gradebook_view_mode', mode);
+    void saveUserSettings({ viewMode: mode });
   };
 
   // YouTube-style collapsible desktop sidebar
@@ -113,9 +119,38 @@ export const App: React.FC = () => {
     setIsSidebarCollapsed((prev) => {
       const next = prev === 'expanded' ? 'collapsed' : 'expanded';
       localStorage.setItem('gradeslate_sidebar_collapsed', next);
+      void saveUserSettings({ sidebarCollapsed: next });
       return next;
     });
   };
+
+  // Sync account settings (grading scale, theme, viewMode, sidebar) across all devices
+  useEffect(() => {
+    if (authLoading) return;
+    setActiveSettingsUserId(user?.uid || null);
+    if (!user) return;
+
+    const unsubscribeSettings = subscribeToUserSettings(user.uid, (cloudSettings) => {
+      if (Array.isArray(cloudSettings.gradingScale) && cloudSettings.gradingScale.length > 0) {
+        applyCloudGradingScale(cloudSettings.gradingScale);
+      }
+      if (cloudSettings.theme === 'light' || cloudSettings.theme === 'dark') {
+        setTheme(cloudSettings.theme, false);
+      }
+      if (cloudSettings.viewMode === 'grid' || cloudSettings.viewMode === 'list') {
+        setViewMode(cloudSettings.viewMode);
+        localStorage.setItem('gemini_gradebook_view_mode', cloudSettings.viewMode);
+      }
+      if (cloudSettings.sidebarCollapsed === 'expanded' || cloudSettings.sidebarCollapsed === 'collapsed') {
+        setIsSidebarCollapsed(cloudSettings.sidebarCollapsed);
+        localStorage.setItem('gradeslate_sidebar_collapsed', cloudSettings.sidebarCollapsed);
+      }
+    });
+
+    return () => {
+      unsubscribeSettings();
+    };
+  }, [user, authLoading]);
 
   // Scroll ref for main content
   const mainContentRef = useRef<HTMLElement>(null);
@@ -355,7 +390,6 @@ export const App: React.FC = () => {
         }}
         noteCount={sources.length}
         onOpenTranscript={() => setIsTranscriptModalOpen(true)}
-        onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
         viewMode={viewMode}
@@ -413,62 +447,67 @@ export const App: React.FC = () => {
         {/* Main Content Area with Sliding Over Transition */}
         <main
           ref={mainContentRef}
-          className="flex-1 min-h-[calc(100vh-64px)] overflow-y-auto bg-[#FAFBFD] dark:bg-[#0f0f10] pb-24 md:pb-8 transition-colors duration-250"
+          className={`flex-1 bg-[#FAFBFD] dark:bg-[#0f0f10] transition-colors duration-250 ${
+            activeTab === 'gemini'
+              ? 'h-[calc(100vh-64px)] overflow-hidden pb-[68px] md:pb-0'
+              : 'min-h-[calc(100vh-64px)] overflow-y-auto pb-24 md:pb-8'
+          }`}
         >
-          <div className="w-full max-w-[1840px] mx-auto px-3 sm:px-6 md:px-8 xl:px-10 py-4 sm:py-7 transition-all duration-300">
-            <div
-              key={activeTab + (selectedClassId || '') + (selectedNoteId || '')}
-              className={slideDirection === 'right' ? 'animate-slide-right' : 'animate-slide-left'}
-            >
-              {activeTab === 'gemini' ? (
-                <AiAdvisorDrawer
-                  isOpen={true}
-                  classes={classes}
-                  notes={notes}
-                  sources={sources}
-                  sessions={chatSessions}
-                  currentSessionId={currentChatSessionId}
-                  onUpdateSessions={setChatSessions}
-                  onSelectSession={setCurrentChatSessionId}
-                  initialPrompt={prefilledAdvisorPrompt}
-                  onClearPrefilledPrompt={() => setPrefilledAdvisorPrompt(undefined)}
-                />
-              ) : activeTab === 'notebook' ? (
-                <NotebookView
-                  sources={sources}
-                  classes={classes}
-                  onAddSource={handleAddSource}
-                  onUpdateSource={handleUpdateSource}
-                  onDeleteSource={handleDeleteSource}
-                  onAddClass={handleQuickAddClass}
-                  onOpenSlateAi={(prompt) => handleOpenAiAdvisor(prompt)}
-                />
-              ) : activeClass ? (
-                <ClassDetail
-                  classItem={activeClass}
-                  onBack={() => {
-                    setSlideDirection('left');
-                    setSelectedClassId(null);
-                  }}
-                  onUpdateClass={handleUpdateClass}
-                  onDeleteClass={handleDeleteClass}
-                  onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
-                />
-              ) : (
-                <Dashboard
-                  classes={classes}
-                  onSelectClass={(id) => {
-                    setSlideDirection('right');
-                    setSelectedClassId(id);
-                  }}
-                  onOpenAddClass={() => setIsAddModalOpen(true)}
-                  onOpenFirebaseConfig={() => setIsFirebaseConfigOpen(true)}
-                  onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
-                  viewMode={viewMode}
-                />
-              )}
+          {activeTab === 'gemini' ? (
+            <AiAdvisorDrawer
+              isOpen={true}
+              classes={classes}
+              notes={notes}
+              sources={sources}
+              sessions={chatSessions}
+              currentSessionId={currentChatSessionId}
+              onUpdateSessions={setChatSessions}
+              onSelectSession={setCurrentChatSessionId}
+              initialPrompt={prefilledAdvisorPrompt}
+              onClearPrefilledPrompt={() => setPrefilledAdvisorPrompt(undefined)}
+            />
+          ) : (
+            <div className="w-full max-w-[1840px] mx-auto px-3 sm:px-6 md:px-8 xl:px-10 py-4 sm:py-7 transition-all duration-300">
+              <div
+                key={activeTab + (selectedClassId || '') + (selectedNoteId || '')}
+                className={slideDirection === 'right' ? 'animate-slide-right' : 'animate-slide-left'}
+              >
+                {activeTab === 'notebook' ? (
+                  <NotebookView
+                    sources={sources}
+                    classes={classes}
+                    onAddSource={handleAddSource}
+                    onUpdateSource={handleUpdateSource}
+                    onDeleteSource={handleDeleteSource}
+                    onAddClass={handleQuickAddClass}
+                    onOpenSlateAi={(prompt) => handleOpenAiAdvisor(prompt)}
+                  />
+                ) : activeClass ? (
+                  <ClassDetail
+                    classItem={activeClass}
+                    onBack={() => {
+                      setSlideDirection('left');
+                      setSelectedClassId(null);
+                    }}
+                    onUpdateClass={handleUpdateClass}
+                    onDeleteClass={handleDeleteClass}
+                    onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
+                  />
+                ) : (
+                  <Dashboard
+                    classes={classes}
+                    onSelectClass={(id) => {
+                      setSlideDirection('right');
+                      setSelectedClassId(id);
+                    }}
+                    onOpenAddClass={() => setIsAddModalOpen(true)}
+                    onOpenAiAdvisor={(prompt) => handleOpenAiAdvisor(prompt)}
+                    viewMode={viewMode}
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
 
@@ -504,11 +543,6 @@ export const App: React.FC = () => {
         isOpen={isTranscriptModalOpen}
         onClose={() => setIsTranscriptModalOpen(false)}
         classes={classes}
-      />
-
-      <FirebaseConfigModal
-        isOpen={isFirebaseConfigOpen}
-        onClose={() => setIsFirebaseConfigOpen(false)}
       />
     </div>
   );

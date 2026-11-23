@@ -7,20 +7,16 @@ import type {
   OverallCalculation,
   GradeScaleEntry,
 } from '../types/grade';
+import { saveUserSettings } from './userSettingsService';
 
-const GRADING_SCALE_STORAGE_KEY = 'gemini_gradebook_grading_scale_v1';
+const GRADING_SCALE_STORAGE_KEY = 'gemini_gradebook_grading_scale_v2';
 
 export const DEFAULT_GRADING_SCALE: GradeScaleEntry[] = [
-  { id: 'scale_a_plus', letter: 'A+', minPercentage: 97, gpaPoints: 4.0 },
-  { id: 'scale_a', letter: 'A', minPercentage: 93, gpaPoints: 4.0 },
-  { id: 'scale_a_minus', letter: 'A-', minPercentage: 90, gpaPoints: 3.7 },
-  { id: 'scale_b_plus', letter: 'B+', minPercentage: 87, gpaPoints: 3.3 },
-  { id: 'scale_b', letter: 'B', minPercentage: 83, gpaPoints: 3.0 },
-  { id: 'scale_b_minus', letter: 'B-', minPercentage: 80, gpaPoints: 2.7 },
-  { id: 'scale_c_plus', letter: 'C+', minPercentage: 77, gpaPoints: 2.3 },
-  { id: 'scale_c', letter: 'C', minPercentage: 73, gpaPoints: 2.0 },
-  { id: 'scale_c_minus', letter: 'C-', minPercentage: 70, gpaPoints: 1.7 },
-  { id: 'scale_d', letter: 'D', minPercentage: 60, gpaPoints: 1.0 },
+  { id: 'scale_a', letter: 'A', minPercentage: 86, gpaPoints: 4.0 },
+  { id: 'scale_b', letter: 'B', minPercentage: 73, gpaPoints: 3.0 },
+  { id: 'scale_c_plus', letter: 'C+', minPercentage: 67, gpaPoints: 2.5 },
+  { id: 'scale_c', letter: 'C', minPercentage: 60, gpaPoints: 2.0 },
+  { id: 'scale_c_minus', letter: 'C-', minPercentage: 50, gpaPoints: 1.0 },
   { id: 'scale_f', letter: 'F', minPercentage: 0, gpaPoints: 0.0 },
 ];
 
@@ -58,7 +54,7 @@ export function getGradingScale(): GradeScaleEntry[] {
   return cachedScale;
 }
 
-export function saveGradingScale(scale: GradeScaleEntry[]): GradeScaleEntry[] {
+export function applyCloudGradingScale(scale: GradeScaleEntry[]): GradeScaleEntry[] {
   const normalized = normalizeScale(scale.length > 0 ? scale : DEFAULT_GRADING_SCALE);
   cachedScale = normalized;
   try {
@@ -67,6 +63,12 @@ export function saveGradingScale(scale: GradeScaleEntry[]): GradeScaleEntry[] {
     // ignore storage errors
   }
   scaleListeners.forEach((listener) => listener(normalized));
+  return normalized;
+}
+
+export function saveGradingScale(scale: GradeScaleEntry[]): GradeScaleEntry[] {
+  const normalized = applyCloudGradingScale(scale);
+  void saveUserSettings({ gradingScale: normalized });
   return normalized;
 }
 

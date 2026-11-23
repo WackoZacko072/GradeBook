@@ -20,7 +20,6 @@ interface DashboardProps {
   classes: ClassItem[];
   onSelectClass: (classId: string) => void;
   onOpenAddClass: () => void;
-  onOpenFirebaseConfig?: () => void;
   onOpenAiAdvisor?: (prompt?: string) => void;
   viewMode?: 'grid' | 'list';
 }
@@ -29,7 +28,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   classes,
   onSelectClass,
   onOpenAddClass,
-  onOpenFirebaseConfig: _onOpenFirebaseConfig,
   onOpenAiAdvisor: _onOpenAiAdvisor,
   viewMode = 'grid',
 }) => {

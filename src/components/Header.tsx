@@ -39,7 +39,6 @@ interface HeaderProps {
   onSelectOverview?: () => void;
   noteCount?: number;
   onOpenTranscript: () => void;
-  onOpenFirebaseConfig: () => void;
   onOpenMobileDrawer?: () => void;
   onOpenAiAdvisor?: () => void;
   viewMode?: 'grid' | 'list';
@@ -55,7 +54,6 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectOverview,
   noteCount: _noteCount = 0,
   onOpenTranscript,
-  onOpenFirebaseConfig,
   onOpenMobileDrawer: _onOpenMobileDrawer,
   viewMode: controlledViewMode,
   onToggleViewMode,
@@ -505,26 +503,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <div className="font-bold">How your grades are calculated</div>
                         <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">
                           Category weights, empty categories & GPA rules
-                        </div>
-                      </div>
-                    </button>
-
-                    {/* Firebase & Cloud Settings */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsSettingsOpen(false);
-                        onOpenFirebaseConfig();
-                      }}
-                      className="w-full text-left px-3 py-2.5 text-xs text-slate-800 dark:text-[#e8eaed] hover:bg-slate-100/80 dark:hover:bg-[#202123] rounded-xl flex items-center gap-3 cursor-pointer transition-colors google-btn-press"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
-                        <Settings className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="font-bold">Cloud & Firebase Setup</div>
-                        <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">
-                          Keys, Firestore rules, and remote sync
                         </div>
                       </div>
                     </button>
@@ -1329,16 +1307,12 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
 
                     {/* Sign In button if guest */}
-                    {!user && (
+                    {!user && isConfigured && (
                       <button
                         type="button"
                         onClick={() => {
                           setIsUserMenuOpen(false);
-                          if (isConfigured) {
-                            signInWithGoogle();
-                          } else {
-                            onOpenFirebaseConfig();
-                          }
+                          signInWithGoogle();
                         }}
                         className="w-full text-left px-3.5 py-2.5 text-xs text-blue-700 dark:text-[#8ab4f8] hover:bg-blue-50/80 dark:hover:bg-[#202123] rounded-2xl flex items-center gap-3 cursor-pointer font-bold transition-colors google-btn-press"
                       >
@@ -1368,24 +1342,6 @@ export const Header: React.FC<HeaderProps> = ({
                         </div>
                       </button>
                     )}
-
-                    {/* Settings */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        onOpenFirebaseConfig();
-                      }}
-                      className="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-100/80 dark:hover:bg-[#202123] rounded-2xl flex items-center gap-3 cursor-pointer transition-colors google-btn-press"
-                    >
-                      <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#202123] text-slate-500 dark:text-[#9aa0a6] flex items-center justify-center flex-shrink-0">
-                        <Settings className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-800 dark:text-[#e8eaed]">Settings & Firebase</div>
-                        <div className="text-[10px] text-slate-400 dark:text-[#9aa0a6]">Keys and Firestore setup</div>
-                      </div>
-                    </button>
 
                     {/* Appearance Toggle */}
                     <div className="px-3.5 py-2.5 rounded-2xl bg-slate-50 dark:bg-[#121314] border border-slate-200/60 dark:border-[#26282a] flex items-center justify-between">
@@ -1445,13 +1401,6 @@ export const Header: React.FC<HeaderProps> = ({
                   : syncStatus.errorMessage}
               </span>
             </div>
-            <button
-              type="button"
-              onClick={onOpenFirebaseConfig}
-              className="ml-3 px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg cursor-pointer flex-shrink-0 text-[11px] google-btn-press"
-            >
-              View Rules & Fix
-            </button>
           </div>
         )}
 
@@ -1459,13 +1408,6 @@ export const Header: React.FC<HeaderProps> = ({
         {authError && (
           <div className="bg-rose-50 dark:bg-rose-950/50 border-t border-rose-200 dark:border-rose-900/60 px-4 py-2 text-xs text-rose-700 dark:text-rose-200 flex items-center justify-between">
             <span className="line-clamp-2">{authError}</span>
-            <button
-              type="button"
-              onClick={onOpenFirebaseConfig}
-              className="underline font-bold hover:text-rose-900 dark:hover:text-rose-100 cursor-pointer ml-3 flex-shrink-0"
-            >
-              Check Settings
-            </button>
           </div>
         )}
       </header>

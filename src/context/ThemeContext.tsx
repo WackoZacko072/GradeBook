@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { saveUserSettings } from '../utils/userSettingsService';
 
 type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: Theme, syncToCloud?: boolean) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -45,11 +46,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [theme]);
 
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setThemeState((prev) => {
+      const next = prev === 'light' ? 'dark' : 'light';
+      void saveUserSettings({ theme: next });
+      return next;
+    });
   };
 
-  const setTheme = (newTheme: Theme) => {
+  const setTheme = (newTheme: Theme, syncToCloud = true) => {
     setThemeState(newTheme);
+    if (syncToCloud) {
+      void saveUserSettings({ theme: newTheme });
+    }
   };
 
   return (
