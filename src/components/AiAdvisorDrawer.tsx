@@ -92,7 +92,7 @@ interface AiAdvisorDrawerProps {
   prefilledPrompt?: string;
   initialPrompt?: string;
   onClearPrefilledPrompt?: () => void;
-  onNavigate?: (tab: 'gradebook' | 'notebook' | 'gemini') => void;
+  onNavigate?: (tab: 'gradebook' | 'notebook' | 'todo' | 'gemini') => void;
   onNavigateToClass?: (id: string) => void;
   onNavigateToNote?: (id: string) => void;
 }

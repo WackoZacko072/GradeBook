@@ -32,8 +32,8 @@ import { calculateClassAverage, getGradingScale } from '../utils/gradeCalculatio
 import type { ClassItem } from '../types/grade';
 
 interface HeaderProps {
-  activeTab: 'gradebook' | 'notebook' | 'gemini';
-  onChangeTab: (tab: 'gradebook' | 'notebook' | 'gemini') => void;
+  activeTab: 'gradebook' | 'notebook' | 'todo' | 'gemini';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'todo' | 'gemini') => void;
   classes: ClassItem[];
   onSelectClass?: (id: string) => void;
   onSelectOverview?: () => void;

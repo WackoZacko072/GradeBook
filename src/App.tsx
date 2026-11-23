@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { ClassItem } from './types/grade';
 import type { NoteItem, NoteSource } from './types/notebook';
+import type { TodoItem } from './types/todo';
 import {
   getInitialClasses,
   subscribeToUserClasses,
@@ -27,6 +28,7 @@ import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ClassDetail } from './components/ClassDetail';
 import { NotebookView } from './components/Notebook/NotebookView';
+import { TodoView } from './components/Todo/TodoView';
 import { AddClassModal } from './components/AddClassModal';
 import { TranscriptModal } from './components/TranscriptModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
@@ -43,19 +45,27 @@ import {
   subscribeToUserSettings,
   saveUserSettings,
 } from './utils/userSettingsService';
+import {
+  getInitialTodos,
+  subscribeToUserTodos,
+  saveUserTodos,
+  loadGuestTodos,
+  saveGuestTodos,
+} from './utils/todoService';
 
-const TAB_INDEX_MAP: Record<'gradebook' | 'notebook' | 'gemini', number> = {
+const TAB_INDEX_MAP: Record<'gradebook' | 'notebook' | 'todo' | 'gemini', number> = {
   gradebook: 0,
   notebook: 1,
-  gemini: 2,
+  todo: 2,
+  gemini: 3,
 };
 
 export const App: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const { setTheme } = useTheme();
 
-  // Top level active tab: Gradebook vs Notebook vs Gemini
-  const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook' | 'gemini'>('gradebook');
+  // Top level active tab: Gradebook vs Notebook vs To-Do vs Gemini
+  const [activeTab, setActiveTab] = useState<'gradebook' | 'notebook' | 'todo' | 'gemini'>('gradebook');
   const [slideDirection, setSlideDirection] = useState<'right' | 'left'>('right');
 
   // Gradebook classes state
@@ -68,6 +78,9 @@ export const App: React.FC = () => {
 
   // Sources Hub state (replaces notetaking)
   const [sources, setSources] = useState<NoteSource[]>(() => getInitialSources());
+
+  // To-Do tasks state
+  const [todos, setTodos] = useState<TodoItem[]>(() => getInitialTodos());
 
   const [_isDataLoaded, setIsDataLoaded] = useState(false);
   const [_gradingScaleTick, setGradingScaleTick] = useState(0);
@@ -152,11 +165,31 @@ export const App: React.FC = () => {
     };
   }, [user, authLoading]);
 
+  // Real-time synchronization for To-Do tasks
+  useEffect(() => {
+    let unsubscribeTodos: (() => void) | null = null;
+    if (authLoading) return;
+
+    if (user) {
+      unsubscribeTodos = subscribeToUserTodos(user.uid, (cloudTodos) => {
+        setTodos(cloudTodos);
+      });
+    } else {
+      setTodos(loadGuestTodos());
+    }
+
+    return () => {
+      if (unsubscribeTodos) {
+        unsubscribeTodos();
+      }
+    };
+  }, [user, authLoading]);
+
   // Scroll ref for main content
   const mainContentRef = useRef<HTMLElement>(null);
 
   // Handle Tab Switch with Directional Slide Transition
-  const handleTabChange = (nextTab: 'gradebook' | 'notebook' | 'gemini') => {
+  const handleTabChange = (nextTab: 'gradebook' | 'notebook' | 'todo' | 'gemini') => {
     if (nextTab === activeTab) return;
     const prevIdx = TAB_INDEX_MAP[activeTab];
     const nextIdx = TAB_INDEX_MAP[nextTab];
@@ -329,6 +362,46 @@ export const App: React.FC = () => {
     handleAddClass(newClass);
   };
 
+  const persistTodos = (nextTodos: TodoItem[]) => {
+    if (user) {
+      void saveUserTodos(user.uid, nextTodos);
+    } else {
+      saveGuestTodos(nextTodos);
+    }
+  };
+
+  const handleAddTodo = (newTodo: TodoItem) => {
+    setTodos((prev) => {
+      const next = [newTodo, ...prev];
+      persistTodos(next);
+      return next;
+    });
+  };
+
+  const handleUpdateTodo = (updatedTodo: TodoItem) => {
+    setTodos((prev) => {
+      const next = prev.map((t) => (t.id === updatedTodo.id ? updatedTodo : t));
+      persistTodos(next);
+      return next;
+    });
+  };
+
+  const handleDeleteTodo = (id: string) => {
+    setTodos((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      persistTodos(next);
+      return next;
+    });
+  };
+
+  const handleClearCompletedTodos = () => {
+    setTodos((prev) => {
+      const next = prev.filter((t) => !t.completed);
+      persistTodos(next);
+      return next;
+    });
+  };
+
   const handleOpenAiAdvisor = (prompt?: string) => {
     if (prompt) {
       setPrefilledAdvisorPrompt(prompt);
@@ -407,6 +480,7 @@ export const App: React.FC = () => {
           classes={classes}
           notes={notes}
           sources={sources}
+          todos={todos}
           chatSessions={chatSessions}
           selectedClassId={selectedClassId}
           selectedNoteId={selectedNoteId}
@@ -482,6 +556,16 @@ export const App: React.FC = () => {
                     onAddClass={handleQuickAddClass}
                     onOpenSlateAi={(prompt) => handleOpenAiAdvisor(prompt)}
                   />
+                ) : activeTab === 'todo' ? (
+                  <TodoView
+                    classes={classes}
+                    todos={todos}
+                    onAddTodo={handleAddTodo}
+                    onUpdateTodo={handleUpdateTodo}
+                    onDeleteTodo={handleDeleteTodo}
+                    onClearCompleted={handleClearCompletedTodos}
+                    onOpenAddClass={() => setIsAddModalOpen(true)}
+                  />
                 ) : activeClass ? (
                   <ClassDetail
                     classItem={activeClass}
@@ -518,6 +602,7 @@ export const App: React.FC = () => {
         selectedClassId={selectedClassId}
         classCount={classes.length}
         noteCount={sources.length}
+        todoCount={todos.filter((t) => !t.completed).length}
         onSelectOverview={() => {
           setSlideDirection('left');
           setActiveTab('gradebook');

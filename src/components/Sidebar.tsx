@@ -4,6 +4,7 @@ import {
   X,
   BookOpen,
   BookMarked,
+  CheckSquare,
   FileText,
   MessageSquare,
   Edit2,
@@ -12,15 +13,17 @@ import {
 } from 'lucide-react';
 import type { ClassItem } from '../types/grade';
 import type { NoteItem, NoteSource } from '../types/notebook';
+import type { TodoItem } from '../types/todo';
 import type { ChatSession } from './AiAdvisorDrawer';
 import { calculateClassAverage } from '../utils/gradeCalculations';
 
 interface SidebarProps {
-  activeTab: 'gradebook' | 'notebook' | 'gemini';
-  onChangeTab: (tab: 'gradebook' | 'notebook' | 'gemini') => void;
+  activeTab: 'gradebook' | 'notebook' | 'todo' | 'gemini';
+  onChangeTab: (tab: 'gradebook' | 'notebook' | 'todo' | 'gemini') => void;
   classes: ClassItem[];
   notes?: NoteItem[];
   sources?: NoteSource[];
+  todos?: TodoItem[];
   chatSessions?: ChatSession[];
   selectedClassId: string | null;
   selectedNoteId?: string | null;
@@ -47,6 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   classes,
   notes: _notes = [],
   sources = [],
+  todos = [],
   chatSessions = [],
   selectedClassId,
   selectedNoteId = null,
@@ -145,7 +149,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </button>
 
-            {/* Gemini Tab Button (same format as Gradebook, Notebook) */}
+            {/* To-Do Tab Button */}
+            <button
+              type="button"
+              onClick={() => {
+                onChangeTab('todo');
+                onMobileClose?.();
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer min-h-[44px] google-btn-press ${
+                activeTab === 'todo'
+                  ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 shadow-2xs font-bold'
+                  : 'text-slate-700 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <CheckSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>To-Do</span>
+              </div>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full font-bold transition-colors ${
+                  activeTab === 'todo'
+                    ? 'bg-emerald-600 dark:bg-emerald-400 text-white dark:text-[#0f0f10]'
+                    : 'bg-slate-200 dark:bg-[#202123] text-slate-600 dark:text-[#9aa0a6]'
+                }`}
+              >
+                {todos.filter((t) => !t.completed).length}
+              </span>
+            </button>
+
+            {/* Gemini Tab Button (same format as Gradebook, Notebook, To-Do) */}
             <button
               type="button"
               onClick={() => {
@@ -300,6 +332,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </div>
           </div>
+        ) : activeTab === 'todo' ? (
+          <div>
+            <div className="flex items-center justify-between px-3 mb-2">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-[#80868b] uppercase tracking-wider">
+                Tasks by Class
+              </span>
+            </div>
+            <div className="space-y-1 max-h-[45vh] overflow-y-auto pr-1">
+              {classes.map((c) => {
+                const pendingCount = todos.filter((t) => t.classId === c.id && !t.completed).length;
+                return (
+                  <div
+                    key={c.id}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-slate-700 dark:text-[#c4c7c5]"
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: c.color || '#2563EB' }}
+                      />
+                      <span className="truncate font-medium">{c.name}</span>
+                    </div>
+                    <span className="text-xs font-bold text-slate-500 dark:text-[#9aa0a6] flex-shrink-0">
+                      {pendingCount}
+                    </span>
+                  </div>
+                );
+              })}
+              <div className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm text-slate-700 dark:text-[#c4c7c5]">
+                <div className="flex items-center gap-2.5 truncate">
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-indigo-500" />
+                  <span className="truncate font-medium">General</span>
+                </div>
+                <span className="text-xs font-bold text-slate-500 dark:text-[#9aa0a6] flex-shrink-0">
+                  {todos.filter((t) => t.classId === 'general' && !t.completed).length}
+                </span>
+              </div>
+            </div>
+          </div>
         ) : activeTab === 'gradebook' ? (
           <div>
             <div className="flex items-center justify-between px-3 mb-2">
@@ -452,7 +523,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span className="text-[10px] tracking-tight">Sources</span>
         </button>
 
-        {/* 3. Gemini */}
+        {/* 3. To-Do */}
+        <button
+          type="button"
+          onClick={() => onChangeTab('todo')}
+          title={`To-Do (${todos.filter((t) => !t.completed).length} pending)`}
+          className={`w-14 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer google-btn-press ${
+            activeTab === 'todo'
+              ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold shadow-2xs'
+              : 'text-slate-600 dark:text-[#c4c7c5] hover:bg-slate-200/60 dark:hover:bg-[#202123]'
+          }`}
+        >
+          <CheckSquare className="w-5 h-5 stroke-[2]" />
+          <span className="text-[10px] tracking-tight">To-Do</span>
+        </button>
+
+        {/* 4. Gemini */}
         <button
           type="button"
           onClick={() => {
