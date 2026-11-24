@@ -262,6 +262,116 @@ export const TodoView: React.FC<TodoViewProps> = ({
     setDragOverTodoId(null);
   };
 
+  // Shared reorder helpers (used by both desktop HTML5 DnD and iPad/mobile touch DnD)
+  const moveListToTarget = (sourceListId: string, targetListId: string) => {
+    if (sourceListId === targetListId) return;
+    const fromIdx = lists.findIndex((l) => l.id === sourceListId);
+    const toIdx = lists.findIndex((l) => l.id === targetListId);
+    if (fromIdx !== -1 && toIdx !== -1) {
+      const reordered = [...lists];
+      const [moved] = reordered.splice(fromIdx, 1);
+      reordered.splice(toIdx, 0, moved);
+      onReorderLists(reordered);
+    }
+  };
+
+  const moveTodoToTodo = (sourceTodoId: string, targetTodoId: string) => {
+    if (sourceTodoId === targetTodoId) return;
+    const fromIdx = todos.findIndex((t) => t.id === sourceTodoId);
+    const targetTodo = todos.find((t) => t.id === targetTodoId);
+    if (fromIdx === -1 || !targetTodo) return;
+
+    const updatedTodos = [...todos];
+    const [movedTodo] = updatedTodos.splice(fromIdx, 1);
+    const updatedMoved: TodoItem = {
+      ...movedTodo,
+      classId: targetTodo.classId,
+    };
+    const toIdx = updatedTodos.findIndex((t) => t.id === targetTodoId);
+    if (toIdx === -1) {
+      updatedTodos.push(updatedMoved);
+    } else {
+      updatedTodos.splice(toIdx, 0, updatedMoved);
+    }
+    onReorderTodos(updatedTodos);
+  };
+
+  const moveTodoToListEnd = (sourceTodoId: string, targetListId: string) => {
+    const fromIdx = todos.findIndex((t) => t.id === sourceTodoId);
+    if (fromIdx === -1) return;
+    const updatedTodos = [...todos];
+    const [movedTodo] = updatedTodos.splice(fromIdx, 1);
+    updatedTodos.push({ ...movedTodo, classId: targetListId });
+    onReorderTodos(updatedTodos);
+  };
+
+  // Touch Drag & Drop Handlers (for iPad & Mobile only)
+  const handleListTouchStart = (e: React.TouchEvent, listId: string) => {
+    e.stopPropagation();
+    setDraggedListId(listId);
+    setDraggedTodoId(null);
+    setDragOverListId(listId);
+  };
+
+  const handleListTouchMove = (e: React.TouchEvent) => {
+    if (!draggedListId) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetListEl = el?.closest('[data-list-id]') as HTMLElement | null;
+    const targetId = targetListEl?.getAttribute('data-list-id');
+    if (targetId && targetId !== draggedListId) {
+      setDragOverListId(targetId);
+    }
+  };
+
+  const handleListTouchEnd = () => {
+    if (draggedListId && dragOverListId && draggedListId !== dragOverListId) {
+      moveListToTarget(draggedListId, dragOverListId);
+    }
+    clearDragState();
+  };
+
+  const handleTodoTouchStart = (e: React.TouchEvent, todoId: string) => {
+    e.stopPropagation();
+    setDraggedTodoId(todoId);
+    setDraggedListId(null);
+    setDragOverTodoId(todoId);
+  };
+
+  const handleTodoTouchMove = (e: React.TouchEvent) => {
+    if (!draggedTodoId) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetTodoEl = el?.closest('[data-todo-id]') as HTMLElement | null;
+    const targetTodoId = targetTodoEl?.getAttribute('data-todo-id');
+    if (targetTodoId && targetTodoId !== draggedTodoId) {
+      setDragOverTodoId(targetTodoId);
+      setDragOverListId(null);
+      return;
+    }
+    const targetListEl = el?.closest('[data-list-id]') as HTMLElement | null;
+    const targetListId = targetListEl?.getAttribute('data-list-id');
+    if (targetListId) {
+      setDragOverListId(targetListId);
+      setDragOverTodoId(null);
+    }
+  };
+
+  const handleTodoTouchEnd = () => {
+    if (draggedTodoId) {
+      if (dragOverTodoId && dragOverTodoId !== draggedTodoId) {
+        moveTodoToTodo(draggedTodoId, dragOverTodoId);
+      } else if (dragOverListId) {
+        moveTodoToListEnd(draggedTodoId, dragOverListId);
+      }
+    }
+    clearDragState();
+  };
+
   const listById = new Map(lists.map((l) => [l.id, l]));
   const activeUnifiedListId =
     unifiedSelectedListId && listById.has(unifiedSelectedListId)
@@ -561,6 +671,7 @@ export const TodoView: React.FC<TodoViewProps> = ({
                   return (
                     <div
                       key={todo.id}
+                      data-todo-id={todo.id}
                       draggable={canDrag && !isEditing}
                       onDragStart={(e) => canDrag && handleTodoDragStart(e, todo.id)}
                       onDragOver={(e) => canDrag && handleTodoDragOver(e, todo.id)}
@@ -578,7 +689,11 @@ export const TodoView: React.FC<TodoViewProps> = ({
                     >
                       {canDrag && (
                         <div
-                          className="text-slate-300 dark:text-[#5f6368] group-hover:text-slate-500 dark:group-hover:text-[#9aa0a6] cursor-grab active:cursor-grabbing flex-shrink-0"
+                          onTouchStart={(e) => handleTodoTouchStart(e, todo.id)}
+                          onTouchMove={handleTodoTouchMove}
+                          onTouchEnd={handleTodoTouchEnd}
+                          onTouchCancel={clearDragState}
+                          className="p-1 -ml-1 text-slate-300 dark:text-[#5f6368] group-hover:text-slate-500 dark:group-hover:text-[#9aa0a6] cursor-grab active:cursor-grabbing flex-shrink-0 touch-none"
                           title="Drag to reorder"
                         >
                           <GripVertical className="w-4 h-4" />
@@ -722,6 +837,7 @@ export const TodoView: React.FC<TodoViewProps> = ({
             return (
               <div
                 key={col.id}
+                data-list-id={col.id}
                 draggable
                 onDragStart={(e) => handleListDragStart(e, col.id)}
                 onDragOver={(e) => handleListDragOver(e, col.id)}
@@ -741,7 +857,16 @@ export const TodoView: React.FC<TodoViewProps> = ({
                 {/* Column Header (Drag Handle + Title + Count + Delete List) */}
                 <div className="px-3.5 pt-3 pb-2.5 flex items-center justify-between gap-2 border-b border-slate-100 dark:border-[#222426] cursor-grab active:cursor-grabbing group/header">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <GripVertical className="w-4 h-4 text-slate-300 dark:text-[#5f6368] group-hover/header:text-slate-500 dark:group-hover/header:text-[#9aa0a6] flex-shrink-0" />
+                    <div
+                      onTouchStart={(e) => handleListTouchStart(e, col.id)}
+                      onTouchMove={handleListTouchMove}
+                      onTouchEnd={handleListTouchEnd}
+                      onTouchCancel={clearDragState}
+                      className="p-1 -ml-1 touch-none flex-shrink-0"
+                      title="Drag to reorder list"
+                    >
+                      <GripVertical className="w-4 h-4 text-slate-300 dark:text-[#5f6368] group-hover/header:text-slate-500 dark:group-hover/header:text-[#9aa0a6]" />
+                    </div>
                     <span
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: col.color }}
@@ -864,6 +989,7 @@ export const TodoView: React.FC<TodoViewProps> = ({
                       return (
                         <div
                           key={todo.id}
+                          data-todo-id={todo.id}
                           draggable={!isEditing}
                           onDragStart={(e) => handleTodoDragStart(e, todo.id)}
                           onDragOver={(e) => handleTodoDragOver(e, todo.id)}
@@ -881,7 +1007,11 @@ export const TodoView: React.FC<TodoViewProps> = ({
                         >
                           {/* Task Drag Handle */}
                           <div
-                            className="mt-0.5 text-slate-300 dark:text-[#5f6368] group-hover:text-slate-400 dark:group-hover:text-[#9aa0a6] cursor-grab active:cursor-grabbing flex-shrink-0"
+                            onTouchStart={(e) => handleTodoTouchStart(e, todo.id)}
+                            onTouchMove={handleTodoTouchMove}
+                            onTouchEnd={handleTodoTouchEnd}
+                            onTouchCancel={clearDragState}
+                            className="mt-0.5 p-0.5 -ml-0.5 text-slate-300 dark:text-[#5f6368] group-hover:text-slate-400 dark:group-hover:text-[#9aa0a6] cursor-grab active:cursor-grabbing flex-shrink-0 touch-none"
                             title="Drag to reorder"
                           >
                             <GripVertical className="w-3.5 h-3.5" />
