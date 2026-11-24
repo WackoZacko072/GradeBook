@@ -513,14 +513,16 @@ export const TodoView: React.FC<TodoViewProps> = ({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => setIsAddingList((prev) => !prev)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-[#8ab4f8] dark:hover:bg-[#aecbfa] dark:text-[#0f0f10] transition-colors cursor-pointer shadow-2xs google-btn-press"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Add To-Do</span>
-          </button>
+          {viewMode === 'grid' && (
+            <button
+              type="button"
+              onClick={() => setIsAddingList((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 dark:bg-[#8ab4f8] dark:hover:bg-[#aecbfa] dark:text-[#0f0f10] transition-colors cursor-pointer shadow-2xs google-btn-press"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>Add To-Do</span>
+            </button>
+          )}
         </div>
       </div>
 
