@@ -624,6 +624,7 @@ export const App: React.FC = () => {
                   <TodoView
                     lists={todoLists}
                     todos={todos}
+                    viewMode={viewMode}
                     onAddList={handleAddTodoList}
                     onDeleteList={handleDeleteTodoList}
                     onReorderLists={handleReorderTodoLists}

@@ -9,12 +9,14 @@ import {
   X,
   Sparkles,
   GripVertical,
+  ArrowUpDown,
 } from 'lucide-react';
 import type { TodoItem, TodoList } from '../../types/todo';
 
 interface TodoViewProps {
   lists: TodoList[];
   todos: TodoItem[];
+  viewMode?: 'grid' | 'list';
   onAddList: (list: TodoList) => void;
   onDeleteList: (listId: string) => void;
   onReorderLists: (newLists: TodoList[]) => void;
@@ -26,6 +28,7 @@ interface TodoViewProps {
 }
 
 type FilterMode = 'all' | 'active' | 'completed';
+type ListSortMode = 'manual' | 'due_asc' | 'due_desc' | 'list' | 'alpha' | 'newest';
 
 const LIST_COLOR_OPTIONS = [
   '#2563EB', // Blue
@@ -66,6 +69,7 @@ function formatDueDate(dateStr?: string): { text: string; isOverdue: boolean; is
 export const TodoView: React.FC<TodoViewProps> = ({
   lists,
   todos,
+  viewMode = 'grid',
   onAddList,
   onDeleteList,
   onReorderLists,
@@ -76,6 +80,10 @@ export const TodoView: React.FC<TodoViewProps> = ({
   onClearCompleted,
 }) => {
   const [filter, setFilter] = useState<FilterMode>('all');
+  const [listSort, setListSort] = useState<ListSortMode>('manual');
+  const [unifiedDraftTitle, setUnifiedDraftTitle] = useState('');
+  const [unifiedDraftDate, setUnifiedDraftDate] = useState('');
+  const [unifiedSelectedListId, setUnifiedSelectedListId] = useState<string>('');
   const [draftTitles, setDraftTitles] = useState<Record<string, string>>({});
   const [draftDates, setDraftDates] = useState<Record<string, string>>({});
   const [expandedDateCol, setExpandedDateCol] = useState<string | null>(null);
@@ -254,6 +262,77 @@ export const TodoView: React.FC<TodoViewProps> = ({
     setDragOverTodoId(null);
   };
 
+  const listById = new Map(lists.map((l) => [l.id, l]));
+  const activeUnifiedListId =
+    unifiedSelectedListId && listById.has(unifiedSelectedListId)
+      ? unifiedSelectedListId
+      : lists[0]?.id || '';
+
+  const handleCreateUnifiedTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = unifiedDraftTitle.trim();
+    if (!trimmed || !activeUnifiedListId) return;
+
+    onAddTodo({
+      id: `todo_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      classId: activeUnifiedListId,
+      title: trimmed,
+      completed: false,
+      dueDate: unifiedDraftDate || undefined,
+      createdAt: Date.now(),
+    });
+    setUnifiedDraftTitle('');
+    setUnifiedDraftDate('');
+  };
+
+  const getSortedUnifiedTodos = (): TodoItem[] => {
+    const filtered = todos.filter((t) => {
+      if (filter === 'active') return !t.completed;
+      if (filter === 'completed') return t.completed;
+      return true;
+    });
+
+    const active = filtered.filter((t) => !t.completed);
+    const completed = filtered.filter((t) => t.completed);
+
+    const sortGroup = (items: TodoItem[]): TodoItem[] => {
+      const copy = [...items];
+      if (listSort === 'manual') return copy;
+      if (listSort === 'due_asc') {
+        return copy.sort((a, b) => {
+          if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+          if (a.dueDate) return -1;
+          if (b.dueDate) return 1;
+          return 0;
+        });
+      }
+      if (listSort === 'due_desc') {
+        return copy.sort((a, b) => {
+          if (a.dueDate && b.dueDate) return b.dueDate.localeCompare(a.dueDate);
+          if (a.dueDate) return -1;
+          if (b.dueDate) return 1;
+          return 0;
+        });
+      }
+      if (listSort === 'list') {
+        return copy.sort((a, b) => {
+          const nameA = listById.get(a.classId)?.name || '';
+          const nameB = listById.get(b.classId)?.name || '';
+          return nameA.localeCompare(nameB);
+        });
+      }
+      if (listSort === 'alpha') {
+        return copy.sort((a, b) => a.title.localeCompare(b.title));
+      }
+      if (listSort === 'newest') {
+        return copy.sort((a, b) => b.createdAt - a.createdAt);
+      }
+      return copy;
+    };
+
+    return [...sortGroup(active), ...sortGroup(completed)];
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header & Controls */}
@@ -276,6 +355,26 @@ export const TodoView: React.FC<TodoViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Sort Selector (shown in List View) */}
+          {viewMode === 'list' && (
+            <div className="inline-flex items-center gap-1.5 bg-white dark:bg-[#18191b] px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-[#26282a]">
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+              <select
+                value={listSort}
+                onChange={(e) => setListSort(e.target.value as ListSortMode)}
+                aria-label="Sort tasks"
+                className="text-xs font-semibold bg-transparent text-slate-700 dark:text-[#e8eaed] focus:outline-hidden cursor-pointer"
+              >
+                <option value="manual" className="dark:bg-[#18191b]">Manual Order</option>
+                <option value="due_asc" className="dark:bg-[#18191b]">Due Date (Earliest)</option>
+                <option value="due_desc" className="dark:bg-[#18191b]">Due Date (Latest)</option>
+                <option value="list" className="dark:bg-[#18191b]">By List / Class</option>
+                <option value="alpha" className="dark:bg-[#18191b]">Title (A–Z)</option>
+                <option value="newest" className="dark:bg-[#18191b]">Newest First</option>
+              </select>
+            </div>
+          )}
+
           {/* Filter Segmented Pill */}
           <div className="inline-flex items-center bg-slate-100 dark:bg-[#18191b] p-1 rounded-xl border border-slate-200/80 dark:border-[#26282a]">
             {(['all', 'active', 'completed'] as FilterMode[]).map((mode) => (
@@ -380,6 +479,225 @@ export const TodoView: React.FC<TodoViewProps> = ({
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Add To-Do</span>
           </button>
+        </div>
+      ) : viewMode === 'list' ? (
+        /* Unified Spacious List View */
+        <div className="max-w-4xl mx-auto space-y-5">
+          {/* Quick-Add Bar for Unified List */}
+          <form
+            onSubmit={handleCreateUnifiedTask}
+            className="bg-white dark:bg-[#18191b] rounded-2xl border border-slate-200/80 dark:border-[#26282a] p-3.5 shadow-2xs flex flex-col sm:flex-row sm:items-center gap-2.5"
+          >
+            <select
+              value={activeUnifiedListId}
+              onChange={(e) => setUnifiedSelectedListId(e.target.value)}
+              aria-label="Select list"
+              className="px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#121314] border border-slate-200 dark:border-[#2c2e33] text-xs font-bold text-slate-700 dark:text-[#e8eaed] focus:outline-hidden cursor-pointer sm:max-w-[180px]"
+            >
+              {lists.map((l) => (
+                <option key={l.id} value={l.id} className="dark:bg-[#18191b]">
+                  {l.name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="text"
+              value={unifiedDraftTitle}
+              onChange={(e) => setUnifiedDraftTitle(e.target.value)}
+              placeholder="Add a task to any list..."
+              className="flex-1 min-w-0 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-[#121314] border border-slate-200 dark:border-[#2c2e33] focus:border-blue-500 text-sm text-slate-800 dark:text-[#e8eaed] placeholder-slate-400 dark:placeholder-[#80868b] focus:outline-hidden"
+            />
+
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={unifiedDraftDate}
+                onChange={(e) => setUnifiedDraftDate(e.target.value)}
+                className="px-2.5 py-2 rounded-xl bg-slate-50 dark:bg-[#121314] border border-slate-200 dark:border-[#2c2e33] text-xs text-slate-600 dark:text-[#c4c7c5] focus:outline-hidden"
+              />
+              <button
+                type="submit"
+                disabled={!unifiedDraftTitle.trim()}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-40 transition-colors cursor-pointer flex-shrink-0 google-btn-press"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Add</span>
+              </button>
+            </div>
+          </form>
+
+          {/* Spacious Combined Tasks List */}
+          {(() => {
+            const unifiedTodos = getSortedUnifiedTodos();
+            if (unifiedTodos.length === 0) {
+              return (
+                <div className="bg-white dark:bg-[#18191b] rounded-3xl border border-dashed border-slate-200 dark:border-[#2c2e33] py-14 px-6 flex flex-col items-center text-center">
+                  <div className="w-11 h-11 rounded-full bg-slate-100 dark:bg-[#202123] flex items-center justify-center mb-3 text-slate-400">
+                    {filter === 'completed' ? (
+                      <CheckCircle2 className="w-5 h-5" />
+                    ) : (
+                      <Sparkles className="w-5 h-5" />
+                    )}
+                  </div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-[#9aa0a6]">
+                    {filter === 'completed' ? 'No completed tasks yet' : 'All caught up across all lists'}
+                  </p>
+                </div>
+              );
+            }
+
+            const canDrag = listSort === 'manual';
+
+            return (
+              <div className="space-y-3">
+                {unifiedTodos.map((todo) => {
+                  const parentList = listById.get(todo.classId);
+                  const accent = parentList?.color || '#2563EB';
+                  const dueInfo = formatDueDate(todo.dueDate);
+                  const isEditing = editingTodoId === todo.id;
+                  const isTodoDragTarget = dragOverTodoId === todo.id && draggedTodoId !== todo.id;
+
+                  return (
+                    <div
+                      key={todo.id}
+                      draggable={canDrag && !isEditing}
+                      onDragStart={(e) => canDrag && handleTodoDragStart(e, todo.id)}
+                      onDragOver={(e) => canDrag && handleTodoDragOver(e, todo.id)}
+                      onDrop={(e) => canDrag && handleTodoDrop(e, todo)}
+                      onDragEnd={clearDragState}
+                      className={`group flex items-center gap-3.5 px-4 py-3.5 rounded-2xl border transition-all ${
+                        draggedTodoId === todo.id
+                          ? 'opacity-40 scale-[0.99] border-blue-400'
+                          : isTodoDragTarget
+                          ? 'border-blue-500 ring-2 ring-blue-500/30 dark:border-[#8ab4f8]'
+                          : todo.completed
+                          ? 'bg-slate-50/80 dark:bg-[#141517] border-slate-200/60 dark:border-[#202123] opacity-70'
+                          : 'bg-white dark:bg-[#18191b] border-slate-200/80 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#3a3d42] shadow-2xs'
+                      }`}
+                    >
+                      {canDrag && (
+                        <div
+                          className="text-slate-300 dark:text-[#5f6368] group-hover:text-slate-500 dark:group-hover:text-[#9aa0a6] cursor-grab active:cursor-grabbing flex-shrink-0"
+                          title="Drag to reorder"
+                        >
+                          <GripVertical className="w-4 h-4" />
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleComplete(todo)}
+                        className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer"
+                        style={
+                          todo.completed
+                            ? { backgroundColor: accent, borderColor: accent }
+                            : { borderColor: accent }
+                        }
+                        aria-label={todo.completed ? 'Mark incomplete' : 'Mark complete'}
+                      >
+                        {todo.completed && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                      </button>
+
+                      <div className="flex-1 min-w-0">
+                        {isEditing ? (
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              autoFocus
+                              value={editingTitle}
+                              onChange={(e) => setEditingTitle(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSaveEdit(todo);
+                                if (e.key === 'Escape') setEditingTodoId(null);
+                              }}
+                              onBlur={() => handleSaveEdit(todo)}
+                              className="w-full text-sm px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-[#121314] border border-blue-500 text-slate-900 dark:text-[#e8eaed] focus:outline-hidden"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setEditingTodoId(null)}
+                              className="p-1 text-slate-400 hover:text-slate-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <p
+                            onDoubleClick={() => handleStartEdit(todo)}
+                            className={`text-sm leading-snug break-words ${
+                              todo.completed
+                                ? 'line-through text-slate-400 dark:text-[#80868b]'
+                                : 'text-slate-800 dark:text-[#e8eaed] font-medium'
+                            }`}
+                          >
+                            {todo.title}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* List Pill & Due Date */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {parentList && (
+                          <span
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                            style={{
+                              backgroundColor: `${accent}15`,
+                              color: accent,
+                            }}
+                          >
+                            <span
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ backgroundColor: accent }}
+                            />
+                            <span className="max-w-[120px] truncate">{parentList.name}</span>
+                          </span>
+                        )}
+
+                        {dueInfo && (
+                          <span
+                            className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg ${
+                              todo.completed
+                                ? 'bg-slate-100 dark:bg-[#202123] text-slate-400 dark:text-[#80868b]'
+                                : dueInfo.isOverdue
+                                ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400'
+                                : dueInfo.isToday
+                                ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-[#8ab4f8]'
+                                : 'bg-slate-100 dark:bg-[#26282a] text-slate-600 dark:text-[#c4c7c5]'
+                            }`}
+                          >
+                            <Calendar className="w-3 h-3" />
+                            {dueInfo.text}
+                          </span>
+                        )}
+                      </div>
+
+                      {!isEditing && (
+                        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(todo)}
+                            className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-[#8ab4f8] rounded-lg transition-colors cursor-pointer"
+                            title="Edit task"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDeleteTodo(todo.id)}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors cursor-pointer"
+                            title="Delete task"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       ) : (
         /* Side-by-Side Class Columns Board */
