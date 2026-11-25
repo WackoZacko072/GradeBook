@@ -6,6 +6,7 @@ export interface UserSettings {
   gradingScale?: GradeScaleEntry[];
   theme?: 'light' | 'dark';
   viewMode?: 'grid' | 'list';
+  todoViewMode?: 'grid' | 'list';
   sidebarCollapsed?: 'expanded' | 'collapsed';
   updatedAt?: number;
 }

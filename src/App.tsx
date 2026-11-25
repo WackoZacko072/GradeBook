@@ -137,6 +137,17 @@ export const App: React.FC = () => {
     void saveUserSettings({ viewMode: mode });
   };
 
+  // Independent To-Do layout view mode (grid columns vs combined list)
+  const [todoViewMode, setTodoViewMode] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('gemini_todo_view_mode') as 'grid' | 'list') || 'grid';
+  });
+
+  const handleToggleTodoViewMode = (mode: 'grid' | 'list') => {
+    setTodoViewMode(mode);
+    localStorage.setItem('gemini_todo_view_mode', mode);
+    void saveUserSettings({ todoViewMode: mode });
+  };
+
   // YouTube-style collapsible desktop sidebar
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<'expanded' | 'collapsed'>(() => {
     return (localStorage.getItem('gradeslate_sidebar_collapsed') as 'expanded' | 'collapsed') || 'expanded';
@@ -167,6 +178,10 @@ export const App: React.FC = () => {
       if (cloudSettings.viewMode === 'grid' || cloudSettings.viewMode === 'list') {
         setViewMode(cloudSettings.viewMode);
         localStorage.setItem('gemini_gradebook_view_mode', cloudSettings.viewMode);
+      }
+      if (cloudSettings.todoViewMode === 'grid' || cloudSettings.todoViewMode === 'list') {
+        setTodoViewMode(cloudSettings.todoViewMode);
+        localStorage.setItem('gemini_todo_view_mode', cloudSettings.todoViewMode);
       }
       if (cloudSettings.sidebarCollapsed === 'expanded' || cloudSettings.sidebarCollapsed === 'collapsed') {
         setIsSidebarCollapsed(cloudSettings.sidebarCollapsed);
@@ -528,8 +543,8 @@ export const App: React.FC = () => {
         onOpenTranscript={() => setIsTranscriptModalOpen(true)}
         onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
         onOpenAiAdvisor={() => handleOpenAiAdvisor()}
-        viewMode={viewMode}
-        onToggleViewMode={handleToggleViewMode}
+        viewMode={activeTab === 'todo' ? todoViewMode : viewMode}
+        onToggleViewMode={activeTab === 'todo' ? handleToggleTodoViewMode : handleToggleViewMode}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={handleToggleSidebar}
       />
@@ -624,7 +639,7 @@ export const App: React.FC = () => {
                   <TodoView
                     lists={todoLists}
                     todos={todos}
-                    viewMode={viewMode}
+                    viewMode={todoViewMode}
                     onAddList={handleAddTodoList}
                     onDeleteList={handleDeleteTodoList}
                     onReorderLists={handleReorderTodoLists}
