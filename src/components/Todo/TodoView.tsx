@@ -225,34 +225,10 @@ export const TodoView: React.FC<TodoViewProps> = ({
   const handleTodoDrop = (e: React.DragEvent, targetTodo: TodoItem) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!draggedTodoId || draggedTodoId === targetTodo.id) {
-      setDraggedTodoId(null);
-      setDragOverTodoId(null);
-      setDragOverListId(null);
-      return;
+    if (draggedTodoId && draggedTodoId !== targetTodo.id) {
+      moveTodoToTodo(draggedTodoId, targetTodo.id);
     }
-
-    const fromIdx = todos.findIndex((t) => t.id === draggedTodoId);
-    if (fromIdx === -1) return;
-
-    const updatedTodos = [...todos];
-    const [movedTodo] = updatedTodos.splice(fromIdx, 1);
-    const updatedMoved: TodoItem = {
-      ...movedTodo,
-      classId: targetTodo.classId,
-    };
-
-    const toIdx = updatedTodos.findIndex((t) => t.id === targetTodo.id);
-    if (toIdx === -1) {
-      updatedTodos.push(updatedMoved);
-    } else {
-      updatedTodos.splice(toIdx, 0, updatedMoved);
-    }
-
-    onReorderTodos(updatedTodos);
-    setDraggedTodoId(null);
-    setDragOverTodoId(null);
-    setDragOverListId(null);
+    clearDragState();
   };
 
   const clearDragState = () => {
@@ -285,7 +261,8 @@ export const TodoView: React.FC<TodoViewProps> = ({
     const [movedTodo] = updatedTodos.splice(fromIdx, 1);
     const updatedMoved: TodoItem = {
       ...movedTodo,
-      classId: targetTodo.classId,
+      // In list view, only reorder without changing the task's course/list
+      classId: viewMode === 'list' ? movedTodo.classId : targetTodo.classId,
     };
     const toIdx = updatedTodos.findIndex((t) => t.id === targetTodoId);
     if (toIdx === -1) {
