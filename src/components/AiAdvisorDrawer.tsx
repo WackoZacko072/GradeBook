@@ -167,6 +167,21 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
     }
   }, [prefilledPrompt, initialPrompt, isOpen, onClearPrefilledPrompt]);
 
+  // Auto-resize textarea vertically as input changes (including reset after send)
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    if (!inputPrompt) {
+      el.style.height = '44px';
+      el.style.overflowY = 'hidden';
+      return;
+    }
+    el.style.height = 'auto';
+    const maxH = 240;
+    el.style.height = `${Math.min(el.scrollHeight, maxH)}px`;
+    el.style.overflowY = el.scrollHeight > maxH ? 'auto' : 'hidden';
+  }, [inputPrompt]);
+
   if (!isOpen) return null;
 
   // Start a new chat session
@@ -517,24 +532,32 @@ export const AiAdvisorDrawer: React.FC<AiAdvisorDrawerProps> = ({
       </div>
 
       {/* Bottom Floating Gemini Pill Input */}
-      <div className="px-4 sm:px-6 pb-3 pt-1 flex-shrink-0">
-        <div className="max-w-3xl w-full mx-auto">
-          <div className="relative flex items-end bg-[#f0f4f9] dark:bg-[#1e1f20] focus-within:bg-white dark:focus-within:bg-[#242628] border border-slate-200/70 dark:border-[#333537] rounded-[28px] transition-all px-4 py-2.5 shadow-2xs">
+      <div className="px-4 sm:px-6 pb-3.5 pt-1.5 flex-shrink-0">
+        <div className="max-w-4xl w-full mx-auto">
+          <div className="relative flex items-end bg-[#f0f4f9] dark:bg-[#1e1f20] focus-within:bg-white dark:focus-within:bg-[#242628] border border-slate-200/70 dark:border-[#333537] rounded-[30px] transition-all px-5 py-3 shadow-2xs">
             <textarea
               ref={inputRef}
               rows={1}
               value={inputPrompt}
-              onChange={(e) => setInputPrompt(e.target.value)}
+              onChange={(e) => {
+                setInputPrompt(e.target.value);
+                const el = e.target;
+                el.style.height = 'auto';
+                const maxH = 240;
+                el.style.height = `${Math.min(el.scrollHeight, maxH)}px`;
+                el.style.overflowY = el.scrollHeight > maxH ? 'auto' : 'hidden';
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Ask Gemini"
               disabled={isLoading}
-              className="w-full resize-none pr-12 pl-1 py-1.5 text-sm bg-transparent focus:outline-hidden text-slate-900 dark:text-[#e3e3e3] placeholder-slate-500 dark:placeholder-[#9aa0a6] leading-relaxed max-h-40 min-h-[36px]"
+              style={{ height: '44px' }}
+              className="w-full resize-none pr-12 pl-1 py-2 text-[15px] bg-transparent focus:outline-hidden text-slate-900 dark:text-[#e3e3e3] placeholder-slate-500 dark:placeholder-[#9aa0a6] leading-relaxed min-h-[44px] max-h-[240px] overflow-y-hidden"
             />
             <button
               type="button"
               disabled={!inputPrompt.trim() || isLoading}
               onClick={() => handleSend()}
-              className="absolute right-2.5 bottom-2.5 w-9 h-9 flex items-center justify-center bg-[#0b57d0] hover:bg-[#0842a0] dark:bg-[#a8c7fa] dark:hover:bg-[#8ab4f8] disabled:opacity-30 text-white dark:text-[#041e49] rounded-full transition-all cursor-pointer google-btn-press"
+              className="absolute right-3 bottom-3 w-10 h-10 flex items-center justify-center bg-[#0b57d0] hover:bg-[#0842a0] dark:bg-[#a8c7fa] dark:hover:bg-[#8ab4f8] disabled:opacity-30 text-white dark:text-[#041e49] rounded-full transition-all cursor-pointer google-btn-press"
               aria-label="Send message"
             >
               <ArrowUp className="w-4 h-4 stroke-[2.5]" />
