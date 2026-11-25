@@ -98,8 +98,10 @@ export const TodoView: React.FC<TodoViewProps> = ({
   // Drag & Drop state for lists and tasks
   const [draggedListId, setDraggedListId] = useState<string | null>(null);
   const [dragOverListId, setDragOverListId] = useState<string | null>(null);
+  const [listDropPosition, setListDropPosition] = useState<'before' | 'after'>('before');
   const [draggedTodoId, setDraggedTodoId] = useState<string | null>(null);
   const [dragOverTodoId, setDragOverTodoId] = useState<string | null>(null);
+  const [todoDropPosition, setTodoDropPosition] = useState<'before' | 'after'>('before');
 
   const totalPending = todos.filter((t) => !t.completed).length;
   const totalCompleted = todos.filter((t) => t.completed).length;
@@ -172,37 +174,25 @@ export const TodoView: React.FC<TodoViewProps> = ({
   const handleListDragOver = (e: React.DragEvent, targetListId: string) => {
     e.preventDefault();
     if (draggedListId && draggedListId !== targetListId) {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const pos = e.clientX < rect.left + rect.width / 2 ? 'before' : 'after';
       setDragOverListId(targetListId);
+      setListDropPosition(pos);
     } else if (draggedTodoId) {
       setDragOverListId(targetListId);
+      setDragOverTodoId(null);
     }
   };
 
   const handleListDrop = (e: React.DragEvent, targetListId: string) => {
     e.preventDefault();
     if (draggedListId && draggedListId !== targetListId) {
-      const fromIdx = lists.findIndex((l) => l.id === draggedListId);
-      const toIdx = lists.findIndex((l) => l.id === targetListId);
-      if (fromIdx !== -1 && toIdx !== -1) {
-        const reordered = [...lists];
-        const [moved] = reordered.splice(fromIdx, 1);
-        reordered.splice(toIdx, 0, moved);
-        onReorderLists(reordered);
-      }
+      moveListToTarget(draggedListId, targetListId, listDropPosition);
     } else if (draggedTodoId) {
       // Dropped a task onto a list column (move to end of that list)
-      const fromIdx = todos.findIndex((t) => t.id === draggedTodoId);
-      if (fromIdx !== -1) {
-        const updatedTodos = [...todos];
-        const [movedTodo] = updatedTodos.splice(fromIdx, 1);
-        updatedTodos.push({ ...movedTodo, classId: targetListId });
-        onReorderTodos(updatedTodos);
-      }
+      moveTodoToListEnd(draggedTodoId, targetListId);
     }
-    setDraggedListId(null);
-    setDragOverListId(null);
-    setDraggedTodoId(null);
-    setDragOverTodoId(null);
+    clearDragState();
   };
 
   // Task Drag & Drop Handlers
@@ -218,7 +208,11 @@ export const TodoView: React.FC<TodoViewProps> = ({
     e.preventDefault();
     e.stopPropagation();
     if (draggedTodoId && draggedTodoId !== targetTodoId) {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const pos = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
       setDragOverTodoId(targetTodoId);
+      setTodoDropPosition(pos);
+      setDragOverListId(null);
     }
   };
 
@@ -226,7 +220,7 @@ export const TodoView: React.FC<TodoViewProps> = ({
     e.preventDefault();
     e.stopPropagation();
     if (draggedTodoId && draggedTodoId !== targetTodo.id) {
-      moveTodoToTodo(draggedTodoId, targetTodo.id);
+      moveTodoToTodo(draggedTodoId, targetTodo.id, todoDropPosition);
     }
     clearDragState();
   };
@@ -234,24 +228,39 @@ export const TodoView: React.FC<TodoViewProps> = ({
   const clearDragState = () => {
     setDraggedListId(null);
     setDragOverListId(null);
+    setListDropPosition('before');
     setDraggedTodoId(null);
     setDragOverTodoId(null);
+    setTodoDropPosition('before');
   };
 
   // Shared reorder helpers (used by both desktop HTML5 DnD and iPad/mobile touch DnD)
-  const moveListToTarget = (sourceListId: string, targetListId: string) => {
+  const moveListToTarget = (
+    sourceListId: string,
+    targetListId: string,
+    position: 'before' | 'after' = 'before'
+  ) => {
     if (sourceListId === targetListId) return;
     const fromIdx = lists.findIndex((l) => l.id === sourceListId);
-    const toIdx = lists.findIndex((l) => l.id === targetListId);
-    if (fromIdx !== -1 && toIdx !== -1) {
-      const reordered = [...lists];
-      const [moved] = reordered.splice(fromIdx, 1);
-      reordered.splice(toIdx, 0, moved);
-      onReorderLists(reordered);
+    if (fromIdx === -1) return;
+
+    const reordered = [...lists];
+    const [moved] = reordered.splice(fromIdx, 1);
+    const toIdx = reordered.findIndex((l) => l.id === targetListId);
+    if (toIdx === -1) {
+      reordered.push(moved);
+    } else {
+      const insertIdx = position === 'after' ? toIdx + 1 : toIdx;
+      reordered.splice(insertIdx, 0, moved);
     }
+    onReorderLists(reordered);
   };
 
-  const moveTodoToTodo = (sourceTodoId: string, targetTodoId: string) => {
+  const moveTodoToTodo = (
+    sourceTodoId: string,
+    targetTodoId: string,
+    position: 'before' | 'after' = 'before'
+  ) => {
     if (sourceTodoId === targetTodoId) return;
     const fromIdx = todos.findIndex((t) => t.id === sourceTodoId);
     const targetTodo = todos.find((t) => t.id === targetTodoId);
@@ -268,7 +277,8 @@ export const TodoView: React.FC<TodoViewProps> = ({
     if (toIdx === -1) {
       updatedTodos.push(updatedMoved);
     } else {
-      updatedTodos.splice(toIdx, 0, updatedMoved);
+      const insertIdx = position === 'after' ? toIdx + 1 : toIdx;
+      updatedTodos.splice(insertIdx, 0, updatedMoved);
     }
     onReorderTodos(updatedTodos);
   };
@@ -298,14 +308,17 @@ export const TodoView: React.FC<TodoViewProps> = ({
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     const targetListEl = el?.closest('[data-list-id]') as HTMLElement | null;
     const targetId = targetListEl?.getAttribute('data-list-id');
-    if (targetId && targetId !== draggedListId) {
+    if (targetId && targetId !== draggedListId && targetListEl) {
+      const rect = targetListEl.getBoundingClientRect();
+      const pos = touch.clientX < rect.left + rect.width / 2 ? 'before' : 'after';
       setDragOverListId(targetId);
+      setListDropPosition(pos);
     }
   };
 
   const handleListTouchEnd = () => {
     if (draggedListId && dragOverListId && draggedListId !== dragOverListId) {
-      moveListToTarget(draggedListId, dragOverListId);
+      moveListToTarget(draggedListId, dragOverListId, listDropPosition);
     }
     clearDragState();
   };
@@ -325,8 +338,11 @@ export const TodoView: React.FC<TodoViewProps> = ({
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     const targetTodoEl = el?.closest('[data-todo-id]') as HTMLElement | null;
     const targetTodoId = targetTodoEl?.getAttribute('data-todo-id');
-    if (targetTodoId && targetTodoId !== draggedTodoId) {
+    if (targetTodoId && targetTodoId !== draggedTodoId && targetTodoEl) {
+      const rect = targetTodoEl.getBoundingClientRect();
+      const pos = touch.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
       setDragOverTodoId(targetTodoId);
+      setTodoDropPosition(pos);
       setDragOverListId(null);
       return;
     }
@@ -341,12 +357,30 @@ export const TodoView: React.FC<TodoViewProps> = ({
   const handleTodoTouchEnd = () => {
     if (draggedTodoId) {
       if (dragOverTodoId && dragOverTodoId !== draggedTodoId) {
-        moveTodoToTodo(draggedTodoId, dragOverTodoId);
+        moveTodoToTodo(draggedTodoId, dragOverTodoId, todoDropPosition);
       } else if (dragOverListId) {
         moveTodoToListEnd(draggedTodoId, dragOverListId);
       }
     }
     clearDragState();
+  };
+
+  const draggedTodoItem = draggedTodoId ? todos.find((t) => t.id === draggedTodoId) || null : null;
+
+  const renderTodoDropShadow = (compact = false) => {
+    if (!draggedTodoItem) return null;
+    return (
+      <div
+        className={`pointer-events-none flex items-center gap-2.5 rounded-xl border-2 border-dashed border-blue-400 dark:border-[#8ab4f8] bg-blue-50/70 dark:bg-[#8ab4f8]/10 shadow-md transition-all ${
+          compact ? 'px-2.5 py-2.5' : 'px-4 py-3.5 rounded-2xl'
+        }`}
+      >
+        <div className="w-3.5 h-3.5 rounded-full border-2 border-blue-400/70 dark:border-[#8ab4f8]/70 flex-shrink-0" />
+        <span className="text-xs sm:text-sm font-medium text-blue-700/80 dark:text-[#aecbfa] truncate">
+          {draggedTodoItem.title}
+        </span>
+      </div>
+    );
   };
 
   const listById = new Map(lists.map((l) => [l.id, l]));
@@ -648,24 +682,23 @@ export const TodoView: React.FC<TodoViewProps> = ({
                   const isTodoDragTarget = dragOverTodoId === todo.id && draggedTodoId !== todo.id;
 
                   return (
-                    <div
-                      key={todo.id}
-                      data-todo-id={todo.id}
-                      draggable={canDrag && !isEditing}
-                      onDragStart={(e) => canDrag && handleTodoDragStart(e, todo.id)}
-                      onDragOver={(e) => canDrag && handleTodoDragOver(e, todo.id)}
-                      onDrop={(e) => canDrag && handleTodoDrop(e, todo)}
-                      onDragEnd={clearDragState}
-                      className={`group flex items-center gap-3.5 px-4 py-3.5 rounded-2xl border transition-all ${
-                        draggedTodoId === todo.id
-                          ? 'opacity-40 scale-[0.99] border-blue-400'
-                          : isTodoDragTarget
-                          ? 'border-blue-500 ring-2 ring-blue-500/30 dark:border-[#8ab4f8]'
-                          : todo.completed
-                          ? 'bg-slate-50/80 dark:bg-[#141517] border-slate-200/60 dark:border-[#202123] opacity-70'
-                          : 'bg-white dark:bg-[#18191b] border-slate-200/80 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#3a3d42] shadow-2xs'
-                      }`}
-                    >
+                    <React.Fragment key={todo.id}>
+                      {isTodoDragTarget && todoDropPosition === 'before' && renderTodoDropShadow(false)}
+                      <div
+                        data-todo-id={todo.id}
+                        draggable={canDrag && !isEditing}
+                        onDragStart={(e) => canDrag && handleTodoDragStart(e, todo.id)}
+                        onDragOver={(e) => canDrag && handleTodoDragOver(e, todo.id)}
+                        onDrop={(e) => canDrag && handleTodoDrop(e, todo)}
+                        onDragEnd={clearDragState}
+                        className={`group flex items-center gap-3.5 px-4 py-3.5 rounded-2xl border transition-all ${
+                          draggedTodoId === todo.id
+                            ? 'opacity-40 scale-[0.99] border-blue-400'
+                            : todo.completed
+                            ? 'bg-slate-50/80 dark:bg-[#141517] border-slate-200/60 dark:border-[#202123] opacity-70'
+                            : 'bg-white dark:bg-[#18191b] border-slate-200/80 dark:border-[#26282a] hover:border-slate-300 dark:hover:border-[#3a3d42] shadow-2xs'
+                        }`}
+                      >
                       {canDrag && (
                         <div
                           onTouchStart={(e) => handleTodoTouchStart(e, todo.id)}
@@ -786,7 +819,9 @@ export const TodoView: React.FC<TodoViewProps> = ({
                           </button>
                         </div>
                       )}
-                    </div>
+                      </div>
+                      {isTodoDragTarget && todoDropPosition === 'after' && renderTodoDropShadow(false)}
+                    </React.Fragment>
                   );
                 })}
               </div>
@@ -812,6 +847,8 @@ export const TodoView: React.FC<TodoViewProps> = ({
             const draftTitle = draftTitles[col.id] || '';
             const isDateOpen = expandedDateCol === col.id;
             const isListDragTarget = dragOverListId === col.id && draggedListId !== col.id;
+            const isTaskColumnDropTarget =
+              Boolean(draggedTodoId) && dragOverListId === col.id && !dragOverTodoId;
 
             return (
               <div
@@ -822,11 +859,15 @@ export const TodoView: React.FC<TodoViewProps> = ({
                 onDragOver={(e) => handleListDragOver(e, col.id)}
                 onDrop={(e) => handleListDrop(e, col.id)}
                 onDragEnd={clearDragState}
-                className={`bg-white dark:bg-[#18191b] rounded-2xl border shadow-2xs overflow-hidden flex flex-col min-h-[280px] transition-all ${
+                className={`relative bg-white dark:bg-[#18191b] rounded-2xl border shadow-2xs overflow-hidden flex flex-col min-h-[280px] transition-all ${
                   draggedListId === col.id
-                    ? 'opacity-50 scale-[0.98] border-blue-400'
+                    ? 'opacity-45 scale-[0.98] border-blue-400'
                     : isListDragTarget
-                    ? 'ring-2 ring-blue-500 border-blue-500 dark:ring-[#8ab4f8] dark:border-[#8ab4f8]'
+                    ? listDropPosition === 'before'
+                      ? 'border-l-4 border-l-blue-500 dark:border-l-[#8ab4f8] border-slate-200/80 dark:border-[#26282a] shadow-lg'
+                      : 'border-r-4 border-r-blue-500 dark:border-r-[#8ab4f8] border-slate-200/80 dark:border-[#26282a] shadow-lg'
+                    : isTaskColumnDropTarget
+                    ? 'ring-2 ring-blue-400/70 border-blue-400 dark:ring-[#8ab4f8]/70 dark:border-[#8ab4f8]'
                     : 'border-slate-200/80 dark:border-[#26282a] hover:shadow-sm'
                 }`}
               >
@@ -947,43 +988,47 @@ export const TodoView: React.FC<TodoViewProps> = ({
                 {/* Task Items List */}
                 <div className="p-3 flex-1 space-y-2 max-h-[420px] overflow-y-auto">
                   {colTodos.length === 0 ? (
-                    <div className="py-10 px-3 flex flex-col items-center justify-center text-center">
-                      <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#202123] flex items-center justify-center mb-2 text-slate-400 dark:text-[#80868b]">
-                        {filter === 'completed' ? (
-                          <CheckCircle2 className="w-4 h-4" />
-                        ) : (
-                          <Sparkles className="w-4 h-4" />
-                        )}
+                    isTaskColumnDropTarget ? (
+                      renderTodoDropShadow(true)
+                    ) : (
+                      <div className="py-10 px-3 flex flex-col items-center justify-center text-center">
+                        <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#202123] flex items-center justify-center mb-2 text-slate-400 dark:text-[#80868b]">
+                          {filter === 'completed' ? (
+                            <CheckCircle2 className="w-4 h-4" />
+                          ) : (
+                            <Sparkles className="w-4 h-4" />
+                          )}
+                        </div>
+                        <p className="text-xs font-medium text-slate-400 dark:text-[#80868b]">
+                          {filter === 'completed' ? 'No completed tasks' : 'All caught up'}
+                        </p>
                       </div>
-                      <p className="text-xs font-medium text-slate-400 dark:text-[#80868b]">
-                        {filter === 'completed' ? 'No completed tasks' : 'All caught up'}
-                      </p>
-                    </div>
+                    )
                   ) : (
-                    colTodos.map((todo) => {
-                      const dueInfo = formatDueDate(todo.dueDate);
-                      const isEditing = editingTodoId === todo.id;
-                      const isTodoDragTarget = dragOverTodoId === todo.id && draggedTodoId !== todo.id;
+                    <>
+                      {colTodos.map((todo) => {
+                        const dueInfo = formatDueDate(todo.dueDate);
+                        const isEditing = editingTodoId === todo.id;
+                        const isTodoDragTarget = dragOverTodoId === todo.id && draggedTodoId !== todo.id;
 
-                      return (
-                        <div
-                          key={todo.id}
-                          data-todo-id={todo.id}
-                          draggable={!isEditing}
-                          onDragStart={(e) => handleTodoDragStart(e, todo.id)}
-                          onDragOver={(e) => handleTodoDragOver(e, todo.id)}
-                          onDrop={(e) => handleTodoDrop(e, todo)}
-                          onDragEnd={clearDragState}
-                          className={`group flex items-start gap-2 p-2.5 rounded-xl border transition-all ${
-                            draggedTodoId === todo.id
-                              ? 'opacity-40 scale-[0.98] border-blue-400'
-                              : isTodoDragTarget
-                              ? 'border-blue-500 ring-2 ring-blue-500/30 dark:border-[#8ab4f8]'
-                              : todo.completed
-                              ? 'bg-slate-50/70 dark:bg-[#131416] border-slate-100 dark:border-[#202123] opacity-70'
-                              : 'bg-white dark:bg-[#1e1f20] border-slate-200/70 dark:border-[#2a2c30] hover:border-slate-300 dark:hover:border-[#3a3d42] shadow-2xs'
-                          }`}
-                        >
+                        return (
+                          <React.Fragment key={todo.id}>
+                            {isTodoDragTarget && todoDropPosition === 'before' && renderTodoDropShadow(true)}
+                            <div
+                              data-todo-id={todo.id}
+                              draggable={!isEditing}
+                              onDragStart={(e) => handleTodoDragStart(e, todo.id)}
+                              onDragOver={(e) => handleTodoDragOver(e, todo.id)}
+                              onDrop={(e) => handleTodoDrop(e, todo)}
+                              onDragEnd={clearDragState}
+                              className={`group flex items-start gap-2 p-2.5 rounded-xl border transition-all ${
+                                draggedTodoId === todo.id
+                                  ? 'opacity-40 scale-[0.98] border-blue-400'
+                                  : todo.completed
+                                  ? 'bg-slate-50/70 dark:bg-[#131416] border-slate-100 dark:border-[#202123] opacity-70'
+                                  : 'bg-white dark:bg-[#1e1f20] border-slate-200/70 dark:border-[#2a2c30] hover:border-slate-300 dark:hover:border-[#3a3d42] shadow-2xs'
+                              }`}
+                            >
                           {/* Task Drag Handle */}
                           <div
                             onTouchStart={(e) => handleTodoTouchStart(e, todo.id)}
@@ -1089,9 +1134,13 @@ export const TodoView: React.FC<TodoViewProps> = ({
                               </button>
                             </div>
                           )}
-                        </div>
-                      );
-                    })
+                            </div>
+                            {isTodoDragTarget && todoDropPosition === 'after' && renderTodoDropShadow(true)}
+                          </React.Fragment>
+                        );
+                      })}
+                      {isTaskColumnDropTarget && renderTodoDropShadow(true)}
+                    </>
                   )}
                 </div>
               </div>
